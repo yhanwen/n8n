@@ -46,7 +46,7 @@ export const taskFields = [
 	/*                                 task:create                                */
 	/* -------------------------------------------------------------------------- */
 	{
-		displayName: 'List ID',
+		displayName: 'Task List',
 		name: 'taskListId',
 		type: 'options',
 		typeOptions: {
@@ -172,7 +172,7 @@ export const taskFields = [
 	/*                                 task:get/delete/update/getAll              */
 	/* -------------------------------------------------------------------------- */
 	{
-		displayName: 'List ID',
+		displayName: 'Task List',
 		name: 'taskListId',
 		type: 'options',
 		typeOptions: {
@@ -196,9 +196,13 @@ export const taskFields = [
 		description: 'The identifier of the list, unique in the user\'s mailbox.',
 	},
 	{
-		displayName: 'Task ID',
+		displayName: 'Task',
 		name: 'taskId',
-		type: 'string',
+		type: 'options',
+		typeOptions: {
+			loadOptionsDependsOn: 'taskListId',
+			loadOptionsMethod: 'getTasks',
+		},
 		displayOptions: {
 			show: {
 				operation: [

@@ -88,7 +88,7 @@ export class MicrosoftToDo implements INodeType {
 
 	methods = {
 		loadOptions: {
-			// Get all the team's channels to display them to user so that he can
+			// Get all the tasks lists to display them to user so that he can
 			// select them easily
 			async getTaskLists(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const returnData: INodePropertyOptions[] = [];
@@ -97,6 +97,22 @@ export class MicrosoftToDo implements INodeType {
 					returnData.push({
 						name: list.displayName as string,
 						value: list.id as string,
+					});
+				}
+				return returnData;
+			},
+			// Get all the tasks to display them to user so that he can
+			// select them easily
+			async getTasks(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const taskListId = this.getNodeParameter('taskListId', 0) as string;
+				const tasks = await microsoftApiRequestAllItems.call(this, 'value', 'GET', `/todo/lists/${taskListId}/tasks/`);
+				console.log({tasks});
+
+				for (const task of tasks) {
+					returnData.push({
+						name: task.title as string,
+						value: task.id as string,
 					});
 				}
 				return returnData;
@@ -122,11 +138,13 @@ export class MicrosoftToDo implements INodeType {
 
 						const taskListId = this.getNodeParameter('taskListId', i) as string;
 						const taskId = this.getNodeParameter('taskId', i) as string;
+						const name = this.getNodeParameter('displayName', i) as string;
 						const body: IDataObject = {
 							applicationName: this.getNodeParameter('applicationName', i) as string,
-							displayName: this.getNodeParameter('displayName', i) as string,
+							displayName: name != '' ? name : null,
 							...this.getNodeParameter('additionalFields', i) as IDataObject[],
 						};
+						console.log(body);
 
 						responseData = await microsoftApiRequest.call(this, 'POST', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources`, body, qs);
 

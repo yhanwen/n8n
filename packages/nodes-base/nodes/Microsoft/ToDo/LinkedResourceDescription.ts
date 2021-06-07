@@ -46,7 +46,7 @@ export const linkedResourceFields = [
 	/*                       linkedResource:ALL                                   */
 	/* -------------------------------------------------------------------------- */
 	{
-		displayName: 'Task List ID',
+		displayName: 'Task List',
 		name: 'taskListId',
 		type: 'options',
 		typeOptions: {
@@ -70,9 +70,13 @@ export const linkedResourceFields = [
 		default: '',
 	},
 	{
-		displayName: 'Task ID',
+		displayName: 'Task',
 		name: 'taskId',
-		type: 'string',
+		type: 'options',
+		typeOptions: {
+			loadOptionsDependsOn: 'taskListId',
+			loadOptionsMethod: 'getTasks',
+		},
 		displayOptions: {
 			show: {
 				operation: [
