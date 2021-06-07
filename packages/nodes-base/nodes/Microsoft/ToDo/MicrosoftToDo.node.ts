@@ -107,7 +107,6 @@ export class MicrosoftToDo implements INodeType {
 				const returnData: INodePropertyOptions[] = [];
 				const taskListId = this.getNodeParameter('taskListId', 0) as string;
 				const tasks = await microsoftApiRequestAllItems.call(this, 'value', 'GET', `/todo/lists/${taskListId}/tasks/`);
-				console.log({tasks});
 
 				for (const task of tasks) {
 					returnData.push({
@@ -141,10 +140,9 @@ export class MicrosoftToDo implements INodeType {
 						const name = this.getNodeParameter('displayName', i) as string;
 						const body: IDataObject = {
 							applicationName: this.getNodeParameter('applicationName', i) as string,
-							displayName: name != '' ? name : null,
+							displayName: name ? name : null,
 							...this.getNodeParameter('additionalFields', i) as IDataObject[],
 						};
-						console.log(body);
 
 						responseData = await microsoftApiRequest.call(this, 'POST', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources`, body, qs);
 
