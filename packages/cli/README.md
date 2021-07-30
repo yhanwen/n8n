@@ -80,7 +80,7 @@ Refer to the [documentation](https://github.com/n8n-io/n8n/blob/master/docker/im
 To install n8n globally using npm:
 
 ```bash
-npm install n8n -g
+yarn install n8n -g
 ```
 
 After the installation, start n8n running the following command:

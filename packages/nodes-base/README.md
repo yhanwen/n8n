@@ -5,7 +5,7 @@
 The nodes which are included by default in n8n
 
 ```
-npm install n8n-nodes-base -g
+yarn install n8n-nodes-base -g
 ```
 
 

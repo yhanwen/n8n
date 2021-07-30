@@ -5,7 +5,7 @@
 Workflow base code for n8n
 
 ```
-npm install n8n-workflow
+yarn install n8n-workflow
 ```
 
 ## License

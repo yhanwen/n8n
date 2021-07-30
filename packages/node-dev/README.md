@@ -6,7 +6,7 @@ Currently very simple and not very sophisticated CLI which makes it easier
 to create credentials and nodes in TypeScript for n8n.
 
 ```
-npm install n8n-node-dev -g
+yarn install n8n-node-dev -g
 ```
 
 ## Contents

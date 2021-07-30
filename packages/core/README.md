@@ -5,7 +5,7 @@
 Core components for n8n
 
 ```
-npm install n8n-core
+yarn install n8n-core
 ```
 
 ## License

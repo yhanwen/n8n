@@ -5,42 +5,42 @@
 The UI to create and update n8n workflows
 
 ```
-npm install n8n -g
+yarn install n8n -g
 ```
 
 ## Project setup
 ```
-npm install
+yarn install
 ```
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+yarn run serve
 ```
 
 ### Compiles and minifies for production
 ```
-npm run build
+yarn run build
 ```
 
 ### Run your tests
 ```
-npm run test
+yarn run test
 ```
 
 ### Lints and fixes files
 ```
-npm run lint
+yarn run lint
 ```
 
 ### Run your end-to-end tests
 ```
-npm run test:e2e
+yarn run test:e2e
 ```
 
 ### Run your unit tests
 ```
-npm run test:unit
+yarn run test:unit
 ```
 
 ### Customize configuration

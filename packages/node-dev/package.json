@@ -19,7 +19,7 @@
     "bin": "n8n-node-dev"
   },
   "scripts": {
-    "dev": "npm run watch",
+    "dev": "yarn run watch",
     "build": "tsc",
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "echo \"Building project...\" && rm -rf dist && tsc -b && oclif-dev manifest",

@@ -69,7 +69,7 @@ yum install gcc gcc-c++ make
 
 Windows:
 ```
-npm install -g windows-build-tools
+yarn install -g windows-build-tools
 ```
 
 #### lerna
@@ -82,7 +82,7 @@ other.
 So for the setup to work correctly lerna has to be installed globally like this:
 
 ```
-npm install -g lerna
+yarn install -g lerna
 ```
 
 
@@ -106,12 +106,12 @@ checked out and set up:
 
 1. Install all dependencies of all modules and link them together:
 	```
-	lerna bootstrap --hoist
+	lerna bootstrap --hoist --npm-client yarn
 	```
 
 1. Build all the code:
 	```
-	npm run build
+	yarn run build
 	```
 
 
@@ -121,7 +121,7 @@ checked out and set up:
 To start n8n execute:
 
 ```
-npm run start
+yarn run start
 ```
 
 To start n8n with tunnel:
@@ -131,24 +131,24 @@ To start n8n with tunnel:
 
 ## Development Cycle
 
-While iterating on n8n modules code, you can run `npm run dev`. It will then
+While iterating on n8n modules code, you can run `yarn run dev`. It will then
 automatically build your code, restart the backend and refresh the frontend
 (editor-ui) on every change you make.
 
 1. Start n8n in development mode:
 	```
-	npm run dev
+	yarn run dev
 	```
 1. Hack, hack, hack
 1. Check if everything still runs in production mode
 	```
-	npm run build
-	npm run start
+	yarn run build
+	yarn run start
 	```
 1. Create tests
 1. Run all tests
 	```
-	npm run test
+	yarn run test
 	```
 1. Commit code and create pull request
 
@@ -157,7 +157,7 @@ automatically build your code, restart the backend and refresh the frontend
 
 The tests can be started via:
 ```
-npm run test
+yarn run test
 ```
 
 If that gets executed in one of the package folders it will only run the tests

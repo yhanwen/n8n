@@ -16,7 +16,7 @@
   "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "npm run watch",
+    "dev": "yarn run watch",
     "tslint": "tslint -p tsconfig.json -c tslint.json",
     "tslintfix": "tslint --fix -p tsconfig.json -c tslint.json",
     "watch": "tsc --watch",
