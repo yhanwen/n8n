@@ -30,11 +30,9 @@ export class WorkflowHooks {
 		this.retryOf = optionalParameters.retryOf;
 	}
 
-	async executeHookFunctions(hookName: string, parameters: any[]) { // eslint-disable-line @typescript-eslint/no-explicit-any
-		if (
-			this.hookFunctions[hookName] !== undefined &&
-			Array.isArray(this.hookFunctions[hookName])
-		) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	async executeHookFunctions(hookName: string, parameters: any[]) {
+		if (this.hookFunctions[hookName] !== undefined && Array.isArray(this.hookFunctions[hookName])) {
 			for (const hookFunction of this.hookFunctions[hookName]!) {
 				await hookFunction.apply(this, parameters);
 			}

@@ -276,19 +276,13 @@ export function displayParameter(
 				values.push.apply(values, value);
 			}
 
-			if (
-				values.some(
-					(v) => typeof v === 'string' && (v).charAt(0) === '=',
-				)
-			) {
+			if (values.some((v) => typeof v === 'string' && v.charAt(0) === '=')) {
 				return true;
 			}
 
 			if (
 				values.length === 0 ||
-				!parameter.displayOptions.show[propertyName].some((v) =>
-					values.includes(v),
-				)
+				!parameter.displayOptions.show[propertyName].some((v) => values.includes(v))
 			) {
 				return false;
 			}
@@ -315,9 +309,7 @@ export function displayParameter(
 
 			if (
 				values.length !== 0 &&
-				parameter.displayOptions.hide[propertyName].some((v) =>
-					values.includes(v),
-				)
+				parameter.displayOptions.hide[propertyName].some((v) => values.includes(v))
 			) {
 				return false;
 			}
@@ -381,15 +373,11 @@ export function getContext(
 		key = 'flow';
 	} else if (type === 'node') {
 		if (node === undefined) {
-			throw new Error(
-				`The request data of context type "node" the node parameter has to be set!`,
-			);
+			throw new Error(`The request data of context type "node" the node parameter has to be set!`);
 		}
 		key = `node:${node.name}`;
 	} else {
-		throw new Error(
-			`The context type "${type}" is not know. Only "flow" and node" are supported!`,
-		);
+		throw new Error(`The context type "${type}" is not know. Only "flow" and node" are supported!`);
 	}
 
 	if (runExecutionData.executionData.contextData[key] === undefined) {
@@ -452,10 +440,7 @@ export function getParamterResolveOrder(
 	parameterDependencies: IParameterDependencies,
 ): number[] {
 	const executionOrder: number[] = [];
-	const indexToResolve = Array.from(
-		{ length: nodePropertiesArray.length },
-		(v, k) => k,
-	);
+	const indexToResolve = Array.from({ length: nodePropertiesArray.length }, (v, k) => k);
 	const resolvedParamters: string[] = [];
 
 	let index: number;
@@ -502,9 +487,7 @@ export function getParamterResolveOrder(
 		}
 
 		if (itterations > lastIndexReduction + nodePropertiesArray.length) {
-			throw new Error(
-				'Could not resolve parameter depenencies. Max itterations got reached!',
-			);
+			throw new Error('Could not resolve parameter depenencies. Max itterations got reached!');
 		}
 		lastIndexLength = indexToResolve.length;
 	}
@@ -607,13 +590,7 @@ export function getNodeParameters(
 			// Is a simple property so can be set as it is
 
 			if (duplicateParameterNames.includes(nodeProperties.name)) {
-				if (
-					!displayParameter(
-						nodeValuesDisplayCheck,
-						nodeProperties,
-						nodeValuesRoot,
-					)
-				) {
+				if (!displayParameter(nodeValuesDisplayCheck, nodeProperties, nodeValuesRoot)) {
 					continue;
 				}
 			}
@@ -631,20 +608,17 @@ export function getNodeParameters(
 					nodeParameters[nodeProperties.name] =
 						nodeValues[nodeProperties.name] || nodeProperties.default;
 				}
-				nodeParametersFull[nodeProperties.name] =
-					nodeParameters[nodeProperties.name];
+				nodeParametersFull[nodeProperties.name] = nodeParameters[nodeProperties.name];
 			} else if (
 				(nodeValues[nodeProperties.name] !== nodeProperties.default &&
 					typeof nodeValues[nodeProperties.name] !== 'object') ||
 				(typeof nodeValues[nodeProperties.name] === 'object' &&
 					!isEqual(nodeValues[nodeProperties.name], nodeProperties.default)) ||
-				(nodeValues[nodeProperties.name] !== undefined &&
-					parentType === 'collection')
+				(nodeValues[nodeProperties.name] !== undefined && parentType === 'collection')
 			) {
 				// Set only if it is different to the default value
 				nodeParameters[nodeProperties.name] = nodeValues[nodeProperties.name];
-				nodeParametersFull[nodeProperties.name] =
-					nodeParameters[nodeProperties.name];
+				nodeParametersFull[nodeProperties.name] = nodeParameters[nodeProperties.name];
 				continue;
 			}
 		}
@@ -680,8 +654,7 @@ export function getNodeParameters(
 						nodeParameters[nodeProperties.name] = [];
 					}
 				}
-				nodeParametersFull[nodeProperties.name] =
-					nodeParameters[nodeProperties.name];
+				nodeParametersFull[nodeProperties.name] = nodeParameters[nodeProperties.name];
 			} else if (nodeValues[nodeProperties.name] !== undefined) {
 				// Has values defined so get them
 				const tempNodeParameters = getNodeParameters(
@@ -697,16 +670,12 @@ export function getNodeParameters(
 
 				if (tempNodeParameters !== null) {
 					nodeParameters[nodeProperties.name] = tempNodeParameters;
-					nodeParametersFull[nodeProperties.name] =
-						nodeParameters[nodeProperties.name];
+					nodeParametersFull[nodeProperties.name] = nodeParameters[nodeProperties.name];
 				}
 			} else if (returnDefaults === true) {
 				// Does not have values defined but defaults should be returned
-				nodeParameters[nodeProperties.name] = JSON.parse(
-					JSON.stringify(nodeProperties.default),
-				);
-				nodeParametersFull[nodeProperties.name] =
-					nodeParameters[nodeProperties.name];
+				nodeParameters[nodeProperties.name] = JSON.parse(JSON.stringify(nodeProperties.default));
+				nodeParametersFull[nodeProperties.name] = nodeParameters[nodeProperties.name];
 			}
 		} else if (nodeProperties.type === 'fixedCollection') {
 			// Is fixedCollection
@@ -772,13 +741,10 @@ export function getNodeParameters(
 					);
 
 					if (nodePropertyOptions !== undefined) {
-						tempNodePropertiesArray = (nodePropertyOptions as INodePropertyCollection)
-							.values!;
+						tempNodePropertiesArray = (nodePropertyOptions as INodePropertyCollection).values!;
 						tempValue = getNodeParameters(
 							tempNodePropertiesArray,
-							(nodeValues[nodeProperties.name] as INodeParameters)[
-								itemName
-							] as INodeParameters,
+							(nodeValues[nodeProperties.name] as INodeParameters)[itemName] as INodeParameters,
 							returnDefaults,
 							returnNoneDisplayed,
 							false,
@@ -797,10 +763,7 @@ export function getNodeParameters(
 				}
 			}
 
-			if (
-				Object.keys(collectionValues).length !== 0 ||
-				returnDefaults === true
-			) {
+			if (Object.keys(collectionValues).length !== 0 || returnDefaults === true) {
 				// Set only if value got found
 
 				if (returnDefaults === true) {
@@ -812,13 +775,11 @@ export function getNodeParameters(
 					} else {
 						nodeParameters[nodeProperties.name] = collectionValues;
 					}
-					nodeParametersFull[nodeProperties.name] =
-						nodeParameters[nodeProperties.name];
+					nodeParametersFull[nodeProperties.name] = nodeParameters[nodeProperties.name];
 				} else if (collectionValues !== nodeProperties.default) {
 					// Set only if values got found and it is not the default
 					nodeParameters[nodeProperties.name] = collectionValues;
-					nodeParametersFull[nodeProperties.name] =
-						nodeParameters[nodeProperties.name];
+					nodeParametersFull[nodeProperties.name] = nodeParameters[nodeProperties.name];
 				}
 			}
 		}
@@ -909,12 +870,7 @@ export function getNodeWebhooks(
 			'internal',
 			false,
 		) as boolean;
-		const path = getNodeWebhookPath(
-			workflowId,
-			node,
-			nodeWebhookPath,
-			isFullPath,
-		);
+		const path = getNodeWebhookPath(workflowId, node, nodeWebhookPath, isFullPath);
 
 		const httpMethod = workflow.expression.getSimpleParameterValue(
 			node,
@@ -950,10 +906,7 @@ export function getNodeWebhooks(
 	return returnData;
 }
 
-export function getNodeWebhooksBasic(
-	workflow: Workflow,
-	node: INode,
-): IWebhookData[] {
+export function getNodeWebhooksBasic(workflow: Workflow, node: INode): IWebhookData[] {
 	if (node.disabled === true) {
 		// Node is disabled so webhooks will also not be enabled
 		return [];
@@ -1001,12 +954,7 @@ export function getNodeWebhooksBasic(
 			false,
 		) as boolean;
 
-		const path = getNodeWebhookPath(
-			workflowId,
-			node,
-			nodeWebhookPath,
-			isFullPath,
-		);
+		const path = getNodeWebhookPath(workflowId, node, nodeWebhookPath, isFullPath);
 
 		const httpMethod = workflow.expression.getSimpleParameterValue(
 			node,
@@ -1052,9 +1000,7 @@ export function getNodeWebhookPath(
 ): string {
 	let webhookPath = '';
 	if (node.webhookId === undefined) {
-		webhookPath = `${workflowId}/${encodeURIComponent(
-			node.name.toLowerCase(),
-		)}/${path}`;
+		webhookPath = `${workflowId}/${encodeURIComponent(node.name.toLowerCase())}/${path}`;
 	} else {
 		if (isFullPath === true) {
 			return path;
@@ -1132,10 +1078,7 @@ export function getNodeParametersIssues(
  * @param {INode} node The node
  * @returns {string[]}
  */
-export function nodeIssuesToString(
-	issues: INodeIssues,
-	node?: INode,
-): string[] {
+export function nodeIssuesToString(issues: INodeIssues, node?: INode): string[] {
 	const nodeIssues = [];
 
 	if (issues.execution !== undefined) {
@@ -1148,9 +1091,7 @@ export function nodeIssuesToString(
 	for (const propertyName of objectProperties) {
 		if (issues[propertyName] !== undefined) {
 			for (parameterName of Object.keys(issues[propertyName] as object)) {
-				for (issueText of (issues[propertyName] as INodeIssueObjectProperty)[
-					parameterName
-				]) {
+				for (issueText of (issues[propertyName] as INodeIssueObjectProperty)[parameterName]) {
 					nodeIssues.push(issueText);
 				}
 			}
@@ -1183,11 +1124,8 @@ export function addToIssuesIfMissing(
 ) {
 	// TODO: Check what it really has when undefined
 	if (
-		(nodeProperties.type === 'string' &&
-			(value === '' || value === undefined)) ||
-		(nodeProperties.type === 'multiOptions' &&
-			Array.isArray(value) &&
-			value.length === 0) ||
+		(nodeProperties.type === 'string' && (value === '' || value === undefined)) ||
+		(nodeProperties.type === 'multiOptions' && Array.isArray(value) && value.length === 0) ||
 		(nodeProperties.type === 'dateTime' && value === undefined)
 	) {
 		// Parameter is requried but empty
@@ -1254,11 +1192,7 @@ export function getParameterIssues(
 				}
 			} else {
 				// Only one can be set so will be a single value
-				addToIssuesIfMissing(
-					foundIssues,
-					nodeProperties,
-					value as NodeParameterValue,
-				);
+				addToIssuesIfMissing(foundIssues, nodeProperties, value as NodeParameterValue);
 			}
 		}
 	}
@@ -1298,11 +1232,7 @@ export function getParameterIssues(
 		let propertyOptions: INodePropertyCollection;
 		for (propertyOptions of nodeProperties.options as INodePropertyCollection[]) {
 			// Check if the option got set and if not skip it
-			value = getParameterValueByPath(
-				nodeValues,
-				propertyOptions.name,
-				basePath.slice(0, -1),
-			);
+			value = getParameterValueByPath(nodeValues, propertyOptions.name, basePath.slice(0, -1));
 			if (value === undefined) {
 				continue;
 			}
@@ -1340,11 +1270,7 @@ export function getParameterIssues(
 	let propertyIssues;
 
 	for (const optionData of checkChildNodeProperties) {
-		propertyIssues = getParameterIssues(
-			optionData.data,
-			nodeValues,
-			optionData.basePath,
-		);
+		propertyIssues = getParameterIssues(optionData.data, nodeValues, optionData.basePath);
 		mergeIssues(foundIssues, propertyIssues);
 	}
 
@@ -1359,10 +1285,7 @@ export function getParameterIssues(
  * @param {(INodeIssues | null)} source The issues to merge
  * @returns
  */
-export function mergeIssues(
-	destination: INodeIssues,
-	source: INodeIssues | null,
-) {
+export function mergeIssues(destination: INodeIssues, source: INodeIssues | null) {
 	if (source === null) {
 		// Nothing to merge
 		return;
@@ -1382,12 +1305,8 @@ export function mergeIssues(
 			}
 
 			let parameterName: string;
-			for (parameterName of Object.keys(
-				source[propertyName] as INodeIssueObjectProperty,
-			)) {
-				destinationProperty = destination[
-					propertyName
-				] as INodeIssueObjectProperty;
+			for (parameterName of Object.keys(source[propertyName] as INodeIssueObjectProperty)) {
+				destinationProperty = destination[propertyName] as INodeIssueObjectProperty;
 				if (destinationProperty[parameterName] === undefined) {
 					destinationProperty[parameterName] = [];
 				}
@@ -1417,9 +1336,7 @@ export function mergeNodeProperties(
 ): void {
 	let existingIndex: number;
 	for (const property of addProperties) {
-		existingIndex = mainProperties.findIndex(
-			(element) => element.name === property.name,
-		);
+		existingIndex = mainProperties.findIndex((element) => element.name === property.name);
 
 		if (existingIndex === -1) {
 			// Property does not exist yet, so add

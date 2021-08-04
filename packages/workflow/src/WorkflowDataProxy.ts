@@ -64,10 +64,7 @@ export class WorkflowDataProxy {
 				ownKeys(target) {
 					if (Reflect.ownKeys(target).length === 0) {
 						// Target object did not get set yet
-						Object.assign(
-							target,
-							NodeHelpers.getContext(that.runExecutionData!, 'node', node),
-						);
+						Object.assign(target, NodeHelpers.getContext(that.runExecutionData!, 'node', node));
 					}
 
 					return Reflect.ownKeys(target);
@@ -75,17 +72,11 @@ export class WorkflowDataProxy {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				get(target, name, receiver) {
 					name = name.toString();
-					const contextData = NodeHelpers.getContext(
-						that.runExecutionData!,
-						'node',
-						node,
-					);
+					const contextData = NodeHelpers.getContext(that.runExecutionData!, 'node', node);
 
 					if (!contextData.hasOwnProperty(name)) {
 						// Parameter does not exist on node
-						throw new Error(
-							`Could not find parameter "${name}" on context of node "${nodeName}"`,
-						);
+						throw new Error(`Could not find parameter "${name}" on context of node "${nodeName}"`);
 					}
 
 					return contextData[name];
@@ -140,17 +131,13 @@ export class WorkflowDataProxy {
 				if (name[0] === '&') {
 					const key = name.slice(1);
 					if (!that.siblingParameters.hasOwnProperty(key)) {
-						throw new Error(
-							`Could not find sibling parameter "${key}" on node "${nodeName}"`,
-						);
+						throw new Error(`Could not find sibling parameter "${key}" on node "${nodeName}"`);
 					}
 					returnValue = that.siblingParameters[key];
 				} else {
 					if (!node.parameters.hasOwnProperty(name)) {
 						// Parameter does not exist on node
-						throw new Error(
-							`Could not find parameter "${name}" on node "${nodeName}"`,
-						);
+						throw new Error(`Could not find parameter "${name}" on node "${nodeName}"`);
 					}
 
 					returnValue = node.parameters[name];
@@ -198,9 +185,7 @@ export class WorkflowDataProxy {
 			// Long syntax got used to return data from node in path
 
 			if (that.runExecutionData === null) {
-				throw new Error(
-					`Workflow did not run so do not have any execution-data.`,
-				);
+				throw new Error(`Workflow did not run so do not have any execution-data.`);
 			}
 
 			if (!that.runExecutionData.resultData.runData.hasOwnProperty(nodeName)) {
@@ -209,27 +194,15 @@ export class WorkflowDataProxy {
 
 			runIndex = runIndex === undefined ? that.defaultReturnRunIndex : runIndex;
 			runIndex =
-				runIndex === -1
-					? that.runExecutionData.resultData.runData[nodeName].length - 1
-					: runIndex;
+				runIndex === -1 ? that.runExecutionData.resultData.runData[nodeName].length - 1 : runIndex;
 
-			if (
-				that.runExecutionData.resultData.runData[nodeName].length < runIndex
-			) {
-				throw new Error(
-					`No execution data found for run "${runIndex}" of node "${nodeName}"`,
-				);
+			if (that.runExecutionData.resultData.runData[nodeName].length < runIndex) {
+				throw new Error(`No execution data found for run "${runIndex}" of node "${nodeName}"`);
 			}
 
-			const taskData = that.runExecutionData.resultData.runData[nodeName][
-				runIndex
-			].data!;
+			const taskData = that.runExecutionData.resultData.runData[nodeName][runIndex].data!;
 
-			if (
-				taskData.main === null ||
-				!taskData.main.length ||
-				taskData.main[0] === null
-			) {
+			if (taskData.main === null || !taskData.main.length || taskData.main[0] === null) {
 				// throw new Error(`No data found for item-index: "${itemIndex}"`);
 				throw new Error(`No data found from "main" input.`);
 			}
@@ -300,16 +273,10 @@ export class WorkflowDataProxy {
 					name = name.toString();
 
 					if (['binary', 'data', 'json'].includes(name)) {
-						const executionData = that.getNodeExecutionData(
-							nodeName,
-							shortSyntax,
-							undefined,
-						);
+						const executionData = that.getNodeExecutionData(nodeName, shortSyntax, undefined);
 
 						if (executionData.length <= that.itemIndex) {
-							throw new Error(
-								`No data found for item-index: "${that.itemIndex}"`,
-							);
+							throw new Error(`No data found for item-index: "${that.itemIndex}"`);
 						}
 
 						if (['data', 'json'].includes(name)) {
@@ -333,8 +300,7 @@ export class WorkflowDataProxy {
 										// Skip the data property
 										continue;
 									}
-									(returnData[keyName] as IDataObject)[propertyName] =
-										binaryData[propertyName];
+									(returnData[keyName] as IDataObject)[propertyName] = binaryData[propertyName];
 								}
 							}
 
@@ -352,9 +318,7 @@ export class WorkflowDataProxy {
 						) {
 							return -1;
 						}
-						return (
-							that.runExecutionData.resultData.runData[nodeName].length - 1
-						);
+						return that.runExecutionData.resultData.runData[nodeName].length - 1;
 					}
 
 					return Reflect.get(target, name, receiver);
@@ -477,12 +441,7 @@ export class WorkflowDataProxy {
 				} else {
 					outputIndex = outputIndex || 0;
 					runIndex = runIndex === undefined ? -1 : runIndex;
-					executionData = that.getNodeExecutionData(
-						nodeName,
-						false,
-						outputIndex,
-						runIndex,
-					);
+					executionData = that.getNodeExecutionData(nodeName, false, outputIndex, runIndex);
 				}
 
 				return executionData;

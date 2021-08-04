@@ -109,7 +109,7 @@ abstract class NodeError extends Error {
 				if (Array.isArray(error[key])) {
 					// @ts-ignore
 					const resolvedErrors: string[] = error[key]
-					// @ts-ignore
+						// @ts-ignore
 						.map((error) => {
 							if (typeof error === 'string') return error;
 							if (typeof error === 'number') return error.toString();
@@ -126,10 +126,7 @@ abstract class NodeError extends Error {
 					return resolvedErrors.join(' | ');
 				}
 				if (this.isTraversableObject(error[key])) {
-					const property = this.findProperty(
-						error[key] as JsonObject,
-						potentialKeys,
-					);
+					const property = this.findProperty(error[key] as JsonObject, potentialKeys);
 					if (property) {
 						return property;
 					}
@@ -139,11 +136,7 @@ abstract class NodeError extends Error {
 
 		for (const key of traversalKeys) {
 			if (this.isTraversableObject(error[key])) {
-				const property = this.findProperty(
-					error[key] as JsonObject,
-					potentialKeys,
-					traversalKeys,
-				);
+				const property = this.findProperty(error[key] as JsonObject, potentialKeys, traversalKeys);
 				if (property) {
 					return property;
 				}
@@ -156,12 +149,10 @@ abstract class NodeError extends Error {
 	/**
 	 * Check if a value is an object with at least one key, i.e. it can be traversed.
 	 */
-	protected isTraversableObject(value: any): value is JsonObject { // eslint-disable-line @typescript-eslint/no-explicit-any
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	protected isTraversableObject(value: any): value is JsonObject {
 		return (
-			value &&
-			typeof value === 'object' &&
-			!Array.isArray(value) &&
-			!!Object.keys(value).length
+			value && typeof value === 'object' && !Array.isArray(value) && !!Object.keys(value).length
 		);
 	}
 
@@ -212,10 +203,8 @@ const STATUS_CODE_MESSAGES: IStatusCodeMessages = {
 	'402': 'Payment required - perhaps check your payment details?',
 	'403': 'Forbidden - perhaps check your credentials?',
 	'404': 'The resource you are requesting could not be found',
-	'405':
-		'Method not allowed - please check you are using the right HTTP method',
-	'429':
-		'The service is receiving too many requests from you! Perhaps take a break?',
+	'405': 'Method not allowed - please check you are using the right HTTP method',
+	'429': 'The service is receiving too many requests from you! Perhaps take a break?',
 
 	'5XX': 'The service failed to process your request',
 	'500': 'The service was not able to process your request',
@@ -224,8 +213,7 @@ const STATUS_CODE_MESSAGES: IStatusCodeMessages = {
 	'504': 'Gateway timed out - perhaps try again later?',
 };
 
-const UNKNOWN_ERROR_MESSAGE =
-	'UNKNOWN ERROR - check the detailed error for more information';
+const UNKNOWN_ERROR_MESSAGE = 'UNKNOWN ERROR - check the detailed error for more information';
 
 /**
  * Class for instantiating an error in an API response, e.g. a 404 Not Found response,
@@ -261,11 +249,7 @@ export class NodeApiError extends NodeError {
 			return;
 		}
 
-		this.httpCode = this.findProperty(
-			error,
-			ERROR_STATUS_PROPERTIES,
-			ERROR_NESTING_PROPERTIES,
-		);
+		this.httpCode = this.findProperty(error, ERROR_STATUS_PROPERTIES, ERROR_NESTING_PROPERTIES);
 		this.setMessage();
 
 		if (parseXml) {
@@ -273,11 +257,7 @@ export class NodeApiError extends NodeError {
 			return;
 		}
 
-		this.description = this.findProperty(
-			error,
-			ERROR_MESSAGE_PROPERTIES,
-			ERROR_NESTING_PROPERTIES,
-		);
+		this.description = this.findProperty(error, ERROR_MESSAGE_PROPERTIES, ERROR_NESTING_PROPERTIES);
 	}
 
 	private setDescriptionFromXml(xml: string) {

@@ -63,16 +63,9 @@ export class Expression {
 		mode: WorkflowExecuteMode,
 		returnObjectAsString = false,
 		selfData = {},
-	):
-		| NodeParameterValue
-		| INodeParameters
-		| NodeParameterValue[]
-		| INodeParameters[] {
+	): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] {
 		// Check if it is an expression
-		if (
-			typeof parameterValue !== 'string' ||
-			parameterValue.charAt(0) !== '='
-		) {
+		if (typeof parameterValue !== 'string' || parameterValue.charAt(0) !== '=') {
 			// Is no expression so return value
 			return parameterValue;
 		}
@@ -165,11 +158,7 @@ export class Expression {
 	 */
 	getComplexParameterValue(
 		node: INode,
-		parameterValue:
-			| NodeParameterValue
-			| INodeParameters
-			| NodeParameterValue[]
-			| INodeParameters[],
+		parameterValue: NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[],
 		mode: WorkflowExecuteMode,
 		defaultValue:
 			| NodeParameterValue
@@ -178,12 +167,7 @@ export class Expression {
 			| INodeParameters[]
 			| undefined = undefined,
 		selfData = {},
-	):
-		| NodeParameterValue
-		| INodeParameters
-		| NodeParameterValue[]
-		| INodeParameters[]
-		| undefined {
+	): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | undefined {
 		if (parameterValue === undefined) {
 			// Value is not set so return the default
 			return defaultValue;
@@ -242,11 +226,7 @@ export class Expression {
 	 * @memberof Workflow
 	 */
 	getParameterValue(
-		parameterValue:
-			| NodeParameterValue
-			| INodeParameters
-			| NodeParameterValue[]
-			| INodeParameters[],
+		parameterValue: NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[],
 		runExecutionData: IRunExecutionData | null,
 		runIndex: number,
 		itemIndex: number,
@@ -255,27 +235,15 @@ export class Expression {
 		mode: WorkflowExecuteMode,
 		returnObjectAsString = false,
 		selfData = {},
-	):
-		| NodeParameterValue
-		| INodeParameters
-		| NodeParameterValue[]
-		| INodeParameters[] {
+	): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] {
 		// Helper function which returns true when the parameter is a complex one or array
 		const isComplexParameter = (
-			value:
-				| NodeParameterValue
-				| INodeParameters
-				| NodeParameterValue[]
-				| INodeParameters[],
+			value: NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[],
 		) => typeof value === 'object';
 
 		// Helper function which resolves a parameter value depending on if it is simply or not
 		const resolveParameterValue = (
-			value:
-				| NodeParameterValue
-				| INodeParameters
-				| NodeParameterValue[]
-				| INodeParameters[],
+			value: NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[],
 			siblingParameters: INodeParameters,
 		) => {
 			if (isComplexParameter(value)) {
