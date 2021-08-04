@@ -25,9 +25,7 @@ module.exports = {
 
 	rules: {
 
-		// ----------------------------------
-		//            eslint
-		// ----------------------------------
+		// toggled off for compatibility with codebase
 
 		'class-methods-use-this': 'off',
 		'no-restricted-syntax': 'off',
@@ -43,17 +41,20 @@ module.exports = {
 		'consistent-return': 'off',
 		'no-else-return': 'off',
 		'no-await-in-loop': 'off',
+		'no-underscore-dangle': 'off',
+		'@typescript-eslint/lines-between-class-members': 'off',
+		'@typescript-eslint/no-shadow': 'off',
+		'@typescript-eslint/no-use-before-define': 'off',
+		'@typescript-eslint/no-loop-func': 'off',
+		'import/no-extraneous-dependencies': 'off',
+		'import/no-cycle': 'off',
+		'import/prefer-default-export': 'off',
 
-		// from custom ruleset
+		// ----------------------------------
+		//            eslint
+		// ----------------------------------
 
 		'arrow-body-style': ['error', 'as-needed'],
-		// 'array-element-newline': [
-		// 	'error',
-		// 	{
-		// 		ArrayExpression: 'consistent',
-		// 		ArrayPattern: { multiline: true },
-		// 	},
-		// ], // disabled - delegate to Prettier
 		'comma-dangle': [
 			'error',
 			{
@@ -84,8 +85,6 @@ module.exports = {
 			'Undefined',
 			'undefined',
 		],
-		// 'id-match': 'error', // see Notion doc
-		indent: 'off',
 		'new-parens': 'error',
 		'no-caller': 'error',
 		'no-cond-assign': 'error',
@@ -95,7 +94,6 @@ module.exports = {
 		'no-new-wrappers': 'error',
 		'no-redeclare': 'error',
 		'no-throw-literal': 'off',
-		// 'no-underscore-dangle': ['error', { allowAfterThis: true }], // see above
 		'no-unused-expressions': 'off',
 		'no-unused-labels': 'error',
 		'no-unused-vars': 'off',
@@ -106,19 +104,11 @@ module.exports = {
 		'prefer-arrow-callback': ['off', { "allowNamedFunctions": true }],
 		'prefer-const': 'error',
 		'prefer-spread': 'warn',
-		// radix: 'error', // see Notion doc
 		'use-isnan': 'error',
 
 		// ----------------------------------
 		//        @typescript-eslint
 		// ----------------------------------
-
-		'@typescript-eslint/lines-between-class-members': 'off',
-		'@typescript-eslint/no-shadow': 'off',
-		'@typescript-eslint/no-use-before-define': 'off',
-		'@typescript-eslint/no-loop-func': 'off',
-
-		// from custom ruleset
 
 		'@typescript-eslint/array-type': [
 			'error', { default: 'array-simple' },
@@ -164,8 +154,6 @@ module.exports = {
 		'@typescript-eslint/explicit-member-accessibility': [
 			'error', { accessibility: 'no-public' },
 		],
-		// '@typescript-eslint/explicit-module-boundary-types': 'error', // see Notion doc
-		// '@typescript-eslint/indent': ['error', 'tab'], // delegate to Prettier
 		'@typescript-eslint/member-delimiter-style': [
 			'error', {
 				multiline: {
@@ -219,7 +207,6 @@ module.exports = {
 			'error', { checksVoidReturn: false },
 		],
 		'@typescript-eslint/no-namespace': 'error',
-		// '@typescript-eslint/no-require-imports': 'error', // see Notion doc
 		'@typescript-eslint/no-throw-literal': 'error',
 		'@typescript-eslint/no-unnecessary-qualifier': 'error',
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
@@ -228,21 +215,36 @@ module.exports = {
 		'@typescript-eslint/prefer-nullish-coalescing': 'warn',
 		'@typescript-eslint/prefer-optional-chain': 'warn',
 		'@typescript-eslint/promise-function-async': 'error',
-		// '@typescript-eslint/semi': ['error', 'always'], // delegate to Prettier
+
 		'@typescript-eslint/triple-slash-reference': 'error',
 
 		// ----------------------------------
 		//       eslint-plugin-import
 		// ----------------------------------
 
-		'import/no-extraneous-dependencies': 'off',
-		'import/no-cycle': 'off',
-		'import/prefer-default-export': 'off',
-
-		// from custom ruleset
-
 		'import/no-default-export': 'error',
 		'import/order': 'error',
 
 	},
 };
+
+		// disabled - delegated to Prettier
+
+			// 'array-element-newline': [
+			// 	'error',
+			// 	{
+			// 		ArrayExpression: 'consistent',
+			// 		ArrayPattern: { multiline: true },
+			// 	},
+			// ], // disabled - delegate to Prettier
+			// '@typescript-eslint/indent': ['error', 'tab'],
+			// '@typescript-eslint/semi': ['error', 'always'],
+			// indent: 'off',
+
+		// disabled - see reasoning in Notion document
+		// https://www.notion.so/n8n/Linting-Formatting-caf1690c53aa438ba979539347ac40f7
+
+			// 'id-match': 'error',
+			// radix: 'error',
+			// '@typescript-eslint/explicit-module-boundary-types': 'error',
+			// '@typescript-eslint/no-require-imports': 'error', // see Notion doc
