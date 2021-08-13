@@ -1,3 +1,8 @@
+
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { randomBytes } from 'crypto';
 import {
 	ENCRYPTION_KEY_ENV_OVERWRITE,
 	EXTENSIONS_SUBDIRECTORY,
@@ -7,11 +12,8 @@ import {
 	USER_SETTINGS_SUBFOLDER,
 } from '.';
 
-
-import * as fs from 'fs';
-import * as path from 'path';
-import { randomBytes } from 'crypto';
 const { promisify } = require('util');
+
 const fsAccess = promisify(fs.access);
 const fsReadFile = promisify(fs.readFile);
 const fsMkdir = promisify(fs.mkdir);
@@ -19,7 +21,7 @@ const fsWriteFile = promisify(fs.writeFile);
 
 
 
-let settingsCache: IUserSettings | undefined = undefined;
+let settingsCache: IUserSettings | undefined;
 
 
 /**

@@ -16,7 +16,7 @@ import {
 import {
 	ITriggerTime,
 	IWorkflowData,
-} from './';
+} from ".";
 
 
 export class ActiveWorkflows {

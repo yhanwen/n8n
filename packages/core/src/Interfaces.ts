@@ -26,7 +26,7 @@ interface Constructable<T> {
 }
 
 export interface IProcessMessage {
-	data?: any; // tslint:disable-line:no-any
+	data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 	type: string;
 }
 
@@ -34,9 +34,9 @@ export interface IProcessMessage {
 export interface IExecuteFunctions extends IExecuteFunctionsBase {
 	helpers: {
 		prepareBinaryData(binaryData: Buffer, filePath?: string, mimeType?: string): Promise<IBinaryData>;
-		request: requestPromise.RequestPromiseAPI,
-		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>, // tslint:disable-line:no-any
-		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>, // tslint:disable-line:no-any
+		request: requestPromise.RequestPromiseAPI;
+		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 		returnJsonArray(jsonData: IDataObject | IDataObject[]): INodeExecutionData[];
 	};
 }
@@ -45,9 +45,9 @@ export interface IExecuteFunctions extends IExecuteFunctionsBase {
 export interface IExecuteSingleFunctions extends IExecuteSingleFunctionsBase {
 	helpers: {
 		prepareBinaryData(binaryData: Buffer, filePath?: string, mimeType?: string): Promise<IBinaryData>;
-		request: requestPromise.RequestPromiseAPI,
-		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>, // tslint:disable-line:no-any
-		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>, // tslint:disable-line:no-any
+		request: requestPromise.RequestPromiseAPI;
+		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 	};
 }
 
@@ -55,9 +55,9 @@ export interface IExecuteSingleFunctions extends IExecuteSingleFunctionsBase {
 export interface IPollFunctions extends IPollFunctionsBase {
 	helpers: {
 		prepareBinaryData(binaryData: Buffer, filePath?: string, mimeType?: string): Promise<IBinaryData>;
-		request: requestPromise.RequestPromiseAPI,
-		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>, // tslint:disable-line:no-any
-		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>, // tslint:disable-line:no-any
+		request: requestPromise.RequestPromiseAPI;
+		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 		returnJsonArray(jsonData: IDataObject | IDataObject[]): INodeExecutionData[];
 	};
 }
@@ -71,9 +71,9 @@ export interface IResponseError extends Error {
 export interface ITriggerFunctions extends ITriggerFunctionsBase {
 	helpers: {
 		prepareBinaryData(binaryData: Buffer, filePath?: string, mimeType?: string): Promise<IBinaryData>;
-		request: requestPromise.RequestPromiseAPI,
-		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>, // tslint:disable-line:no-any
-		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>, // tslint:disable-line:no-any
+		request: requestPromise.RequestPromiseAPI;
+		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 		returnJsonArray(jsonData: IDataObject | IDataObject[]): INodeExecutionData[];
 	};
 }
@@ -96,18 +96,18 @@ export interface IUserSettings {
 
 export interface ILoadOptionsFunctions extends ILoadOptionsFunctionsBase {
 	helpers: {
-		request?: requestPromise.RequestPromiseAPI,
-		requestOAuth2?: (this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options) => Promise<any>, // tslint:disable-line:no-any
-		requestOAuth1?(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>, // tslint:disable-line:no-any
+		request?: requestPromise.RequestPromiseAPI;
+		requestOAuth2?: (this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options) => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+		requestOAuth1?(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 	};
 }
 
 
 export interface IHookFunctions extends IHookFunctionsBase {
 	helpers: {
-		request: requestPromise.RequestPromiseAPI,
-		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>, // tslint:disable-line:no-any
-		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>, // tslint:disable-line:no-any
+		request: requestPromise.RequestPromiseAPI;
+		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 	};
 }
 
@@ -115,9 +115,9 @@ export interface IHookFunctions extends IHookFunctionsBase {
 export interface IWebhookFunctions extends IWebhookFunctionsBase {
 	helpers: {
 		prepareBinaryData(binaryData: Buffer, filePath?: string, mimeType?: string): Promise<IBinaryData>;
-		request: requestPromise.RequestPromiseAPI,
-		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>, // tslint:disable-line:no-any
-		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>, // tslint:disable-line:no-any
+		request: requestPromise.RequestPromiseAPI;
+		requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+		requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 		returnJsonArray(jsonData: IDataObject | IDataObject[]): INodeExecutionData[];
 	};
 }

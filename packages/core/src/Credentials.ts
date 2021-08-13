@@ -41,7 +41,7 @@ export class Credentials extends ICredentials {
 		let fullData;
 		try {
 			fullData = this.getData(encryptionKey);
-		} catch (e) {
+		} catch (_) {
 			fullData = {};
 		}
 
@@ -67,7 +67,7 @@ export class Credentials extends ICredentials {
 
 		try {
 			return JSON.parse(decryptedData.toString(enc.Utf8));
-		} catch (e) {
+		} catch (_) {
 			throw new Error('Credentials could not be decrypted. The reason is that probably a different "encryptionKey" got used to encrypt the data than now to decrypt it.');
 		}
 	}

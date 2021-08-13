@@ -8,7 +8,7 @@ import {
 
 import {
 	NodeExecuteFunctions,
-} from './';
+} from ".";
 
 
 export class ActiveWebhooks {
@@ -41,7 +41,7 @@ export class ActiveWebhooks {
 
 		const webhookKey = this.getWebhookKey(webhookData.httpMethod, webhookData.path, webhookData.webhookId);
 
-		//check that there is not a webhook already registed with that path/method
+		// check that there is not a webhook already registed with that path/method
 		if (this.webhookUrls[webhookKey] && !webhookData.webhookId) {
 			throw new Error(`Test-Webhook can not be activated because another one with the same method "${webhookData.httpMethod}" and path "${webhookData.path}" is already active!`);
 		}
@@ -124,7 +124,7 @@ export class ActiveWebhooks {
 
 		Object.keys(this.webhookUrls)
 		.filter(key => key.includes(path))
-		.map(key => {
+		.map(key => { // eslint-disable-line array-callback-return
 			methods.push(key.split('|')[0]);
 		});
 
@@ -206,7 +206,7 @@ export class ActiveWebhooks {
 		}
 
 		await Promise.all(removePromises);
-		return;
+
 	}
 
 }

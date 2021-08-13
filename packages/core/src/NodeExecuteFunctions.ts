@@ -1,10 +1,3 @@
-import {
-	BINARY_ENCODING,
-	IHookFunctions,
-	ILoadOptionsFunctions,
-	IResponseError,
-	IWorkflowSettings,
-} from './';
 
 import {
 	IAllExecuteFunctions,
@@ -38,6 +31,8 @@ import {
 	WorkflowActivateMode,
 	WorkflowDataProxy,
 	WorkflowExecuteMode,
+
+	LoggerProxy as Logger,
 } from 'n8n-workflow';
 
 import * as clientOAuth1 from 'oauth-1.0a';
@@ -51,9 +46,14 @@ import * as requestPromise from 'request-promise-native';
 import { createHmac } from 'crypto';
 import { fromBuffer } from 'file-type';
 import { lookup } from 'mime-types';
+
 import {
-	LoggerProxy as Logger,
-} from 'n8n-workflow';
+	BINARY_ENCODING,
+	IHookFunctions,
+	ILoadOptionsFunctions,
+	IResponseError,
+	IWorkflowSettings,
+} from ".";
 
 const requestPromiseWithDefaults = requestPromise.defaults({
 	timeout: 300000, // 5 minutes
@@ -166,7 +166,7 @@ export function requestOAuth2(this: IAllExecuteFunctions, credentialsType: strin
 
 	// If keep bearer is false remove the it from the authorization header
 	if (oAuth2Options?.keepBearer === false) {
-		//@ts-ignore
+		// @ts-ignore
 		newRequestOptions?.headers?.Authorization = newRequestOptions?.headers?.Authorization.split(' ')[1];
 	}
 
@@ -261,7 +261,7 @@ export function requestOAuth1(this: IAllExecuteFunctions, credentialsType: strin
 		secret: oauthTokenData.oauth_token_secret as string,
 	};
 
-	//@ts-ignore
+	// @ts-ignore
 	requestOptions.data = { ...requestOptions.qs, ...requestOptions.form };
 
 	// Fixes issue that OAuth1 library only works with "url" property and not with "uri"
@@ -273,7 +273,7 @@ export function requestOAuth1(this: IAllExecuteFunctions, credentialsType: strin
 		delete requestOptions.uri;
 	}
 
-	//@ts-ignore
+	// @ts-ignore
 	requestOptions.headers = oauth.toHeader(oauth.authorize(requestOptions, token));
 
 	return this.helpers.request!(requestOptions)
@@ -405,7 +405,7 @@ export function getNode(node: INode): INode {
  * @param {*} [fallbackValue]
  * @returns {(NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object)}
  */
-export function getNodeParameter(workflow: Workflow, runExecutionData: IRunExecutionData | null, runIndex: number, connectionInputData: INodeExecutionData[], node: INode, parameterName: string, itemIndex: number, mode: WorkflowExecuteMode, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object { //tslint:disable-line:no-any
+export function getNodeParameter(workflow: Workflow, runExecutionData: IRunExecutionData | null, runIndex: number, connectionInputData: INodeExecutionData[], node: INode, parameterName: string, itemIndex: number, mode: WorkflowExecuteMode, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object { // eslint-disable-line @typescript-eslint/no-explicit-any
 	const nodeType = workflow.nodeTypes.getByName(node.type);
 	if (nodeType === undefined) {
 		throw new Error(`Node type "${node.type}" is not known so can not return paramter value!`);
@@ -420,9 +420,9 @@ export function getNodeParameter(workflow: Workflow, runExecutionData: IRunExecu
 	let returnData;
 	try {
 		returnData = workflow.expression.getParameterValue(value, runExecutionData, runIndex, itemIndex, node.name, connectionInputData, mode);
-	} catch (e) {
-		e.message += ` [Error in parameter: "${parameterName}"]`;
-		throw e;
+	} catch (error) {
+		error.message += ` [Error in parameter: "${parameterName}"]`;
+		throw error;
 	}
 
 	return returnData;
@@ -465,12 +465,12 @@ export function getNodeWebhookUrl(name: string, workflow: Workflow, node: INode,
 		return undefined;
 	}
 
-	const path = workflow.expression.getSimpleParameterValue(node, webhookDescription['path'], mode);
+	const path = workflow.expression.getSimpleParameterValue(node, webhookDescription.path, mode);
 	if (path === undefined) {
 		return undefined;
 	}
 
-	const isFullPath: boolean = workflow.expression.getSimpleParameterValue(node, webhookDescription['isFullPath'], mode, false) as boolean;
+	const isFullPath: boolean = workflow.expression.getSimpleParameterValue(node, webhookDescription.isFullPath, mode, false) as boolean;
 	return NodeHelpers.getNodeWebhookUrl(baseUrl, workflow.id!, node, path.toString(), isFullPath);
 }
 
@@ -552,7 +552,7 @@ export function getWorkflowMetadata(workflow: Workflow): IWorkflowMetadata {
 export function getExecutePollFunctions(workflow: Workflow, node: INode, additionalData: IWorkflowExecuteAdditionalData, mode: WorkflowExecuteMode, activation: WorkflowActivateMode): IPollFunctions {
 	return ((workflow: Workflow, node: INode) => {
 		return {
-			__emit: (data: INodeExecutionData[][]): void => {
+			__emit: (_: INodeExecutionData[][]): void => {
 				throw new Error('Overwrite NodeExecuteFunctions.getExecutePullFunctions.__emit function!');
 			},
 			getCredentials(type: string): ICredentialDataDecryptedObject | undefined {
@@ -567,7 +567,7 @@ export function getExecutePollFunctions(workflow: Workflow, node: INode, additio
 			getNode: () => {
 				return getNode(node);
 			},
-			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { //tslint:disable-line:no-any
+			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { // eslint-disable-line @typescript-eslint/no-explicit-any
 				const runExecutionData: IRunExecutionData | null = null;
 				const itemIndex = 0;
 				const runIndex = 0;
@@ -590,10 +590,10 @@ export function getExecutePollFunctions(workflow: Workflow, node: INode, additio
 			helpers: {
 				prepareBinaryData,
 				request: requestPromiseWithDefaults,
-				requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth2.call(this, credentialsType, requestOptions, node, additionalData, oAuth2Options);
 				},
-				requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth1.call(this, credentialsType, requestOptions);
 				},
 				returnJsonArray,
@@ -618,7 +618,7 @@ export function getExecutePollFunctions(workflow: Workflow, node: INode, additio
 export function getExecuteTriggerFunctions(workflow: Workflow, node: INode, additionalData: IWorkflowExecuteAdditionalData, mode: WorkflowExecuteMode, activation: WorkflowActivateMode): ITriggerFunctions {
 	return ((workflow: Workflow, node: INode) => {
 		return {
-			emit: (data: INodeExecutionData[][]): void => {
+			emit: (_: INodeExecutionData[][]): void => {
 				throw new Error('Overwrite NodeExecuteFunctions.getExecuteTriggerFunctions.emit function!');
 			},
 			getCredentials(type: string): ICredentialDataDecryptedObject | undefined {
@@ -633,7 +633,7 @@ export function getExecuteTriggerFunctions(workflow: Workflow, node: INode, addi
 			getActivationMode: (): WorkflowActivateMode => {
 				return activation;
 			},
-			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { //tslint:disable-line:no-any
+			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { // eslint-disable-line @typescript-eslint/no-explicit-any
 				const runExecutionData: IRunExecutionData | null = null;
 				const itemIndex = 0;
 				const runIndex = 0;
@@ -656,10 +656,10 @@ export function getExecuteTriggerFunctions(workflow: Workflow, node: INode, addi
 			helpers: {
 				prepareBinaryData,
 				request: requestPromiseWithDefaults,
-				requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth2.call(this, credentialsType, requestOptions, node, additionalData, oAuth2Options);
 				},
-				requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth1.call(this, credentialsType, requestOptions);
 				},
 				returnJsonArray,
@@ -691,9 +691,9 @@ export function getExecuteFunctions(workflow: Workflow, runExecutionData: IRunEx
 				return continueOnFail(node);
 			},
 			evaluateExpression: (expression: string, itemIndex: number) => {
-				return workflow.expression.resolveSimpleParameterValue('=' + expression, {}, runExecutionData, runIndex, itemIndex, node.name, connectionInputData, mode);
+				return workflow.expression.resolveSimpleParameterValue(`=${  expression}`, {}, runExecutionData, runIndex, itemIndex, node.name, connectionInputData, mode);
 			},
-			async executeWorkflow(workflowInfo: IExecuteWorkflowInfo, inputData?: INodeExecutionData[]): Promise<any> { // tslint:disable-line:no-any
+			async executeWorkflow(workflowInfo: IExecuteWorkflowInfo, inputData?: INodeExecutionData[]): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 				return additionalData.executeWorkflow(workflowInfo, additionalData, inputData);
 			},
 			getContext(type: string): IContextObject {
@@ -723,7 +723,7 @@ export function getExecuteFunctions(workflow: Workflow, runExecutionData: IRunEx
 				// TODO: Maybe do clone of data only here so it only clones the data that is really needed
 				return inputData[inputName][inputIndex] as INodeExecutionData[];
 			},
-			getNodeParameter: (parameterName: string, itemIndex: number, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { //tslint:disable-line:no-any
+			getNodeParameter: (parameterName: string, itemIndex: number, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { // eslint-disable-line @typescript-eslint/no-explicit-any
 				return getNodeParameter(workflow, runExecutionData, runIndex, connectionInputData, node, parameterName, itemIndex, mode, fallbackValue);
 			},
 			getMode: (): WorkflowExecuteMode => {
@@ -749,7 +749,7 @@ export function getExecuteFunctions(workflow: Workflow, runExecutionData: IRunEx
 				return workflow.getStaticData(type, node);
 			},
 			prepareOutputData: NodeHelpers.prepareOutputData,
-			sendMessageToUI(message: any): void { // tslint:disable-line:no-any
+			sendMessageToUI(message: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
 				if (mode !== 'manual') {
 					return;
 				}
@@ -764,10 +764,10 @@ export function getExecuteFunctions(workflow: Workflow, runExecutionData: IRunEx
 			helpers: {
 				prepareBinaryData,
 				request: requestPromiseWithDefaults,
-				requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth2.call(this, credentialsType, requestOptions, node, additionalData, oAuth2Options);
 				},
-				requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth1.call(this, credentialsType, requestOptions);
 				},
 				returnJsonArray,
@@ -801,7 +801,7 @@ export function getExecuteSingleFunctions(workflow: Workflow, runExecutionData: 
 			},
 			evaluateExpression: (expression: string, evaluateItemIndex: number | undefined) => {
 				evaluateItemIndex = evaluateItemIndex === undefined ? itemIndex : evaluateItemIndex;
-				return workflow.expression.resolveSimpleParameterValue('=' + expression, {}, runExecutionData, runIndex, evaluateItemIndex, node.name, connectionInputData, mode);
+				return workflow.expression.resolveSimpleParameterValue(`=${  expression}`, {}, runExecutionData, runIndex, evaluateItemIndex, node.name, connectionInputData, mode);
 			},
 			getContext(type: string): IContextObject {
 				return NodeHelpers.getContext(runExecutionData, type, node);
@@ -832,7 +832,7 @@ export function getExecuteSingleFunctions(workflow: Workflow, runExecutionData: 
 					throw new Error(`Value "${inputIndex}" of input "${inputName}" with itemIndex "${itemIndex}" did not get set!`);
 				}
 
-				return allItems[itemIndex] as INodeExecutionData;
+				return allItems[itemIndex] ;
 			},
 			getMode: (): WorkflowExecuteMode => {
 				return mode;
@@ -846,7 +846,7 @@ export function getExecuteSingleFunctions(workflow: Workflow, runExecutionData: 
 			getTimezone: (): string => {
 				return getTimezone(workflow, additionalData);
 			},
-			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { //tslint:disable-line:no-any
+			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { // eslint-disable-line @typescript-eslint/no-explicit-any
 				return getNodeParameter(workflow, runExecutionData, runIndex, connectionInputData, node, parameterName, itemIndex, mode, fallbackValue);
 			},
 			getWorkflow: () => {
@@ -862,10 +862,10 @@ export function getExecuteSingleFunctions(workflow: Workflow, runExecutionData: 
 			helpers: {
 				prepareBinaryData,
 				request: requestPromiseWithDefaults,
-				requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth2.call(this, credentialsType, requestOptions, node, additionalData, oAuth2Options);
 				},
-				requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth1.call(this, credentialsType, requestOptions);
 				},
 			},
@@ -904,7 +904,7 @@ export function getLoadOptionsFunctions(workflow: Workflow, node: INode, path: s
 			getNode: () => {
 				return getNode(node);
 			},
-			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { //tslint:disable-line:no-any
+			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { // eslint-disable-line @typescript-eslint/no-explicit-any
 				const runExecutionData: IRunExecutionData | null = null;
 				const itemIndex = 0;
 				const runIndex = 0;
@@ -920,10 +920,10 @@ export function getLoadOptionsFunctions(workflow: Workflow, node: INode, path: s
 			},
 			helpers: {
 				request: requestPromiseWithDefaults,
-				requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth2.call(this, credentialsType, requestOptions, node, additionalData, oAuth2Options);
 				},
-				requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth1.call(this, credentialsType, requestOptions);
 				},
 			},
@@ -959,7 +959,7 @@ export function getExecuteHookFunctions(workflow: Workflow, node: INode, additio
 			getNode: () => {
 				return getNode(node);
 			},
-			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { //tslint:disable-line:no-any
+			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { // eslint-disable-line @typescript-eslint/no-explicit-any
 				const runExecutionData: IRunExecutionData | null = null;
 				const itemIndex = 0;
 				const runIndex = 0;
@@ -990,10 +990,10 @@ export function getExecuteHookFunctions(workflow: Workflow, node: INode, additio
 			},
 			helpers: {
 				request: requestPromiseWithDefaults,
-				requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth2.call(this, credentialsType, requestOptions, node, additionalData, oAuth2Options);
 				},
-				requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth1.call(this, credentialsType, requestOptions);
 				},
 			},
@@ -1039,7 +1039,7 @@ export function getExecuteWebhookFunctions(workflow: Workflow, node: INode, addi
 			getNode: () => {
 				return getNode(node);
 			},
-			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { //tslint:disable-line:no-any
+			getNodeParameter: (parameterName: string, fallbackValue?: any): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object => { // eslint-disable-line @typescript-eslint/no-explicit-any
 				const runExecutionData: IRunExecutionData | null = null;
 				const itemIndex = 0;
 				const runIndex = 0;
@@ -1090,10 +1090,10 @@ export function getExecuteWebhookFunctions(workflow: Workflow, node: INode, addi
 			helpers: {
 				prepareBinaryData,
 				request: requestPromiseWithDefaults,
-				requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth2(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUri | requestPromise.RequestPromiseOptions, oAuth2Options?: IOAuth2Options): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth2.call(this, credentialsType, requestOptions, node, additionalData, oAuth2Options);
 				},
-				requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // tslint:disable-line:no-any
+				async requestOAuth1(this: IAllExecuteFunctions, credentialsType: string, requestOptions: OptionsWithUrl | requestPromise.RequestPromiseOptions): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 					return requestOAuth1.call(this, credentialsType, requestOptions);
 				},
 				returnJsonArray,

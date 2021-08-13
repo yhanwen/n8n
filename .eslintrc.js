@@ -340,11 +340,6 @@ module.exports = {
 		// ----------------------------------
 
 		/**
-		 * https://eslint.org/docs/rules/no-invalid-this
-		 */
-		 'no-invalid-this': 'error',
-
-		/**
 		 * https://eslint.org/docs/rules/no-unused-vars
 		 */
  		'no-unused-vars': 'off',
@@ -433,6 +428,21 @@ module.exports = {
 		// ----------------------------------
 		//              ESLint
 		// ----------------------------------
+
+		/**
+		 * https://eslint.org/docs/rules/no-labels
+		 */
+ 		'no-labels': 'off',
+
+		/**
+		 * https://eslint.org/docs/rules/new-cap
+		 */
+ 		'new-cap': 'off',
+
+		/**
+		 * https://eslint.org/docs/rules/no-invalid-this
+		 */
+		 'no-invalid-this': 'off',
 
 		/**
 		 * https://eslint.org/docs/rules/class-methods-use-this

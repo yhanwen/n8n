@@ -10,7 +10,7 @@ import {
 
 import {
 	NodeExecuteFunctions,
-} from './';
+} from ".";
 
 
 const TEMP_NODE_NAME = 'Temp-Node';
@@ -82,7 +82,7 @@ export class LoadNodeParameterOptions {
 	 * @returns {Promise<INodePropertyOptions[]>}
 	 * @memberof LoadNodeParameterOptions
 	 */
-	getOptions(methodName: string, additionalData: IWorkflowExecuteAdditionalData): Promise<INodePropertyOptions[]> {
+	async getOptions(methodName: string, additionalData: IWorkflowExecuteAdditionalData): Promise<INodePropertyOptions[]> {
 		const node = this.workflow.getNode(TEMP_NODE_NAME);
 
 		const nodeType = this.workflow.nodeTypes.getByName(node!.type);

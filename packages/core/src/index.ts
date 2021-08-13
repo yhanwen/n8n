@@ -1,5 +1,8 @@
+import * as NodeExecuteFunctions from './NodeExecuteFunctions';
+import * as UserSettings from './UserSettings';
+
 try {
-	require('source-map-support').install();
+	require('source-map-support').install(); // eslint-disable-line global-require
 } catch (error) {
 
 }
@@ -13,9 +16,6 @@ export * from './Interfaces';
 export * from './LoadNodeParameterOptions';
 export * from './NodeExecuteFunctions';
 export * from './WorkflowExecute';
-
-import * as NodeExecuteFunctions from './NodeExecuteFunctions';
-import * as UserSettings from './UserSettings';
 export {
 	NodeExecuteFunctions,
 	UserSettings,
