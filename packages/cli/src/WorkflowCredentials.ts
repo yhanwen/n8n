@@ -1,10 +1,10 @@
 import {
-	Db,
-} from './';
-import {
 	INode,
-	IWorkflowCredentials
+	IWorkflowCredentials,
 } from 'n8n-workflow';
+import {
+	Db,
+} from ".";
 
 
 export async function WorkflowCredentials(nodes: INode[]): Promise<IWorkflowCredentials> {
@@ -28,6 +28,7 @@ export async function WorkflowCredentials(nodes: INode[]): Promise<IWorkflowCred
 				if (!foundCredentials.length) {
 					throw new Error(`Could not find credentials for type "${type}" with name "${name}".`);
 				}
+				// eslint-disable-next-line prefer-destructuring
 				returnCredentials[type][name] = foundCredentials[0];
 			}
 		}

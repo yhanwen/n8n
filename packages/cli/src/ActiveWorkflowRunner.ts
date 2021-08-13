@@ -1,18 +1,3 @@
-import {
-	Db,
-	IActivationError,
-	IResponseCallbackData,
-	IWebhookDb,
-	IWorkflowDb,
-	IWorkflowExecutionDataProcess,
-	NodeTypes,
-	ResponseHelper,
-	WebhookHelpers,
-	WorkflowCredentials,
-	WorkflowExecuteAdditionalData,
-	WorkflowHelpers,
-	WorkflowRunner,
-} from './';
 
 import {
 	ActiveWorkflows,
@@ -32,12 +17,27 @@ import {
 	Workflow,
 	WorkflowActivateMode,
 	WorkflowExecuteMode,
+
+	LoggerProxy as Logger,
 } from 'n8n-workflow';
 
 import * as express from 'express';
+
 import {
-	LoggerProxy as Logger,
-} from 'n8n-workflow';
+	Db,
+	IActivationError,
+	IResponseCallbackData,
+	IWebhookDb,
+	IWorkflowDb,
+	IWorkflowExecutionDataProcess,
+	NodeTypes,
+	ResponseHelper,
+	WebhookHelpers,
+	WorkflowCredentials,
+	WorkflowExecuteAdditionalData,
+	WorkflowHelpers,
+	WorkflowRunner,
+} from ".";
 
 const WEBHOOK_PROD_UNREGISTERED_HINT = `The workflow must be active for a production URL to run successfully. You can activate the workflow using the toggle in the top-right of the editor. Note that unlike test URL calls, production URL calls aren't shown on the canvas (only in the executions list)`;
 
@@ -112,7 +112,7 @@ export class ActiveWorkflowRunner {
 		}
 
 		await Promise.all(removePromises);
-		return;
+
 	}
 
 	/**
@@ -174,9 +174,11 @@ export class ActiveWorkflowRunner {
 				throw new ResponseHelper.ResponseError(`The requested webhook "${httpMethod} ${path}" is not registered.`, 404, 404, WEBHOOK_PROD_UNREGISTERED_HINT);
 			}
 
-			path = webhook!.webhookPath;
+			// @ts-ignore
+			path = webhook.webhookPath;
 			// extracting params from path
-			webhook!.webhookPath.split('/').forEach((ele, index) => {
+			// @ts-ignore
+			webhook.webhookPath.split('/').forEach((ele, index) => {
 				if (ele.startsWith(':')) {
 					// write params to req.params
 					req.params[ele.slice(1)] = pathElements[index];
@@ -192,11 +194,11 @@ export class ActiveWorkflowRunner {
 		const nodeTypes = NodeTypes();
 		const workflow = new Workflow({ id: webhook.workflowId.toString(), name: workflowData.name, nodes: workflowData.nodes, connections: workflowData.connections, active: workflowData.active, nodeTypes, staticData: workflowData.staticData, settings: workflowData.settings });
 
-		const credentials = await WorkflowCredentials([workflow.getNode(webhook.node as string) as INode]);
+		const credentials = await WorkflowCredentials([workflow.getNode(webhook.node ) as INode]);
 
 		const additionalData = await WorkflowExecuteAdditionalData.getBase(credentials);
 
-		const webhookData = NodeHelpers.getNodeWebhooks(workflow, workflow.getNode(webhook.node as string) as INode, additionalData).filter((webhook) => {
+		const webhookData = NodeHelpers.getNodeWebhooks(workflow, workflow.getNode(webhook.node ) as INode, additionalData).filter((webhook) => {
 			return (webhook.httpMethod === httpMethod && webhook.path === path);
 		})[0];
 
@@ -210,7 +212,7 @@ export class ActiveWorkflowRunner {
 
 		return new Promise((resolve, reject) => {
 			const executionMode = 'webhook';
-			//@ts-ignore
+			// @ts-ignore
 			WebhookHelpers.executeWebhook(workflow, webhookData, workflowData, workflowStartNode, executionMode, undefined, req, res, (error: Error | null, data: object) => {
 				if (error !== null) {
 					return reject(error);
@@ -256,7 +258,7 @@ export class ActiveWorkflowRunner {
 	 */
 	async isActive(id: string): Promise<boolean> {
 		const workflow = await Db.collections.Workflow?.findOne({ id: Number(id) }) as IWorkflowDb;
-		return workflow?.active as boolean;
+		return workflow?.active ;
 	}
 
 	/**
@@ -339,6 +341,7 @@ export class ActiveWorkflowRunner {
 					// it's a error runnig the webhook methods (checkExists, create)
 					errorMessage = error.detail;
 				} else {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					errorMessage = error.message;
 				}
 
@@ -397,7 +400,7 @@ export class ActiveWorkflowRunner {
 	 * @returns
 	 * @memberof ActiveWorkflowRunner
 	 */
-	runWorkflow(workflowData: IWorkflowDb, node: INode, data: INodeExecutionData[][], additionalData: IWorkflowExecuteAdditionalDataWorkflow, mode: WorkflowExecuteMode) {
+	async runWorkflow(workflowData: IWorkflowDb, node: INode, data: INodeExecutionData[][], additionalData: IWorkflowExecuteAdditionalDataWorkflow, mode: WorkflowExecuteMode) {
 		const nodeExecutionStack: IExecuteData[] = [
 			{
 				node,
@@ -470,7 +473,7 @@ export class ActiveWorkflowRunner {
 			returnFunctions.emit = (data: INodeExecutionData[][]): void => {
 				Logger.debug(`Received trigger for workflow "${workflow.name}"`);
 				WorkflowHelpers.saveStaticData(workflow);
-				this.runWorkflow(workflowData, node, data, additionalData, mode).catch((err) => console.error(err));
+				this.runWorkflow(workflowData, node, data, additionalData, mode).catch((error) => console.error(error));
 			};
 			return returnFunctions;
 		});

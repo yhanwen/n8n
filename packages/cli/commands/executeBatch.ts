@@ -1,3 +1,4 @@
+/* eslint-disable array-callback-return */
 import * as fs from 'fs';
 import {
 	Command,
@@ -10,24 +11,11 @@ import {
 
 import {
 	INode,
-	INodeExecutionData,
 	ITaskData,
+
+	LoggerProxy,
 } from 'n8n-workflow';
 
-import {
-	ActiveExecutions,
-	CredentialsOverwrites,
-	CredentialTypes,
-	Db,
-	ExternalHooks,
-	IExecutionsCurrentSummary,
-	IWorkflowDb,
-	IWorkflowExecutionDataProcess,
-	LoadNodesAndCredentials,
-	NodeTypes,
-	WorkflowCredentials,
-	WorkflowRunner,
-} from '../src';
 
 import {
 	sep,
@@ -38,16 +26,27 @@ import {
 } from 'json-diff';
 
 import {
+	pick,
+} from 'lodash';
+import {
 	getLogger,
 } from '../src/Logger';
 
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
+
 
 import {
-	pick,
-} from 'lodash';
+	ActiveExecutions,
+	CredentialsOverwrites,
+	CredentialTypes,
+	Db,
+	ExternalHooks,
+	IWorkflowDb,
+	IWorkflowExecutionDataProcess,
+	LoadNodesAndCredentials,
+	NodeTypes,
+	WorkflowCredentials,
+	WorkflowRunner,
+} from '../src';
 
 export class ExecuteBatch extends Command {
 	static description = '\nExecutes multiple workflows once';
@@ -135,7 +134,7 @@ export class ExecuteBatch extends Command {
 			process.exit(0);
 		}, 30000);
 
-		let executingWorkflows = activeExecutionsInstance.getActiveExecutions() as IExecutionsCurrentSummary[];
+		let executingWorkflows = activeExecutionsInstance.getActiveExecutions() ;
 
 		let count = 0;
 		while (executingWorkflows.length !== 0) {
@@ -281,7 +280,7 @@ export class ExecuteBatch extends Command {
 
 		let allWorkflows;
 
-		const query = Db.collections!.Workflow!.createQueryBuilder('workflows');
+		const query = Db.collections.Workflow!.createQueryBuilder('workflows');
 
 		if (ids.length > 0) {
 			query.andWhere(`workflows.id in (:...ids)`, { ids });
@@ -291,6 +290,7 @@ export class ExecuteBatch extends Command {
 			query.andWhere(`workflows.id not in (:...skipIds)`, { skipIds });
 		}
 
+		// eslint-disable-next-line prefer-const
 		allWorkflows = await query.getMany() as IWorkflowDb[];
 
 		if (ExecuteBatch.debug === true) {
@@ -343,13 +343,11 @@ export class ExecuteBatch extends Command {
 				console.log(`\t${nodeName}: ${nodeCount}`);
 			});
 			console.log('\nCheck the JSON file for more details.');
-		} else {
-			if (flags.shortOutput === true) {
+		} else if (flags.shortOutput === true) {
 				console.log(this.formatJsonOutput({ ...results, executions: results.executions.filter(execution => execution.executionStatus !== 'success') }));
 			} else {
 				console.log(this.formatJsonOutput(results));
 			}
-		}
 
 		await ExecuteBatch.stopProcess(true);
 
@@ -413,9 +411,11 @@ export class ExecuteBatch extends Command {
 			this.initializeLogs();
 		}
 
+		// eslint-disable-next-line no-async-promise-executor
 		return new Promise(async (res) => {
 			const promisesArray = [];
 			for (let i = 0; i < ExecuteBatch.concurrency; i++) {
+				// eslint-disable-next-line no-async-promise-executor
 				const promise = new Promise(async (resolve) => {
 					let workflow: IWorkflowDb | undefined;
 					while (allWorkflows.length > 0) {
@@ -537,13 +537,13 @@ export class ExecuteBatch extends Command {
 					default:
 						break;
 				}
-				message += (workflowIndex > 0 ? ', ' : '') + `${openColor}${executionItem.workflowId}${closeColor}`;
+				message += `${workflowIndex > 0 ? ', ' : ''  }${openColor}${executionItem.workflowId}${closeColor}`;
 			});
 			if (process.stdout.isTTY === true) {
 				process.stdout.cursorTo(0);
 				process.stdout.clearLine(0);
 			}
-			process.stdout.write(message + '\n');
+			process.stdout.write(`${message  }\n`);
 		});
 	}
 
@@ -560,7 +560,7 @@ export class ExecuteBatch extends Command {
 		}
 	}
 
-	startThread(workflowData: IWorkflowDb): Promise<IExecutionResult> {
+	async startThread(workflowData: IWorkflowDb): Promise<IExecutionResult> {
 		// This will be the object returned by the promise.
 		// It will be updated according to execution progress below.
 		const executionResult: IExecutionResult = {
@@ -575,7 +575,7 @@ export class ExecuteBatch extends Command {
 
 
 		const requiredNodeTypes = ['n8n-nodes-base.start'];
-		let startNode: INode | undefined = undefined;
+		let startNode: INode | undefined;
 		for (const node of workflowData.nodes) {
 			if (requiredNodeTypes.includes(node.type)) {
 				startNode = node;
@@ -614,6 +614,7 @@ export class ExecuteBatch extends Command {
 			}
 		});
 
+		// eslint-disable-next-line no-async-promise-executor
 		return new Promise(async (resolve) => {
 			if (startNode === undefined) {
 				// If the workflow does not contain a start-node we can not know what
@@ -635,13 +636,13 @@ export class ExecuteBatch extends Command {
 
 
 			try {
-				const credentials = await WorkflowCredentials(workflowData!.nodes);
+				const credentials = await WorkflowCredentials(workflowData.nodes);
 
 				const runData: IWorkflowExecutionDataProcess = {
 					credentials,
 					executionMode: 'cli',
 					startNodes: [startNode!.name],
-					workflowData: workflowData!,
+					workflowData,
 				};
 
 				const workflowRunner = new WorkflowRunner();
@@ -660,7 +661,7 @@ export class ExecuteBatch extends Command {
 					executionResult.executionStatus = 'error';
 				} else {
 					executionResult.executionTime = (Date.parse(data.stoppedAt as unknown as string) - Date.parse(data.startedAt as unknown as string)) / 1000;
-					executionResult.finished = (data?.finished !== undefined) as boolean;
+					executionResult.finished = (data?.finished !== undefined);
 
 					if (data.data.resultData.error) {
 						executionResult.error =
@@ -691,7 +692,7 @@ export class ExecuteBatch extends Command {
 										return;
 									}
 									Object.keys(taskData.data).map(connectionName => {
-										const connection = taskData.data![connectionName] as Array<INodeExecutionData[] | null>;
+										const connection = taskData.data![connectionName] ;
 										connection.map(executionDataArray => {
 											if (executionDataArray === null) {
 												return;
@@ -740,7 +741,7 @@ export class ExecuteBatch extends Command {
 										return;
 									}
 									Object.keys(taskData.data).map(connectionName => {
-										const connection = taskData.data![connectionName] as Array<INodeExecutionData[] | null>;
+										const connection = taskData.data![connectionName] ;
 										connection.map(executionDataArray => {
 											if (executionDataArray === null) {
 												return;
@@ -769,7 +770,7 @@ export class ExecuteBatch extends Command {
 						if (ExecuteBatch.compare === undefined) {
 							executionResult.executionStatus = 'success';
 						} else {
-							const fileName = (ExecuteBatch.compare.endsWith(sep) ? ExecuteBatch.compare : ExecuteBatch.compare + sep) + `${workflowData.id}-snapshot.json`;
+							const fileName = `${ExecuteBatch.compare.endsWith(sep) ? ExecuteBatch.compare : ExecuteBatch.compare + sep  }${workflowData.id}-snapshot.json`;
 							if (fs.existsSync(fileName) === true) {
 
 								const contents = fs.readFileSync(fileName, { encoding: 'utf-8' });
@@ -792,12 +793,12 @@ export class ExecuteBatch extends Command {
 						// Save snapshots only after comparing - this is to make sure we're updating
 						// After comparing to existing verion.
 						if (ExecuteBatch.snapshot !== undefined) {
-							const fileName = (ExecuteBatch.snapshot.endsWith(sep) ? ExecuteBatch.snapshot : ExecuteBatch.snapshot + sep) + `${workflowData.id}-snapshot.json`;
+							const fileName = `${ExecuteBatch.snapshot.endsWith(sep) ? ExecuteBatch.snapshot : ExecuteBatch.snapshot + sep  }${workflowData.id}-snapshot.json`;
 							fs.writeFileSync(fileName, serializedData);
 						}
 					}
 				}
-			} catch (e) {
+			} catch (error) {
 				executionResult.error = 'Workflow failed to execute.';
 				executionResult.executionStatus = 'error';
 			}

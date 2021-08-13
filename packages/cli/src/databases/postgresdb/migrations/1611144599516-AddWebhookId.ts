@@ -9,7 +9,7 @@ export class AddWebhookId1611144599516 implements MigrationInterface {
 		const tablePrefixPure = tablePrefix;
 		const schema = config.get('database.postgresdb.schema');
 		if (schema) {
-			tablePrefix = schema + '.' + tablePrefix;
+			tablePrefix = `${schema  }.${  tablePrefix}`;
 		}
 
 		await queryRunner.query(`ALTER TABLE ${tablePrefix}webhook_entity ADD "webhookId" character varying`);
@@ -22,7 +22,7 @@ export class AddWebhookId1611144599516 implements MigrationInterface {
 		const tablePrefixPure = tablePrefix;
 		const schema = config.get('database.postgresdb.schema');
 		if (schema) {
-			tablePrefix = schema + '.' + tablePrefix;
+			tablePrefix = `${schema  }.${  tablePrefix}`;
 		}
 
 		await queryRunner.query(`DROP INDEX IDX_${tablePrefixPure}16f4436789e804e3e1c9eeb240`);

@@ -6,7 +6,7 @@ import {
 	CredentialTypes,
 	GenericHelpers,
 	ICredentialsOverwrite,
-} from './';
+} from ".";
 
 
 class CredentialsOverwritesClass {

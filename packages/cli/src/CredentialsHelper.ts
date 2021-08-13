@@ -22,16 +22,18 @@ import {
 	CredentialTypes,
 	Db,
 	ICredentialsDb,
-} from './';
+} from ".";
 
 
 const mockNodeTypes: INodeTypes = {
 	nodeTypes: {},
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	init: async (nodeTypes?: INodeTypeData): Promise<void> => { },
 	getAll: (): INodeType[] => {
 		// Does not get used in Workflow so no need to return it
 		return [];
 	},
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	getByName: (nodeType: string): INodeType | undefined => {
 		return undefined;
 	},
@@ -139,9 +141,9 @@ export class CredentialsHelper extends ICredentialsHelper {
 			try {
 				const workflow = new Workflow({ nodes: Object.values(expressionResolveValues.workflow.nodes), connections: expressionResolveValues.workflow.connectionsBySourceNode, active: false, nodeTypes: expressionResolveValues.workflow.nodeTypes });
 				decryptedData = workflow.expression.getParameterValue(decryptedData as INodeParameters, expressionResolveValues.runExecutionData, expressionResolveValues.runIndex, expressionResolveValues.itemIndex, expressionResolveValues.node.name, expressionResolveValues.connectionInputData, mode, false, decryptedData) as ICredentialDataDecryptedObject;
-			} catch (e) {
-				e.message += ' [Error resolving credentials]';
-				throw e;
+			} catch (error) {
+				error.message += ' [Error resolving credentials]';
+				throw error;
 			}
 		} else {
 			const node = {
@@ -152,10 +154,10 @@ export class CredentialsHelper extends ICredentialsHelper {
 				parameters: {} as INodeParameters,
 			} as INode;
 
-			const workflow = new Workflow({ nodes: [node!], connections: {}, active: false, nodeTypes: mockNodeTypes });
+			const workflow = new Workflow({ nodes: [node], connections: {}, active: false, nodeTypes: mockNodeTypes });
 
 			// Resolve expressions if any are set
-			decryptedData = workflow.expression.getComplexParameterValue(node!, decryptedData as INodeParameters, mode, undefined, decryptedData) as ICredentialDataDecryptedObject;
+			decryptedData = workflow.expression.getComplexParameterValue(node, decryptedData as INodeParameters, mode, undefined, decryptedData) as ICredentialDataDecryptedObject;
 		}
 
 		// Load and apply the credentials overwrites if any exist
@@ -174,9 +176,10 @@ export class CredentialsHelper extends ICredentialsHelper {
 	 * @memberof CredentialsHelper
 	 */
 	async updateCredentials(name: string, type: string, data: ICredentialDataDecryptedObject): Promise<void> {
+		// eslint-disable-next-line @typescript-eslint/await-thenable
 		const credentials = await this.getCredentials(name, type);
 
-		if (Db.collections!.Credentials === null) {
+		if (Db.collections.Credentials === null) {
 			// The first time executeWorkflow gets called the Database has
 			// to get initialized first
 			await Db.init();

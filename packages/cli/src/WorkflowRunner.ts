@@ -1,3 +1,25 @@
+
+import {
+	IProcessMessage,
+	WorkflowExecute,
+} from 'n8n-core';
+
+import {
+	ExecutionError,
+	IRun,
+	LoggerProxy as Logger,
+	Workflow,
+	WorkflowExecuteMode,
+	WorkflowHooks,
+	WorkflowOperationError,
+} from 'n8n-workflow';
+
+import * as PCancelable from 'p-cancelable';
+import { join as pathJoin } from 'path';
+import { fork } from 'child_process';
+
+import * as Bull from 'bull';
+import * as config from '../config';
 import {
 	ActiveExecutions,
 	CredentialsOverwrites,
@@ -8,9 +30,7 @@ import {
 	IBullJobResponse,
 	ICredentialsOverwrite,
 	ICredentialsTypeData,
-	IExecutionDb,
 	IExecutionFlattedDb,
-	IExecutionResponse,
 	IProcessMessageDataHook,
 	ITransferNodeTypes,
 	IWorkflowExecutionDataProcess,
@@ -20,30 +40,7 @@ import {
 	ResponseHelper,
 	WorkflowExecuteAdditionalData,
 	WorkflowHelpers,
-} from './';
-
-import {
-	IProcessMessage,
-	WorkflowExecute,
-} from 'n8n-core';
-
-import {
-	ExecutionError,
-	IRun,
-	IWorkflowBase,
-	LoggerProxy as Logger,
-	Workflow,
-	WorkflowExecuteMode,
-	WorkflowHooks,
-	WorkflowOperationError,
-} from 'n8n-workflow';
-
-import * as config from '../config';
-import * as PCancelable from 'p-cancelable';
-import { join as pathJoin } from 'path';
-import { fork } from 'child_process';
-
-import * as Bull from 'bull';
+} from ".";
 import * as Queue from './Queue';
 
 export class WorkflowRunner {
@@ -175,14 +172,14 @@ export class WorkflowRunner {
 		let executionTimeout: NodeJS.Timeout;
 		let workflowTimeout = config.get('executions.timeout') as number; // initialize with default
 		if (data.workflowData.settings && data.workflowData.settings.executionTimeout) {
-			workflowTimeout = data.workflowData.settings!.executionTimeout as number; // preference on workflow setting
+			workflowTimeout = data.workflowData.settings.executionTimeout as number; // preference on workflow setting
 		}
 
 		if (workflowTimeout > 0) {
 			workflowTimeout = Math.min(workflowTimeout, config.get('executions.maxTimeout') as number);
 		}
 
-		const workflow = new Workflow({ id: data.workflowData.id as string | undefined, name: data.workflowData.name, nodes: data.workflowData!.nodes, connections: data.workflowData!.connections, active: data.workflowData!.active, nodeTypes, staticData: data.workflowData!.staticData });
+		const workflow = new Workflow({ id: data.workflowData.id as string | undefined, name: data.workflowData.name, nodes: data.workflowData.nodes, connections: data.workflowData.connections, active: data.workflowData.active, nodeTypes, staticData: data.workflowData.staticData });
 		const additionalData = await WorkflowExecuteAdditionalData.getBase(data.credentials, undefined, workflowTimeout <= 0 ? undefined : Date.now() + workflowTimeout * 1000);
 
 		// Register the active execution
@@ -269,7 +266,7 @@ export class WorkflowRunner {
 		try {
 			job = await this.jobQueue.add(jobData, jobOptions);
 
-			console.log('Started with ID: ' + job.id.toString());
+			console.log(`Started with ID: ${  job.id.toString()}`);
 
 			hooks = WorkflowExecuteAdditionalData.getWorkflowHooksWorkerMain(data.executionMode, executionId, data.workflowData, { retryOf: data.retryOf ? data.retryOf.toString() : undefined });
 
@@ -307,7 +304,7 @@ export class WorkflowRunner {
 
 			let clearWatchdogInterval;
 			if (queueRecoveryInterval > 0) {
-				/*************************************************
+				/** ***********************************************
 				 * Long explanation about what this solves:      *
 				 * This only happens in a very specific scenario *
 				 * when Redis crashes and recovers shortly       *
@@ -318,7 +315,7 @@ export class WorkflowRunner {
 				 * the queue that allows us to identify that the *
 				 * execution finished and get information from   *
 				 * the database.                                 *
-				*************************************************/
+				************************************************ */
 				let watchDogInterval: NodeJS.Timeout | undefined;
 
 				const watchDog: Promise<object> = new Promise((res) => {
@@ -361,7 +358,7 @@ export class WorkflowRunner {
 			}
 
 			const executionDb = await Db.collections.Execution!.findOne(executionId) as IExecutionFlattedDb;
-			const fullExecutionData = ResponseHelper.unflattenExecutionData(executionDb) as IExecutionResponse;
+			const fullExecutionData = ResponseHelper.unflattenExecutionData(executionDb) ;
 			const runData = {
 				data: fullExecutionData.data,
 				finished: fullExecutionData.finished,
@@ -390,9 +387,9 @@ export class WorkflowRunner {
 				) {
 					await Db.collections.Execution!.delete(executionId);
 				}
-			} catch (err) {
+			} catch (error) {
 				// We don't want errors here to crash n8n. Just log and proceed.
-				console.log('Error removing saved execution from database. More details: ', err);
+				console.log('Error removing saved execution from database. More details: ', error);
 			}
 
 			resolve(runData);
@@ -436,7 +433,7 @@ export class WorkflowRunner {
 
 		let nodeTypeData: ITransferNodeTypes;
 		let credentialTypeData: ICredentialsTypeData;
-		let credentialsOverwrites = this.credentialsOverwrites;
+		let {credentialsOverwrites} = this;
 
 		if (loadAllNodeTypes === true) {
 			// Supply all nodeTypes and credentialTypes
@@ -475,7 +472,7 @@ export class WorkflowRunner {
 		let executionTimeout: NodeJS.Timeout;
 		let workflowTimeout = config.get('executions.timeout') as number; // initialize with default
 		if (data.workflowData.settings && data.workflowData.settings.executionTimeout) {
-			workflowTimeout = data.workflowData.settings!.executionTimeout as number; // preference on workflow setting
+			workflowTimeout = data.workflowData.settings.executionTimeout as number; // preference on workflow setting
 		}
 
 		const processTimeoutFunction = (timeout: number) => {
@@ -509,7 +506,7 @@ export class WorkflowRunner {
 
 			} else if (message.type === 'end') {
 				clearTimeout(executionTimeout);
-				this.activeExecutions.remove(executionId!, message.data.runData);
+				this.activeExecutions.remove(executionId, message.data.runData);
 
 			} else if (message.type === 'sendMessageToUI') {
 				WorkflowExecuteAdditionalData.sendMessageToUI.bind({ sessionId: data.sessionId })(message.data.source, message.data.message);
@@ -536,6 +533,7 @@ export class WorkflowRunner {
 					childExecutionIds.splice(executionIdIndex, 1);
 				}
 
+				// eslint-disable-next-line @typescript-eslint/await-thenable
 				await this.activeExecutions.remove(message.data.executionId, message.data.result);
 			}
 		});
@@ -562,6 +560,7 @@ export class WorkflowRunner {
 				// They will display as unknown to the user
 				// Instead of pending forever as executing when it
 				// actually isn't anymore.
+				// eslint-disable-next-line @typescript-eslint/await-thenable
 				await this.activeExecutions.remove(executionId);
 			}
 

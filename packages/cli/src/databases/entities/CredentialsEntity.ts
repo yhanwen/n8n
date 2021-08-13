@@ -3,15 +3,6 @@ import {
 } from 'n8n-workflow';
 
 import {
-	getTimestampSyntax,
-	resolveDataType
-} from '../utils';
-
-import {
-	ICredentialsDb,
-} from '../..';
-
-import {
 	BeforeUpdate,
 	Column,
 	CreateDateColumn,
@@ -20,6 +11,15 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
+import {
+	getTimestampSyntax,
+	resolveDataType,
+} from '../utils';
+
+import {
+	ICredentialsDb,
+} from '../..';
+
 
 @Entity()
 export class CredentialsEntity implements ICredentialsDb {

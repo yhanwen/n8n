@@ -6,7 +6,7 @@ import {
 import {
 	CredentialsOverwrites,
 	ICredentialsTypeData,
-} from './';
+} from ".";
 
 class CredentialTypesClass implements ICredentialTypesInterface {
 

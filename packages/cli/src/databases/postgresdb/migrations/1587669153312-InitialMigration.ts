@@ -11,7 +11,7 @@ export class InitialMigration1587669153312 implements MigrationInterface {
 		const tablePrefixIndex = tablePrefix;
 		const schema = config.get('database.postgresdb.schema');
 		if (schema) {
-			tablePrefix = schema + '.' + tablePrefix;
+			tablePrefix = `${schema  }.${  tablePrefix}`;
 		}
 
 		await queryRunner.query(`CREATE TABLE IF NOT EXISTS ${tablePrefix}credentials_entity ("id" SERIAL NOT NULL, "name" character varying(128) NOT NULL, "data" text NOT NULL, "type" character varying(32) NOT NULL, "nodesAccess" json NOT NULL, "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT PK_${tablePrefixIndex}814c3d3c36e8a27fa8edb761b0e PRIMARY KEY ("id"))`, undefined);
@@ -26,7 +26,7 @@ export class InitialMigration1587669153312 implements MigrationInterface {
 		const tablePrefixIndex = tablePrefix;
 		const schema = config.get('database.postgresdb.schema');
 		if (schema) {
-			tablePrefix = schema + '.' + tablePrefix;
+			tablePrefix = `${schema  }.${  tablePrefix}`;
 		}
 
 		await queryRunner.query(`DROP TABLE ${tablePrefix}workflow_entity`, undefined);

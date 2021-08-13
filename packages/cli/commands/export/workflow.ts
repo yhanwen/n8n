@@ -4,22 +4,23 @@ import {
 } from '@oclif/command';
 
 import {
-	IDataObject
+	IDataObject,
+	LoggerProxy,
 } from 'n8n-workflow';
 
 import {
 	Db,
 } from '../../src';
 
-import { 
+import {
 	getLogger,
 } from '../../src/Logger';
 
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
 
+
+// eslint-disable-next-line import/order
 import * as fs from 'fs';
+// eslint-disable-next-line import/order
 import * as path from 'path';
 
 export class ExportWorkflowsCommand extends Command {
@@ -92,12 +93,12 @@ export class ExportWorkflowsCommand extends Command {
 				} else {
 					fs.mkdirSync(flags.output, { recursive: true });
 				}
-			} catch (e) {
+			} catch (error) {
 				console.error('Aborting execution as a filesystem error has been encountered while creating the output directory. See log messages for details.');
 				logger.error('\nFILESYSTEM ERROR');
 				logger.info('====================================');
-				logger.error(e.message);
-				logger.error(e.stack);
+				logger.error(error.message);
+				logger.error(error.stack);
 				this.exit(1);
 			}
 		} else if (flags.output) {
@@ -127,14 +128,14 @@ export class ExportWorkflowsCommand extends Command {
 				let fileContents: string, i: number;
 				for (i = 0; i < workflows.length; i++) {
 					fileContents = JSON.stringify(workflows[i], null, flags.pretty ? 2 : undefined);
-					const filename = (flags.output!.endsWith(path.sep) ? flags.output! : flags.output + path.sep) + workflows[i].id + '.json';
+					const filename = `${(flags.output!.endsWith(path.sep) ? flags.output! : flags.output + path.sep) + workflows[i].id  }.json`;
 					fs.writeFileSync(filename, fileContents);
 				}
 				console.info(`Successfully exported ${i} workflows.`);
 			} else {
 				const fileContents = JSON.stringify(workflows, null, flags.pretty ? 2 : undefined);
 				if (flags.output) {
-					fs.writeFileSync(flags.output!, fileContents);
+					fs.writeFileSync(flags.output, fileContents);
 					console.info(`Successfully exported ${workflows.length} ${workflows.length === 1 ? 'workflow.' : 'workflows.'}`);
 				} else {
 					console.info(fileContents);

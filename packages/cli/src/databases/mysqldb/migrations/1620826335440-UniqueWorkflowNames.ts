@@ -23,7 +23,7 @@ export class UniqueWorkflowNames1620826335440 implements MigrationInterface {
 				const duplicates = await queryRunner.query(duplicatesQuery, parameters);
 
 				if (duplicates.length > 1) {
-					await Promise.all(duplicates.map(({ id, name }: { id: number; name: string; }, index: number) => {
+					await Promise.all(duplicates.map(async ({ id, name }: { id: number; name: string }, index: number) => {
 						if (index === 0) return Promise.resolve();
 						const [updateQuery, updateParams] = queryRunner.connection.driver.escapeQueryWithParameters(`
 							UPDATE ${tablePrefix}workflow_entity
@@ -36,13 +36,13 @@ export class UniqueWorkflowNames1620826335440 implements MigrationInterface {
 				}
 			}
 
-			await queryRunner.query('ALTER TABLE `' + tablePrefix + 'workflow_entity` ADD UNIQUE INDEX `IDX_' + tablePrefix + '943d8f922be094eb507cb9a7f9` (`name`)');
+			await queryRunner.query(`ALTER TABLE \`${  tablePrefix  }workflow_entity\` ADD UNIQUE INDEX \`IDX_${  tablePrefix  }943d8f922be094eb507cb9a7f9\` (\`name\`)`);
 		}
 
 		async down(queryRunner: QueryRunner): Promise<void> {
 			const tablePrefix = config.get('database.tablePrefix');
 
-			await queryRunner.query('ALTER TABLE `' + tablePrefix + 'workflow_entity` DROP INDEX `IDX_' + tablePrefix + '943d8f922be094eb507cb9a7f9`');
+			await queryRunner.query(`ALTER TABLE \`${  tablePrefix  }workflow_entity\` DROP INDEX \`IDX_${  tablePrefix  }943d8f922be094eb507cb9a7f9\``);
 		}
 
 }

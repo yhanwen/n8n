@@ -35,7 +35,7 @@ export class CertifyCorrectCollation1623936588000 implements MigrationInterface 
 		}
 	}
 
-	async down(queryRunner: QueryRunner): Promise<void> {
+	async down(_: QueryRunner): Promise<void> {
 		// There is nothing to undo in this case as we already expect default collation to be utf8mb4
 		// This migration exists simply to enforce that n8n will work with
 		// older mysql versions

@@ -1,38 +1,39 @@
-import {
-	DatabaseType,
-	GenericHelpers,
-	IDatabaseCollections,
-} from './';
-
+/* eslint-disable no-case-declarations */
 import {
 	UserSettings,
 } from 'n8n-core';
-
 import {
 	ConnectionOptions,
 	createConnection,
 	getRepository,
 } from 'typeorm';
-
 import { TlsOptions } from 'tls';
+import * as path from 'path';
+import {
+	DatabaseType,
+	GenericHelpers,
+	IDatabaseCollections,
+} from ".";
+
+
+
 
 import * as config from '../config';
 
 import { entities } from './databases/entities';
 
-export let collections: IDatabaseCollections = {
+import { postgresMigrations } from './databases/postgresdb/migrations';
+import { mysqlMigrations } from './databases/mysqldb/migrations';
+import { sqliteMigrations } from './databases/sqlite/migrations';
+
+
+export const collections: IDatabaseCollections = {
 	Credentials: null,
 	Execution: null,
 	Workflow: null,
 	Webhook: null,
 	Tag: null,
 };
-
-import { postgresMigrations } from './databases/postgresdb/migrations';
-import { mysqlMigrations } from './databases/mysqldb/migrations';
-import { sqliteMigrations } from './databases/sqlite/migrations';
-
-import * as path from 'path';
 
 export async function init(): Promise<IDatabaseCollections> {
 	const dbType = await GenericHelpers.getConfigValue('database.type') as DatabaseType;
@@ -49,7 +50,7 @@ export async function init(): Promise<IDatabaseCollections> {
 			const sslKey = await GenericHelpers.getConfigValue('database.postgresdb.ssl.key') as string;
 			const sslRejectUnauthorized = await GenericHelpers.getConfigValue('database.postgresdb.ssl.rejectUnauthorized') as boolean;
 
-			let ssl: TlsOptions | undefined = undefined;
+			let ssl: TlsOptions | undefined;
 			if (sslCa !== '' || sslCert !== '' || sslKey !== '' || sslRejectUnauthorized !== true) {
 				ssl = {
 					ca: sslCa || undefined,

@@ -7,7 +7,7 @@ import {
 	IExecutionFlattedDb,
 	IExecutionResponse,
 	IWorkflowDb,
-} from './';
+} from ".";
 
 /**
  * Special Error which allows to return also an error code and http status code
@@ -65,7 +65,7 @@ export function jwtAuthAuthorizationError(resp: Response, message?: string) {
 }
 
 
-export function sendSuccessResponse(res: Response, data: any, raw?: boolean, responseCode?: number) { // tslint:disable-line:no-any
+export function sendSuccessResponse(res: Response, data: any, raw?: boolean, responseCode?: number) { // eslint-disable-line @typescript-eslint/no-explicit-any
 	if (responseCode !== undefined) {
 		res.status(responseCode);
 	}
@@ -133,7 +133,7 @@ export function sendErrorResponse(res: Response, error: ResponseError) {
  * @returns
  */
 
-export function send(processFunction: (req: Request, res: Response) => Promise<any>) { // tslint:disable-line:no-any
+export function send(processFunction: (req: Request, res: Response) => Promise<any>) { // eslint-disable-line @typescript-eslint/no-explicit-any
 
 	return async (req: Request, res: Response) => {
 		try {
@@ -160,26 +160,24 @@ export function send(processFunction: (req: Request, res: Response) => Promise<a
  */
 export function flattenExecutionData(fullExecutionData: IExecutionDb): IExecutionFlatted {
 	// Flatten the data
-	const returnData: IExecutionFlatted = Object.assign({}, {
-		data: stringify(fullExecutionData.data),
+	const returnData: IExecutionFlatted = { data: stringify(fullExecutionData.data),
 		mode: fullExecutionData.mode,
 		startedAt: fullExecutionData.startedAt,
 		stoppedAt: fullExecutionData.stoppedAt,
 		finished: fullExecutionData.finished ? fullExecutionData.finished : false,
 		workflowId: fullExecutionData.workflowId,
-		workflowData: fullExecutionData.workflowData!,
-	});
+		workflowData: fullExecutionData.workflowData!};
 
 	if (fullExecutionData.id !== undefined) {
-		returnData.id = fullExecutionData.id!.toString();
+		returnData.id = fullExecutionData.id.toString();
 	}
 
 	if (fullExecutionData.retryOf !== undefined) {
-		returnData.retryOf = fullExecutionData.retryOf!.toString();
+		returnData.retryOf = fullExecutionData.retryOf.toString();
 	}
 
 	if (fullExecutionData.retrySuccessId !== undefined) {
-		returnData.retrySuccessId = fullExecutionData.retrySuccessId!.toString();
+		returnData.retrySuccessId = fullExecutionData.retrySuccessId.toString();
 	}
 
 	return returnData;
@@ -195,16 +193,14 @@ export function flattenExecutionData(fullExecutionData: IExecutionDb): IExecutio
  */
 export function unflattenExecutionData(fullExecutionData: IExecutionFlattedDb): IExecutionResponse {
 
-	const returnData: IExecutionResponse = Object.assign({}, {
-		id: fullExecutionData.id.toString(),
+	const returnData: IExecutionResponse = { id: fullExecutionData.id.toString(),
 		workflowData: fullExecutionData.workflowData as IWorkflowDb,
 		data: parse(fullExecutionData.data),
 		mode: fullExecutionData.mode,
 		startedAt: fullExecutionData.startedAt,
 		stoppedAt: fullExecutionData.stoppedAt,
 		finished: fullExecutionData.finished ? fullExecutionData.finished : false,
-		workflowId: fullExecutionData.workflowId,
-	});
+		workflowId: fullExecutionData.workflowId};
 
 	return returnData;
 }

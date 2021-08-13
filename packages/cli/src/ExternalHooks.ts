@@ -3,7 +3,7 @@ import {
 	IExternalHooksClass,
 	IExternalHooksFileData,
 	IExternalHooksFunctions,
-} from './';
+} from ".";
 
 import * as config from '../config';
 
@@ -11,7 +11,7 @@ import * as config from '../config';
 class ExternalHooksClass implements IExternalHooksClass {
 
 	externalHooks: {
-		[key: string]: Array<() => {}>
+		[key: string]: Array<() => {}>;
 	} = {};
 	initDidRun = false;
 
@@ -51,6 +51,7 @@ class ExternalHooksClass implements IExternalHooksClass {
 						delete require.cache[require.resolve(hookFilePath)];
 					}
 
+					// eslint-disable-next-line
 					const hookFile = require(hookFilePath) as IExternalHooksFileData;
 					this.loadHooks(hookFile);
 				} catch (error) {
@@ -77,7 +78,7 @@ class ExternalHooksClass implements IExternalHooksClass {
 	}
 
 
-	async run(hookName: string, hookParameters?: any[]): Promise<void> { // tslint:disable-line:no-any
+	async run(hookName: string, hookParameters?: any[]): Promise<void> { // eslint-disable-line @typescript-eslint/no-explicit-any
 		const externalHookFunctions: IExternalHooksFunctions = {
 			dbCollections: Db.collections,
 		};

@@ -4,6 +4,9 @@ import {
 import { Command, flags } from '@oclif/command';
 import * as Redis from 'ioredis';
 
+import { IDataObject ,
+	LoggerProxy,
+} from 'n8n-workflow';
 import * as config from '../config';
 import {
 	ActiveExecutions,
@@ -15,18 +18,14 @@ import {
 	GenericHelpers,
 	LoadNodesAndCredentials,
 	NodeTypes,
-	TestWebhooks,
 	WebhookServer,
 } from '../src';
-import { IDataObject } from 'n8n-workflow';
 
-import { 
+import {
 	getLogger,
 } from '../src/Logger';
 
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
+
 
 let activeWorkflowRunner: ActiveWorkflowRunner.ActiveWorkflowRunner | undefined;
 let processExistCode = 0;
@@ -92,6 +91,7 @@ export class Webhook extends Command {
 		process.on('SIGTERM', Webhook.stopProcess);
 		process.on('SIGINT', Webhook.stopProcess);
 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { flags } = this.parse(Webhook);
 
 		// Wrap that the process does not close but we can still use async
@@ -124,6 +124,7 @@ export class Webhook extends Command {
 				});
 
 				// Make sure the settings exist
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const userSettings = await UserSettings.prepareUserSettings();
 
 				// Load all node and credential types
@@ -156,6 +157,7 @@ export class Webhook extends Command {
 					let lastTimer = 0, cumulativeTimeout = 0;
 
 					const settings = {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						retryStrategy: (times: number): number | null => {
 							const now = Date.now();
 							if (now - lastTimer > 30000) {
@@ -166,7 +168,7 @@ export class Webhook extends Command {
 								cumulativeTimeout += now - lastTimer;
 								lastTimer = now;
 								if (cumulativeTimeout > redisConnectionTimeoutLimit) {
-									logger.error('Unable to connect to Redis after ' + redisConnectionTimeoutLimit + ". Exiting process.");
+									logger.error(`Unable to connect to Redis after ${  redisConnectionTimeoutLimit  }. Exiting process.`);
 									process.exit(1);
 								}
 							}
@@ -208,6 +210,7 @@ export class Webhook extends Command {
 				activeWorkflowRunner = ActiveWorkflowRunner.getInstance();
 				await activeWorkflowRunner.initWebhooks();
 
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const editorUrl = GenericHelpers.getBaseUrl();
 				console.info('Webhook listener waiting for requests.');
 

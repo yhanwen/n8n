@@ -3,21 +3,19 @@ import {
 } from '@oclif/command';
 
 import {
-	IDataObject
+	IDataObject,
+	LoggerProxy,
 } from 'n8n-workflow';
 
 import {
 	Db,
-	GenericHelpers,
 } from '../../src';
 
-import { 
+import {
 	getLogger,
 } from '../../src/Logger';
 
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
+
 
 export class UpdateWorkflowCommand extends Command {
 	static description = '\Update workflows';
@@ -82,12 +80,12 @@ export class UpdateWorkflowCommand extends Command {
 
 			await Db.collections.Workflow!.update(findQuery, updateQuery);
 			console.info('Done');
-		} catch (e) {
+		} catch (error) {
 			console.error('Error updating database. See log messages for details.');
 			logger.error('\nGOT ERROR');
 			logger.info('====================================');
-			logger.error(e.message);
-			logger.error(e.stack);
+			logger.error(error.message);
+			logger.error(error.stack);
 			this.exit(1);
 		}
 

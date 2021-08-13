@@ -6,9 +6,11 @@ import {
 	getConnectionManager,
 } from 'typeorm';
 import * as bodyParser from 'body-parser';
-require('body-parser-xml')(bodyParser);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as _ from 'lodash';
 
+import * as compression from 'compression';
+import * as parseUrl from 'parseurl';
 import {
 	ActiveExecutions,
 	ActiveWorkflowRunner,
@@ -19,11 +21,11 @@ import {
 	IExternalHooksClass,
 	IPackageVersions,
 	ResponseHelper,
-} from './';
+} from ".";
 
-import * as compression from 'compression';
 import * as config from '../config';
-import * as parseUrl from 'parseurl';
+
+require('body-parser-xml')(bodyParser);
 
 export function registerProductionWebhooks() {
 	// HEAD webhook requests
@@ -210,7 +212,7 @@ class App {
 			},
 		}));
 
-		//support application/x-www-form-urlencoded post data
+		// support application/x-www-form-urlencoded post data
 		this.app.use(bodyParser.urlencoded({ extended: false,
 			verify: (req, res, buf) => {
 				// @ts-ignore
@@ -218,7 +220,7 @@ class App {
 			},
 		}));
 
-		if (process.env['NODE_ENV'] !== 'production') {
+		if (process.env.NODE_ENV !== 'production') {
 			this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
 				// Allow access also from frontend when developing
 				res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
@@ -257,7 +259,7 @@ class App {
 				}
 				// DB ping
 				await connection.query('SELECT 1');
-			} catch (err) {
+			} catch (_) {
 				const error = new ResponseHelper.ResponseError('No Database connection!', undefined, 503);
 				return ResponseHelper.sendErrorResponse(res, error);
 			}
@@ -287,12 +289,14 @@ export async function start(): Promise<void> {
 	let server;
 
 	if (app.protocol === 'https' && app.sslKey && app.sslCert) {
+		// eslint-disable-next-line global-require
 		const https = require('https');
 		const privateKey = readFileSync(app.sslKey, 'utf8');
 		const cert = readFileSync(app.sslCert, 'utf8');
 		const credentials = { key: privateKey, cert };
 		server = https.createServer(credentials, app.app);
 	} else {
+		// eslint-disable-next-line global-require
 		const http = require('http');
 		server = http.createServer(app.app);
 	}

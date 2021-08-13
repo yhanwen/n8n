@@ -430,6 +430,11 @@ module.exports = {
 		// ----------------------------------
 
 		/**
+		 * https://eslint.org/docs/rules/func-names
+		 */
+ 		'func-names': 'off',
+
+		/**
 		 * https://eslint.org/docs/rules/no-labels
 		 */
  		'no-labels': 'off',
@@ -713,3 +718,8 @@ module.exports = {
 // are not being transpiled, so they triggered an error when linting.
 // Therefore had to add "templates/**/*" in `include` in that tsconfig.
 // Downside is transpiling files that do not need transpilation.
+// Same for cli/migrations
+
+// TODO: Adding lint exceptions most non-autofixed lintings,
+// to avoid breaking functionality, except for id-denylist, deleting
+// unused imports other similar simple minor rules.

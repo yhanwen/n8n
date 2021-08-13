@@ -24,11 +24,11 @@ import {
 
 import {
 	IWorkflowDb,
-} from '../../';
+} from "../..";
 
 import {
 	getTimestampSyntax,
-	resolveDataType
+	resolveDataType,
 } from '../utils';
 
 import {

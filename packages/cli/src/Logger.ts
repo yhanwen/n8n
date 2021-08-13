@@ -1,4 +1,3 @@
-import config = require('../config');
 import * as winston from 'winston';
 
 import {
@@ -9,6 +8,7 @@ import {
 
 import * as callsites from 'callsites';
 import { basename } from 'path';
+import config = require('../config');
 
 class Logger implements ILogger {
 	private logger: winston.Logger;
@@ -29,17 +29,17 @@ class Logger implements ILogger {
 					winston.format.timestamp(),
 					winston.format.colorize({ all: true }),
 					winston.format.printf(({ level, message, timestamp, metadata }) => {
-						return `${timestamp} | ${level.padEnd(18)} | ${message}` + (Object.keys(metadata).length ? ` ${JSON.stringify(metadata)}` : '');
-					}) as winston.Logform.Format
+						return `${timestamp} | ${level.padEnd(18)} | ${message}${  Object.keys(metadata).length ? ` ${JSON.stringify(metadata)}` : ''}`;
+					}), 
 				);
 			} else {
-				format = winston.format.printf(({ message }) => message) as winston.Logform.Format;
+				format = winston.format.printf(({ message }) => message) ;
 			}
 
 			this.logger.add(
 				new winston.transports.Console({
 					format,
-				})
+				}),
 			);
 		}
 
@@ -47,7 +47,7 @@ class Logger implements ILogger {
 			const fileLogFormat = winston.format.combine(
 				winston.format.timestamp(),
 				winston.format.metadata(),
-				winston.format.json()
+				winston.format.json(),
 			);
 			this.logger.add(
 				new winston.transports.File({
@@ -55,7 +55,7 @@ class Logger implements ILogger {
 					format: fileLogFormat,
 					maxsize: config.get('logs.file.fileSizeMax') as number * 1048576, // config * 1mb
 					maxFiles: config.get('logs.file.fileCountMax'),
-				})
+				}),
 			);
 		}
 	}

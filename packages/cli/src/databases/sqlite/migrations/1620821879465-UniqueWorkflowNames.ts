@@ -23,7 +23,7 @@ export class UniqueWorkflowNames1620821879465 implements MigrationInterface {
 				const duplicates = await queryRunner.query(duplicatesQuery, parameters);
 
 				if (duplicates.length > 1) {
-					await Promise.all(duplicates.map(({ id, name }: { id: number; name: string; }, index: number) => {
+					await Promise.all(duplicates.map(async ({ id, name }: { id: number; name: string }, index: number) => {
 						if (index === 0) return Promise.resolve();
 						const [updateQuery, updateParams] = queryRunner.connection.driver.escapeQueryWithParameters(`
 							UPDATE "${tablePrefix}workflow_entity"

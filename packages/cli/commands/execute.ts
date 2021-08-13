@@ -5,6 +5,8 @@ import {
 } from 'n8n-core';
 import {
 	INode,
+
+	LoggerProxy,
 } from 'n8n-workflow';
 
 import {
@@ -26,9 +28,7 @@ import {
 	getLogger,
 } from '../src/Logger';
 
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
+
 
 export class Execute extends Command {
 	static description = '\nExecutes a given workflow';
@@ -76,7 +76,7 @@ export class Execute extends Command {
 		}
 
 		let workflowId: string | undefined;
-		let workflowData: IWorkflowBase | undefined = undefined;
+		let workflowData: IWorkflowBase | undefined;
 		if (flags.file) {
 			// Path to workflow is given
 			try {
@@ -105,7 +105,7 @@ export class Execute extends Command {
 		if (flags.id) {
 			// Id of workflow is given
 			workflowId = flags.id;
-			workflowData = await Db.collections!.Workflow!.findOne(workflowId);
+			workflowData = await Db.collections.Workflow!.findOne(workflowId);
 			if (workflowData === undefined) {
 				console.info(`The workflow with the id "${workflowId}" does not exist.`);
 				process.exit(1);
@@ -139,7 +139,7 @@ export class Execute extends Command {
 		// Check if the workflow contains the required "Start" node
 		// "requiredNodeTypes" are also defined in editor-ui/views/NodeView.vue
 		const requiredNodeTypes = ['n8n-nodes-base.start'];
-		let startNode: INode | undefined = undefined;
+		let startNode: INode | undefined;
 		for (const node of workflowData!.nodes) {
 			if (requiredNodeTypes.includes(node.type)) {
 				startNode = node;
@@ -181,6 +181,7 @@ export class Execute extends Command {
 				logger.info(JSON.stringify(data, null, 2));
 
 				const { error } = data.data.resultData;
+				// eslint-disable-next-line @typescript-eslint/no-throw-literal
 				throw {
 					...error,
 					stack: error.stack,
@@ -191,12 +192,12 @@ export class Execute extends Command {
 				this.log('====================================');
 			}
 			this.log(JSON.stringify(data, null, 2));
-		} catch (e) {
+		} catch (error) {
 			console.error('Error executing workflow. See log messages for details.');
 			logger.error('\nExecution error:');
 			logger.info('====================================');
-			logger.error(e.message);
-			logger.error(e.stack);
+			logger.error(error.message);
+			logger.error(error.stack);
 			this.exit(1);
 		}
 

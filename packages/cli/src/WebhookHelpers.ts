@@ -1,20 +1,6 @@
 import * as express from 'express';
 import { get } from 'lodash';
 
-import {
-	ActiveExecutions,
-	ExternalHooks,
-	GenericHelpers,
-	IExecutionDb,
-	IResponseCallbackData,
-	IWorkflowDb,
-	IWorkflowExecutionDataProcess,
-	ResponseHelper,
-	WorkflowCredentials,
-	WorkflowExecuteAdditionalData,
-	WorkflowHelpers,
-	WorkflowRunner,
-} from './';
 
 import {
 	BINARY_ENCODING,
@@ -35,6 +21,19 @@ import {
 	Workflow,
 	WorkflowExecuteMode,
 } from 'n8n-workflow';
+import {
+	ActiveExecutions,
+	GenericHelpers,
+	IExecutionDb,
+	IResponseCallbackData,
+	IWorkflowDb,
+	IWorkflowExecutionDataProcess,
+	ResponseHelper,
+	WorkflowCredentials,
+	WorkflowExecuteAdditionalData,
+	WorkflowHelpers,
+	WorkflowRunner,
+} from ".";
 
 
 const activeExecutions = ActiveExecutions.getInstance();
@@ -116,8 +115,8 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 	}
 
 	// Get the responseMode
-	 const responseMode = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription['responseMode'], executionMode, 'onReceived');
-	 const responseCode = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription['responseCode'], executionMode, 200) as number;
+	 const responseMode = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription.responseMode, executionMode, 'onReceived');
+	 const responseCode = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription.responseCode, executionMode, 200) as number;
 
 	if (!['onReceived', 'lastNode'].includes(responseMode as string)) {
 		// If the mode is not known we error. Is probably best like that instead of using
@@ -145,7 +144,7 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 
 		try {
 			webhookResultData = await workflow.runWebhook(webhookData, workflowStartNode, additionalData, NodeExecuteFunctions, executionMode);
-		} catch (err) {
+		} catch (error) {
 			// Send error response to webhook caller
 			const errorMessage = 'Workflow Webhook Error: Workflow could not be started!';
 			responseCallback(new Error(errorMessage), {});
@@ -157,9 +156,9 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 					runData: {},
 					lastNodeExecuted: workflowStartNode.name,
 					error: {
-						...err,
-						message: err.message,
-						stack: err.stack,
+						...error,
+						message: error.message,
+						stack: error.stack,
 					},
 				},
 			};
@@ -175,17 +174,17 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 		// Save static data if it changed
 		await WorkflowHelpers.saveStaticData(workflow);
 
-		if (webhookData.webhookDescription['responseHeaders'] !== undefined) {
-			const responseHeaders = workflow.expression.getComplexParameterValue(workflowStartNode, webhookData.webhookDescription['responseHeaders'], executionMode, undefined) as {
+		if (webhookData.webhookDescription.responseHeaders !== undefined) {
+			const responseHeaders = workflow.expression.getComplexParameterValue(workflowStartNode, webhookData.webhookDescription.responseHeaders, executionMode, undefined) as {
 				entries?: Array<{
 					name: string;
 					value: string;
 				}> | undefined;
 			};
 
-			if (responseHeaders !== undefined && responseHeaders['entries'] !== undefined) {
-				for (const item of responseHeaders['entries']) {
-					res.setHeader(item['name'], item['value']);
+			if (responseHeaders !== undefined && responseHeaders.entries !== undefined) {
+				for (const item of responseHeaders.entries) {
+					res.setHeader(item.name, item.value);
 				}
 			}
 		}
@@ -211,6 +210,7 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 				}
 			} else {
 				// Send default response
+				// eslint-disable-next-line no-lonely-if
 				if (didSendResponse === false) {
 					responseCallback(null, {
 						data: {
@@ -254,7 +254,7 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 				data: {
 					main: webhookResultData.workflowData,
 				},
-			}
+			},
 		);
 
 		const runExecutionData: IRunExecutionData = {
@@ -332,7 +332,7 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 				return data;
 			}
 
-			const responseData = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription['responseData'], executionMode, 'firstEntryJson');
+			const responseData = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription.responseData, executionMode, 'firstEntryJson');
 
 			if (didSendResponse === false) {
 				let data: IDataObject | IDataObject[];
@@ -347,13 +347,13 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 
 					data = returnData.data!.main[0]![0].json;
 
-					const responsePropertyName = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription['responsePropertyName'], executionMode, undefined);
+					const responsePropertyName = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription.responsePropertyName, executionMode, undefined);
 
 					if (responsePropertyName !== undefined) {
 						data = get(data, responsePropertyName as string) as IDataObject;
 					}
 
-					const responseContentType = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription['responseContentType'], executionMode, undefined);
+					const responseContentType = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription.responseContentType, executionMode, undefined);
 
 					if (responseContentType !== undefined) {
 						// Send the webhook response manually to be able to set the content-type
@@ -374,6 +374,7 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 
 				} else if (responseData === 'firstEntryBinary') {
 					// Return the binary data of the first entry
+					// eslint-disable-next-line prefer-destructuring
 					data = returnData.data!.main[0]![0];
 
 					if (data === undefined) {
@@ -386,7 +387,7 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 						didSendResponse = true;
 					}
 
-					const responseBinaryPropertyName = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription['responseBinaryPropertyName'], executionMode, 'data');
+					const responseBinaryPropertyName = workflow.expression.getSimpleParameterValue(workflowStartNode, webhookData.webhookDescription.responseBinaryPropertyName, executionMode, 'data');
 
 					if (responseBinaryPropertyName === undefined && didSendResponse === false) {
 						responseCallback(new Error('No "responseBinaryPropertyName" is set.'), {});
@@ -428,22 +429,22 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 
 			return data;
 		})
-		.catch((e) => {
+		.catch((error) => {
 			if (didSendResponse === false) {
 				responseCallback(new Error('There was a problem executing the workflow.'), {});
 			}
 
-			throw new ResponseHelper.ResponseError(e.message, 500, 500);
+			throw new ResponseHelper.ResponseError(error.message, 500, 500);
 		});
 
 		return executionId;
 
-	} catch (e) {
+	} catch (error) {
 		if (didSendResponse === false) {
 			responseCallback(new Error('There was a problem executing the workflow.'), {});
 		}
 
-		throw new ResponseHelper.ResponseError(e.message, 500, 500);
+		throw new ResponseHelper.ResponseError(error.message, 500, 500);
 	}
 }
 

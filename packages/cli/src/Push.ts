@@ -3,13 +3,13 @@ import * as sseChannel from 'sse-channel';
 import * as express from 'express';
 
 import {
+	LoggerProxy as Logger,
+} from 'n8n-workflow';
+import {
 	IPushData,
 	IPushDataType,
 } from '.';
 
-import {
-	LoggerProxy as Logger,
-} from 'n8n-workflow';
 
 export class Push {
 	private channel: sseChannel;
@@ -69,7 +69,7 @@ export class Push {
 
 
 
-	send(type: IPushDataType, data: any, sessionId?: string) { // tslint:disable-line:no-any
+	send(type: IPushDataType, data: any, sessionId?: string) { // eslint-disable-line @typescript-eslint/no-explicit-any
 		if (sessionId !== undefined && this.connections[sessionId] === undefined) {
 			Logger.error(`The session "${sessionId}" is not registred.`, { sessionId });
 			return;

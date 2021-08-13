@@ -4,7 +4,7 @@ import {
 } from '@oclif/command';
 
 import {
-	IDataObject
+	IDataObject,
 } from 'n8n-workflow';
 
 import {
@@ -50,15 +50,15 @@ export class ListWorkflowCommand extends Command {
 			if (flags.onlyId) {
 				workflows.forEach(workflow => console.log(workflow.id));
 			} else {
-				workflows.forEach(workflow => console.log(workflow.id + "|" + workflow.name));
+				workflows.forEach(workflow => console.log(`${workflow.id  }|${  workflow.name}`));
 			}
 
 
-		} catch (e) {
+		} catch (error) {
 			console.error('\nGOT ERROR');
 			console.log('====================================');
-			console.error(e.message);
-			console.error(e.stack);
+			console.error(error.message);
+			console.error(error.stack);
 			this.exit(1);
 		}
 

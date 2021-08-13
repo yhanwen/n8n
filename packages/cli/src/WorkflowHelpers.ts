@@ -1,4 +1,15 @@
 import {
+	IDataObject,
+	IExecuteData,
+	INode,
+	IRun,
+	IRunExecutionData,
+	ITaskData,
+	IWorkflowCredentials,
+	LoggerProxy as Logger,
+	Workflow} from 'n8n-workflow';
+import { validate } from 'class-validator';
+import {
 	CredentialTypes,
 	Db,
 	ICredentialsTypeData,
@@ -9,22 +20,11 @@ import {
 	ResponseHelper,
 	WorkflowCredentials,
 	WorkflowRunner,
-} from './';
+} from ".";
 
-import {
-	IDataObject,
-	IExecuteData,
-	INode,
-	IRun,
-	IRunExecutionData,
-	ITaskData,
-	IWorkflowCredentials,
-	LoggerProxy as Logger,
-	Workflow,} from 'n8n-workflow';
 
 import * as config from '../config';
 import { WorkflowEntity } from './databases/entities/WorkflowEntity';
-import { validate } from 'class-validator';
 
 const ERROR_TRIGGER_TYPE = config.get('nodes.errorTriggerType') as string;
 
@@ -37,8 +37,8 @@ const ERROR_TRIGGER_TYPE = config.get('nodes.errorTriggerType') as string;
  * @returns {(ITaskData | undefined)}
  */
 export function getDataLastExecutedNodeData(inputData: IRun): ITaskData | undefined {
-	const runData = inputData.data.resultData.runData;
-	const lastNodeExecuted = inputData.data.resultData.lastNodeExecuted;
+	const {runData} = inputData.data.resultData;
+	const {lastNodeExecuted} = inputData.data.resultData;
 
 	if (lastNodeExecuted === undefined) {
 		return undefined;
@@ -65,6 +65,7 @@ export function isWorkflowIdValid (id: string | null | undefined | number): bool
 		id = parseInt(id, 10);
 	}
 
+	// eslint-disable-next-line no-restricted-globals
 	if (isNaN(id as number)) {
 		return false;
 
@@ -128,7 +129,7 @@ export async function executeErrorWorkflow(workflowId: string, workflowErrorData
 						],
 					],
 				},
-			}
+			},
 		);
 
 		const runExecutionData: IRunExecutionData = {
@@ -317,8 +318,8 @@ export async function saveStaticData(workflow: Workflow): Promise <void> {
 			try {
 				await saveStaticDataById(workflow.id!, workflow.staticData);
 				workflow.staticData.__dataChanged = false;
-			} catch (e) {
-				Logger.error(`There was a problem saving the workflow with id "${workflow.id}" to save changed staticData: "${e.message}"`, { workflowId: workflow.id });
+			} catch (error) {
+				Logger.error(`There was a problem saving the workflow with id "${workflow.id}" to save changed staticData: "${error.message}"`, { workflowId: workflow.id });
 			}
 		}
 	}
@@ -386,6 +387,6 @@ export type WorkflowNameRequest = Express.Request & {
 	query: {
 		name?: string;
 		offset?: string;
-	}
+	};
 };
 

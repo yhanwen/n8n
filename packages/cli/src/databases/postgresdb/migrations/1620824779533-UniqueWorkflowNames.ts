@@ -9,7 +9,7 @@ export class UniqueWorkflowNames1620824779533 implements MigrationInterface {
 			const tablePrefixPure = tablePrefix;
 			const schema = config.get('database.postgresdb.schema');
 			if (schema) {
-				tablePrefix = schema + '.' + tablePrefix;
+				tablePrefix = `${schema  }.${  tablePrefix}`;
 			}
 
 			const workflowNames = await queryRunner.query(`
@@ -28,7 +28,7 @@ export class UniqueWorkflowNames1620824779533 implements MigrationInterface {
 				const duplicates = await queryRunner.query(duplicatesQuery, parameters);
 
 				if (duplicates.length > 1) {
-					await Promise.all(duplicates.map(({ id, name }: { id: number; name: string; }, index: number) => {
+					await Promise.all(duplicates.map(async ({ id, name }: { id: number; name: string }, index: number) => {
 						if (index === 0) return Promise.resolve();
 						const [updateQuery, updateParams] = queryRunner.connection.driver.escapeQueryWithParameters(`
 							UPDATE ${tablePrefix}workflow_entity
@@ -49,7 +49,7 @@ export class UniqueWorkflowNames1620824779533 implements MigrationInterface {
 			const tablePrefixPure = tablePrefix;
 			const schema = config.get('database.postgresdb.schema');
 			if (schema) {
-				tablePrefix = schema + '.' + tablePrefix;
+				tablePrefix = `${schema  }.${  tablePrefix}`;
 			}
 
 			await queryRunner.query(`DROP INDEX "public"."IDX_${tablePrefixPure}a252c527c4c89237221fe2c0ab"`);

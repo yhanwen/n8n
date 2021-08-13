@@ -8,13 +8,7 @@ import {
 	UserSettings,
 } from 'n8n-core';
 
-import {
-	Db,
-} from '../../src';
 
-import { 
-	getLogger,
-} from '../../src/Logger';
 
 import {
 	LoggerProxy,
@@ -23,6 +17,12 @@ import {
 import * as fs from 'fs';
 import * as glob from 'glob-promise';
 import * as path from 'path';
+import { 
+	getLogger,
+} from '../../src/Logger';
+import {
+	Db,
+} from '../../src';
 
 export class ImportCredentialsCommand extends Command {
 	static description = 'Import credentials';
@@ -76,7 +76,7 @@ export class ImportCredentialsCommand extends Command {
 			}
 
 			if (flags.separate) {
-				const files = await glob((flags.input.endsWith(path.sep) ? flags.input : flags.input + path.sep) + '*.json');
+				const files = await glob(`${flags.input.endsWith(path.sep) ? flags.input : flags.input + path.sep  }*.json`);
 				for (i = 0; i < files.length; i++) {
 					const credential = JSON.parse(fs.readFileSync(files[i], { encoding: 'utf8' }));
 

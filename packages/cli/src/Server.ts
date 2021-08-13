@@ -1,3 +1,7 @@
+/* eslint-disable id-denylist */
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as express from 'express';
 import {
 	readFileSync,
@@ -11,9 +15,13 @@ import {
 	getConnectionManager,
 	In,
 	Like,
+
+	FindManyOptions,
+	FindOneOptions,
+	LessThanOrEqual,
+	Not,
 } from 'typeorm';
 import * as bodyParser from 'body-parser';
-require('body-parser-xml')(bodyParser);
 import * as history from 'connect-history-api-fallback';
 import * as _ from 'lodash';
 import * as clientOAuth2 from 'client-oauth2';
@@ -27,6 +35,42 @@ import { createHash, createHmac } from 'crypto';
 import { compare } from 'bcryptjs';
 import * as promClient from 'prom-client';
 
+
+import {
+	Credentials,
+	LoadNodeParameterOptions,
+	UserSettings,
+} from 'n8n-core';
+
+import {
+	ICredentialsEncrypted,
+	ICredentialType,
+	IDataObject,
+	INodeCredentials,
+	INodeParameters,
+	INodePropertyOptions,
+	INodeTypeDescription,
+	IRunData,
+	IWorkflowBase,
+	IWorkflowCredentials,
+	LoggerProxy,
+	Workflow,
+	WorkflowExecuteMode,
+} from 'n8n-workflow';
+
+
+
+import * as basicAuth from 'basic-auth';
+import * as compression from 'compression';
+import * as jwt from 'jsonwebtoken';
+import * as jwks from 'jwks-rsa';
+// @ts-ignore
+import * as timezones from 'google-timezones-json';
+import * as parseUrl from 'parseurl';
+import * as querystring from 'querystring';
+import { OptionsWithUrl } from 'request-promise-native';
+import { Registry } from 'prom-client';
+import * as Queue from "./Queue";
 import {
 	ActiveExecutions,
 	ActiveWorkflowRunner,
@@ -70,54 +114,15 @@ import {
 	WorkflowExecuteAdditionalData,
 	WorkflowHelpers,
 	WorkflowRunner,
-} from './';
-
-import {
-	Credentials,
-	LoadNodeParameterOptions,
-	UserSettings,
-} from 'n8n-core';
-
-import {
-	ICredentialsEncrypted,
-	ICredentialType,
-	IDataObject,
-	INodeCredentials,
-	INodeParameters,
-	INodePropertyOptions,
-	INodeTypeDescription,
-	IRunData,
-	IWorkflowBase,
-	IWorkflowCredentials,
-	LoggerProxy,
-	Workflow,
-	WorkflowExecuteMode,
-} from 'n8n-workflow';
-
-import {
-	FindManyOptions,
-	FindOneOptions,
-	LessThanOrEqual,
-	Not,
-} from 'typeorm';
-
-import * as basicAuth from 'basic-auth';
-import * as compression from 'compression';
+} from ".";
 import * as config from '../config';
-import * as jwt from 'jsonwebtoken';
-import * as jwks from 'jwks-rsa';
-// @ts-ignore
-import * as timezones from 'google-timezones-json';
-import * as parseUrl from 'parseurl';
-import * as querystring from 'querystring';
-import * as Queue from '../src/Queue';
-import { OptionsWithUrl } from 'request-promise-native';
-import { Registry } from 'prom-client';
 
 import * as TagHelpers from './TagHelpers';
 import { TagEntity } from './databases/entities/TagEntity';
 import { WorkflowEntity } from './databases/entities/WorkflowEntity';
 import { WorkflowNameRequest } from './WorkflowHelpers';
+
+require('body-parser-xml')(bodyParser);
 
 class App {
 
@@ -193,8 +198,8 @@ class App {
 			urlBaseWebhook,
 			versionCli: '',
 			oauthCallbackUrls: {
-				'oauth1': urlBaseWebhook + `${this.restEndpoint}/oauth1-credential/callback`,
-				'oauth2': urlBaseWebhook + `${this.restEndpoint}/oauth2-credential/callback`,
+				'oauth1': `${urlBaseWebhook  }${this.restEndpoint}/oauth1-credential/callback`,
+				'oauth2': `${urlBaseWebhook  }${this.restEndpoint}/oauth2-credential/callback`,
 			},
 			versionNotifications: {
 				enabled: config.get('versionNotifications.enabled'),
@@ -282,12 +287,10 @@ class App {
 							// Provided hash is correct
 							return next();
 						}
-					} else {
-						if (basicAuthData.pass === basicAuthPassword) {
+					} else if (basicAuthData.pass === basicAuthPassword) {
 							// Provided password is correct
 							return next();
 						}
-					}
 				}
 
 				// Provided authentication data is wrong
@@ -312,6 +315,7 @@ class App {
 			const jwtAllowedTenantKey = await GenericHelpers.getConfigValue('security.jwtAuth.jwtAllowedTenantKey') as string;
 			const jwtAllowedTenant = await GenericHelpers.getConfigValue('security.jwtAuth.jwtAllowedTenant') as string;
 
+			// eslint-disable-next-line no-inner-declarations
 			function isTenantAllowed(decodedToken: object): boolean {
 				if (jwtNamespace === '' || jwtAllowedTenantKey === '' || jwtAllowedTenant === '') return true;
 				else {
@@ -338,13 +342,15 @@ class App {
 					return ResponseHelper.jwtAuthAuthorizationError(res, "Missing token");
 				}
 				if (jwtHeaderValuePrefix !== '' && token.startsWith(jwtHeaderValuePrefix)) {
-					token = token.replace(jwtHeaderValuePrefix + ' ', '').trimLeft();
+					token = token.replace(`${jwtHeaderValuePrefix  } `, '').trimLeft();
 				}
 
 				const jwkClient = jwks({ cache: true, jwksUri });
-				function getKey(header: any, callback: Function) { // tslint:disable-line:no-any
-					jwkClient.getSigningKey(header.kid, (err: Error, key: any) => { // tslint:disable-line:no-any
-						if (err) throw ResponseHelper.jwtAuthAuthorizationError(res, err.message);
+				// eslint-disable-next-line @typescript-eslint/ban-types
+				function getKey(header: any, callback: Function) { // eslint-disable-line @typescript-eslint/no-explicit-any
+					jwkClient.getSigningKey(header.kid, (error: Error, key: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+						// eslint-disable-next-line @typescript-eslint/no-throw-literal
+						if (error) throw ResponseHelper.jwtAuthAuthorizationError(res, error.message);
 
 						const signingKey = key.publicKey || key.rsaPublicKey;
 						callback(null, signingKey);
@@ -392,7 +398,7 @@ class App {
 
 		// Support application/json type post data
 		this.app.use(bodyParser.json({
-			limit: this.payloadSizeMax + 'mb', verify: (req, res, buf) => {
+			limit: `${this.payloadSizeMax  }mb`, verify: (req, res, buf) => {
 				// @ts-ignore
 				req.rawBody = buf;
 			},
@@ -401,7 +407,7 @@ class App {
 		// Support application/xml type post data
 		// @ts-ignore
 		this.app.use(bodyParser.xml({
-			limit: this.payloadSizeMax + 'mb', xmlParseOptions: {
+			limit: `${this.payloadSizeMax  }mb`, xmlParseOptions: {
 				normalize: true,     // Trim whitespace inside text nodes
 				normalizeTags: true, // Transform tags to lowercase
 				explicitArray: false, // Only put properties in array if length > 1
@@ -409,7 +415,7 @@ class App {
 		}));
 
 		this.app.use(bodyParser.text({
-			limit: this.payloadSizeMax + 'mb', verify: (req, res, buf) => {
+			limit: `${this.payloadSizeMax  }mb`, verify: (req, res, buf) => {
 				// @ts-ignore
 				req.rawBody = buf;
 			},
@@ -421,13 +427,13 @@ class App {
 				{
 					from: new RegExp(`^\/(${this.restEndpoint}|healthz|metrics|css|js|${this.endpointWebhook}|${this.endpointWebhookTest})\/?.*$`),
 					to: (context) => {
-						return context.parsedUrl!.pathname!.toString();
+						return context.parsedUrl.pathname!.toString();
 					},
 				},
 			],
 		}));
 
-		//support application/x-www-form-urlencoded post data
+		// support application/x-www-form-urlencoded post data
 		this.app.use(bodyParser.urlencoded({
 			extended: false,
 			verify: (req, res, buf) => {
@@ -436,7 +442,7 @@ class App {
 			},
 		}));
 
-		if (process.env['NODE_ENV'] !== 'production') {
+		if (process.env.NODE_ENV !== 'production') {
 			this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
 				// Allow access also from frontend when developing
 				res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
@@ -475,10 +481,10 @@ class App {
 				}
 				// DB ping
 				await connection.query('SELECT 1');
-			} catch (err) {
-				LoggerProxy.error('No Database connection!', err);
-				const error = new ResponseHelper.ResponseError('No Database connection!', undefined, 503);
-				return ResponseHelper.sendErrorResponse(res, error);
+			} catch (error) {
+				LoggerProxy.error('No Database connection!', error);
+				const dbError = new ResponseHelper.ResponseError('No Database connection!', undefined, 503);
+				return ResponseHelper.sendErrorResponse(res, dbError);
 			}
 
 			// Everything fine
@@ -606,6 +612,7 @@ class App {
 
 				const suffix = Number(parts[1]);
 
+				// eslint-disable-next-line no-restricted-globals
 				if (!isNaN(suffix) && Math.ceil(suffix) > acc) {
 					acc = Math.ceil(suffix);
 				}
@@ -633,7 +640,7 @@ class App {
 			// @ts-ignore
 			workflow.id = workflow.id.toString();
 			// @ts-ignore
-			workflow.tags.forEach(tag => tag.id = tag.id.toString());
+			workflow.tags.forEach(tag => tag.id = tag.id.toString()); // eslint-disable-line no-return-assign
 			return workflow;
 		}));
 
@@ -642,7 +649,7 @@ class App {
 		this.app.patch(`/${this.restEndpoint}/workflows/:id`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<WorkflowEntity> => {
 			const { tags, ...updateData } = req.body;
 
-			const id = req.params.id;
+			const {id} = req.params;
 			updateData.id = id;
 
 			await this.externalHooks.run('workflow.update', [updateData]);
@@ -735,7 +742,7 @@ class App {
 
 		// Deletes a specific workflow
 		this.app.delete(`/${this.restEndpoint}/workflows/:id`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<boolean> => {
-			const id = req.params.id;
+			const {id} = req.params;
 
 			await this.externalHooks.run('workflow.delete', [id]);
 
@@ -753,10 +760,10 @@ class App {
 		}));
 
 		this.app.post(`/${this.restEndpoint}/workflows/run`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<IExecutionPushResponse> => {
-			const workflowData = req.body.workflowData;
-			const runData: IRunData | undefined = req.body.runData;
-			const startNodes: string[] | undefined = req.body.startNodes;
-			const destinationNode: string | undefined = req.body.destinationNode;
+			const {workflowData} = req.body;
+			const {runData} = req.body;
+			const {startNodes} = req.body;
+			const {destinationNode} = req.body;
 			const executionMode = 'manual';
 			const activationMode = 'manual';
 
@@ -808,7 +815,7 @@ class App {
 
 			const tags = await Db.collections.Tag!.find({ select: ['id', 'name'] });
 			// @ts-ignore
-			tags.forEach(tag => tag.id = tag.id.toString());
+			tags.forEach(tag => tag.id = tag.id.toString()); // eslint-disable-line no-return-assign
 			return tags;
 		}));
 
@@ -868,8 +875,8 @@ class App {
 		this.app.get(`/${this.restEndpoint}/node-parameter-options`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<INodePropertyOptions[]> => {
 			const nodeType = req.query.nodeType as string;
 			const path = req.query.path as string;
-			let credentials: INodeCredentials | undefined = undefined;
-			const currentNodeParameters = JSON.parse('' + req.query.currentNodeParameters) as INodeParameters;
+			let credentials: INodeCredentials | undefined;
+			const currentNodeParameters = JSON.parse(`${  req.query.currentNodeParameters}`) as INodeParameters;
 			if (req.query.credentials !== undefined) {
 				credentials = JSON.parse(req.query.credentials as string);
 			}
@@ -878,7 +885,7 @@ class App {
 			const nodeTypes = NodeTypes();
 
 			// @ts-ignore
-			const loadDataInstance = new LoadNodeParameterOptions(nodeType, nodeTypes, path, JSON.parse('' + req.query.currentNodeParameters), credentials!);
+			const loadDataInstance = new LoadNodeParameterOptions(nodeType, nodeTypes, path, JSON.parse(`${  req.query.currentNodeParameters}`), credentials);
 
 			const workflowData = loadDataInstance.getWorkflowData() as IWorkflowBase;
 			const workflowCredentials = await WorkflowCredentials(workflowData.nodes);
@@ -921,7 +928,7 @@ class App {
 			return nodeNames.map(name => {
 				try {
 					return nodeTypes.getByName(name);
-				} catch (e) {
+				} catch (error) {
 					return undefined;
 				}
 			}).filter(nodeData => !!nodeData).map(nodeData => nodeData!.description);
@@ -979,13 +986,13 @@ class App {
 		// Returns the active workflow ids
 		this.app.get(`/${this.restEndpoint}/active`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<string[]> => {
 			const activeWorkflows = await this.activeWorkflowRunner.getActiveWorkflows();
-			return activeWorkflows.map(workflow => workflow.id.toString()) as string[];
+			return activeWorkflows.map(workflow => workflow.id.toString()) ;
 		}));
 
 
 		// Returns if the workflow with the given id had any activation errors
 		this.app.get(`/${this.restEndpoint}/active/error/:id`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<IActivationError | undefined> => {
-			const id = req.params.id;
+			const {id} = req.params;
 			return this.activeWorkflowRunner.getActivationError(id);
 		}));
 
@@ -998,7 +1005,7 @@ class App {
 
 		// Deletes a specific credential
 		this.app.delete(`/${this.restEndpoint}/credentials/:id`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<boolean> => {
-			const id = req.params.id;
+			const {id} = req.params;
 
 			await this.externalHooks.run('credentials.delete', [id]);
 
@@ -1067,7 +1074,7 @@ class App {
 		this.app.patch(`/${this.restEndpoint}/credentials/:id`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<ICredentialsResponse> => {
 			const incomingData = req.body;
 
-			const id = req.params.id;
+			const {id} = req.params;
 
 			if (incomingData.name === '') {
 				throw new Error('Credentials have to have a name set!');
@@ -1106,7 +1113,7 @@ class App {
 			}
 
 			const currentlySavedCredentials = new Credentials(result.name, result.type, result.nodesAccess, result.data);
-			const decryptedData = currentlySavedCredentials.getData(encryptionKey!);
+			const decryptedData = currentlySavedCredentials.getData(encryptionKey);
 
 			// Do not overwrite the oauth data else data like the access or refresh token would get lost
 			// everytime anybody changes anything on the credentials even if it is just the name.
@@ -1162,7 +1169,7 @@ class App {
 				return result;
 			}
 
-			let encryptionKey = undefined;
+			let encryptionKey;
 			if (includeData === true) {
 				encryptionKey = await UserSettings.getEncryptionKey();
 				if (encryptionKey === undefined) {
@@ -1170,7 +1177,7 @@ class App {
 				}
 
 				const credentials = new Credentials(result.name, result.type, result.nodesAccess, result.data);
-				(result as ICredentialsDecryptedDb).data = credentials.getData(encryptionKey!);
+				(result as ICredentialsDecryptedDb).data = credentials.getData(encryptionKey);
 			}
 
 			(result as ICredentialsDecryptedResponse).id = result.id.toString();
@@ -1196,7 +1203,7 @@ class App {
 
 			const results = await Db.collections.Credentials!.find(findQuery) as unknown as ICredentialsResponse[];
 
-			let encryptionKey = undefined;
+			let encryptionKey;
 
 			const includeData = ['true', true].includes(req.query.includeData as string);
 			if (includeData === true) {
@@ -1252,7 +1259,7 @@ class App {
 				return '';
 			}
 
-			let encryptionKey = undefined;
+			let encryptionKey;
 			encryptionKey = await UserSettings.getEncryptionKey();
 			if (encryptionKey === undefined) {
 				res.status(500).send('No encryption key got found to decrypt the credentials!');
@@ -1261,8 +1268,8 @@ class App {
 
 			// Decrypt the currently saved credentials
 			const workflowCredentials: IWorkflowCredentials = {
-				[result.type as string]: {
-					[result.name as string]: result as ICredentialsEncrypted,
+				[result.type ]: {
+					[result.name ]: result as ICredentialsEncrypted,
 				},
 			};
 			const mode: WorkflowExecuteMode = 'internal';
@@ -1300,9 +1307,9 @@ class App {
 				data: oauthRequestData,
 			};
 
-			const data = oauth.toHeader(oauth.authorize(options as RequestOptions));
+			const data = oauth.toHeader(oauth.authorize(options ));
 
-			//@ts-ignore
+			// @ts-ignore
 			options.headers = data;
 
 			const response = await requestPromise(options);
@@ -1334,17 +1341,17 @@ class App {
 				const { oauth_verifier, oauth_token, cid } = req.query;
 
 				if (oauth_verifier === undefined || oauth_token === undefined) {
-					const errorResponse = new ResponseHelper.ResponseError('Insufficient parameters for OAuth1 callback. Received following query parameters: ' + JSON.stringify(req.query), undefined, 503);
+					const errorResponse = new ResponseHelper.ResponseError(`Insufficient parameters for OAuth1 callback. Received following query parameters: ${  JSON.stringify(req.query)}`, undefined, 503);
 					return ResponseHelper.sendErrorResponse(res, errorResponse);
 				}
 
-				const result = await Db.collections.Credentials!.findOne(cid as any); // tslint:disable-line:no-any
+				const result = await Db.collections.Credentials!.findOne(cid as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 				if (result === undefined) {
 					const errorResponse = new ResponseHelper.ResponseError('The credential is not known.', undefined, 404);
 					return ResponseHelper.sendErrorResponse(res, errorResponse);
 				}
 
-				let encryptionKey = undefined;
+				let encryptionKey;
 				encryptionKey = await UserSettings.getEncryptionKey();
 				if (encryptionKey === undefined) {
 					const errorResponse = new ResponseHelper.ResponseError('No encryption key got found to decrypt the credentials!', undefined, 503);
@@ -1353,8 +1360,8 @@ class App {
 
 				// Decrypt the currently saved credentials
 				const workflowCredentials: IWorkflowCredentials = {
-					[result.type as string]: {
-						[result.name as string]: result as ICredentialsEncrypted,
+					[result.type ]: {
+						[result.name ]: result as ICredentialsEncrypted,
 					},
 				};
 				const mode: WorkflowExecuteMode = 'internal';
@@ -1392,7 +1399,7 @@ class App {
 				// Add special database related data
 				newCredentialsData.updatedAt = this.getCurrentDate();
 				// Save the credentials in DB
-				await Db.collections.Credentials!.update(cid as any, newCredentialsData); // tslint:disable-line:no-any
+				await Db.collections.Credentials!.update(cid as any, newCredentialsData); // eslint-disable-line @typescript-eslint/no-explicit-any
 
 				res.sendFile(pathResolve(__dirname, '../../templates/oauth-callback.html'));
 			} catch (error) {
@@ -1420,7 +1427,7 @@ class App {
 				return '';
 			}
 
-			let encryptionKey = undefined;
+			let encryptionKey;
 			encryptionKey = await UserSettings.getEncryptionKey();
 			if (encryptionKey === undefined) {
 				res.status(500).send('No encryption key got found to decrypt the credentials!');
@@ -1429,8 +1436,8 @@ class App {
 
 			// Decrypt the currently saved credentials
 			const workflowCredentials: IWorkflowCredentials = {
-				[result.type as string]: {
-					[result.name as string]: result as ICredentialsEncrypted,
+				[result.type ]: {
+					[result.name ]: result as ICredentialsEncrypted,
 				},
 			};
 			const mode: WorkflowExecuteMode = 'internal';
@@ -1445,7 +1452,7 @@ class App {
 				token: token.create(csrfSecret),
 				cid: req.query.id,
 			};
-			const stateEncodedStr = Buffer.from(JSON.stringify(state)).toString('base64') as string;
+			const stateEncodedStr = Buffer.from(JSON.stringify(state)).toString('base64') ;
 
 			const oAuthOptions: clientOAuth2.Options = {
 				clientId: _.get(oauthCredentials, 'clientId') as string,
@@ -1479,13 +1486,13 @@ class App {
 
 			// if scope uses comma, change it as the library always return then with spaces
 			if ((_.get(oauthCredentials, 'scope') as string).includes(',')) {
-				const data = querystring.parse(returnUri.split('?')[1] as string);
+				const data = querystring.parse(returnUri.split('?')[1] );
 				data.scope = _.get(oauthCredentials, 'scope') as string;
 				returnUri = `${_.get(oauthCredentials, 'authUrl', '')}?${querystring.stringify(data)}`;
 			}
 
 			if (authQueryParameters) {
-				returnUri += '&' + authQueryParameters;
+				returnUri += `&${  authQueryParameters}`;
 			}
 
 			return returnUri;
@@ -1503,7 +1510,7 @@ class App {
 				const { code, state: stateEncoded } = req.query;
 
 				if (code === undefined || stateEncoded === undefined) {
-					const errorResponse = new ResponseHelper.ResponseError('Insufficient parameters for OAuth2 callback. Received following query parameters: ' + JSON.stringify(req.query), undefined, 503);
+					const errorResponse = new ResponseHelper.ResponseError(`Insufficient parameters for OAuth2 callback. Received following query parameters: ${  JSON.stringify(req.query)}`, undefined, 503);
 					return ResponseHelper.sendErrorResponse(res, errorResponse);
 				}
 
@@ -1521,7 +1528,7 @@ class App {
 					return ResponseHelper.sendErrorResponse(res, errorResponse);
 				}
 
-				let encryptionKey = undefined;
+				let encryptionKey;
 				encryptionKey = await UserSettings.getEncryptionKey();
 				if (encryptionKey === undefined) {
 					const errorResponse = new ResponseHelper.ResponseError('No encryption key got found to decrypt the credentials!', undefined, 503);
@@ -1530,8 +1537,8 @@ class App {
 
 				// Decrypt the currently saved credentials
 				const workflowCredentials: IWorkflowCredentials = {
-					[result.type as string]: {
-						[result.name as string]: result as ICredentialsEncrypted,
+					[result.type ]: {
+						[result.name ]: result as ICredentialsEncrypted,
 					},
 				};
 				const mode: WorkflowExecuteMode = 'internal';
@@ -1617,7 +1624,7 @@ class App {
 
 		// Returns all finished executions
 		this.app.get(`/${this.restEndpoint}/executions`, ResponseHelper.send(async (req: express.Request, res: express.Response): Promise<IExecutionsListResponse> => {
-			let filter: any = {}; // tslint:disable-line:no-any
+			let filter: any = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 			if (req.query.filter) {
 				filter = JSON.parse(req.query.filter as string);
@@ -1635,11 +1642,12 @@ class App {
 				executingWorkflowIds.push(...currentJobs.map(job => job.data.executionId) as string[]);
 			}
 			// We may have manual executions even with queue so we must account for these.
-			executingWorkflowIds.push(...this.activeExecutionsInstance.getActiveExecutions().map(execution => execution.id.toString()) as string[]);
+			executingWorkflowIds.push(...this.activeExecutionsInstance.getActiveExecutions().map(execution => execution.id.toString()) );
 
 			const countFilter = JSON.parse(JSON.stringify(filter));
 			countFilter.id = Not(In(executingWorkflowIds));
 
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			const resultsQuery = await Db.collections.Execution!
 				.createQueryBuilder("execution")
 				.select([
@@ -1679,15 +1687,15 @@ class App {
 
 			for (const result of results) {
 				returnResults.push({
-					id: result.id!.toString(),
+					id: result.id.toString(),
 					finished: result.finished,
 					mode: result.mode,
 					retryOf: result.retryOf ? result.retryOf.toString() : undefined,
 					retrySuccessId: result.retrySuccessId ? result.retrySuccessId.toString() : undefined,
 					startedAt: result.startedAt,
 					stoppedAt: result.stoppedAt,
-					workflowId: result.workflowData!.id ? result.workflowData!.id!.toString() : '',
-					workflowName: result.workflowData!.name,
+					workflowId: result.workflowData.id ? result.workflowData.id.toString() : '',
+					workflowName: result.workflowData.name,
 				});
 			}
 
@@ -1709,7 +1717,7 @@ class App {
 
 			if (req.query.unflattedResponse === 'true') {
 				const fullExecutionData = ResponseHelper.unflattenExecutionData(result);
-				return fullExecutionData as IExecutionResponse;
+				return fullExecutionData ;
 			} else {
 				// Convert to response format in which the id is a string
 				(result as IExecutionFlatted as IExecutionFlattedResponse).id = result.id.toString();
@@ -1748,16 +1756,16 @@ class App {
 				workflowData: fullExecutionData.workflowData,
 			};
 
-			const lastNodeExecuted = data!.executionData!.resultData.lastNodeExecuted as string | undefined;
+			const {lastNodeExecuted} = data.executionData!.resultData ;
 
 			if (lastNodeExecuted) {
 				// Remove the old error and the data of the last run of the node that it can be replaced
-				delete data!.executionData!.resultData.error;
-				const length = data!.executionData!.resultData.runData[lastNodeExecuted].length;
-				if (length > 0 && data!.executionData!.resultData.runData[lastNodeExecuted][length - 1].error !== undefined) {
+				delete data.executionData!.resultData.error;
+				const {length} = data.executionData!.resultData.runData[lastNodeExecuted];
+				if (length > 0 && data.executionData!.resultData.runData[lastNodeExecuted][length - 1].error !== undefined) {
 					// Remove results only if it is an error.
 					// If we are retrying due to a crash, the information is simply success info from last node
-					data!.executionData!.resultData.runData[lastNodeExecuted].pop();
+					data.executionData!.resultData.runData[lastNodeExecuted].pop();
 					// Stack will determine what to run next
 				}
 			}
@@ -1777,7 +1785,7 @@ class App {
 				const workflowInstance = new Workflow({ id: workflowData.id as string, name: workflowData.name, nodes: workflowData.nodes, connections: workflowData.connections, active: false, nodeTypes, staticData: undefined, settings: workflowData.settings });
 
 				// Replace all of the nodes in the execution stack with the ones of the new workflow
-				for (const stack of data!.executionData!.executionData!.nodeExecutionStack) {
+				for (const stack of data.executionData!.executionData!.nodeExecutionStack) {
 					// Find the data of the last executed node in the new workflow
 					const node = workflowInstance.getNode(stack.node.name);
 					if (node === null) {
@@ -1847,6 +1855,7 @@ class App {
 					return [];
 				}
 
+				// eslint-disable-next-line @typescript-eslint/await-thenable
 				const resultsQuery = await Db.collections.Execution!
 					.createQueryBuilder("execution")
 					.select([
@@ -1882,7 +1891,7 @@ class App {
 
 				const returnData: IExecutionsSummary[] = [];
 
-				let filter: any = {}; // tslint:disable-line:no-any
+				let filter: any = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 				if (req.query.filter) {
 					filter = JSON.parse(req.query.filter as string);
 				}
@@ -1898,7 +1907,7 @@ class App {
 							mode: data.mode,
 							retryOf: data.retryOf,
 							startedAt: new Date(data.startedAt),
-						}
+						},
 					);
 				}
 				returnData.sort((a, b) => parseInt(b.id, 10) - parseInt(a.id, 10));
@@ -1935,7 +1944,7 @@ class App {
 				}
 
 				const executionDb = await Db.collections.Execution?.findOne(req.params.id) as IExecutionFlattedDb;
-				const fullExecutionData = ResponseHelper.unflattenExecutionData(executionDb) as IExecutionResponse;
+				const fullExecutionData = ResponseHelper.unflattenExecutionData(executionDb) ;
 
 				const returnData: IExecutionsStopData = {
 					mode: fullExecutionData.mode,
@@ -2169,12 +2178,14 @@ export async function start(): Promise<void> {
 	let server;
 
 	if (app.protocol === 'https' && app.sslKey && app.sslCert) {
+		// eslint-disable-next-line global-require
 		const https = require('https');
 		const privateKey = readFileSync(app.sslKey, 'utf8');
 		const cert = readFileSync(app.sslCert, 'utf8');
 		const credentials = { key: privateKey, cert };
 		server = https.createServer(credentials, app.app);
 	} else {
+		// eslint-disable-next-line global-require
 		const http = require('http');
 		server = http.createServer(app.app);
 	}
@@ -2188,7 +2199,7 @@ export async function start(): Promise<void> {
 	});
 }
 
-async function getExecutionsCount(countFilter: IDataObject): Promise<{ count: number; estimate: boolean; }> {
+async function getExecutionsCount(countFilter: IDataObject): Promise<{ count: number; estimate: boolean }> {
 
 	const dbType = await GenericHelpers.getConfigValue('database.type') as DatabaseType;
 	const filteredFields = Object.keys(countFilter).filter(field => field !== 'id');
@@ -2212,8 +2223,8 @@ async function getExecutionsCount(countFilter: IDataObject): Promise<{ count: nu
 			// table scan should not take so long.
 			return { count: estimate, estimate: true };
 		}
-	} catch (err) {
-		LoggerProxy.warn('Unable to get executions count from postgres: ' + err);
+	} catch (error) {
+		LoggerProxy.warn(`Unable to get executions count from postgres: ${  error}`);
 	}
 
 	const count = await Db.collections.Execution!.count(countFilter);

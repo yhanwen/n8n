@@ -28,7 +28,8 @@
 		"index.ts",
 		"config/**/*",
 		"src/**/*",
-		"test/**/*"
+		"test/**/*",
+		"migrations/**/*"
 	],
 	"exclude": [
 		"dist/**/*",

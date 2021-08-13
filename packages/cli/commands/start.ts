@@ -4,9 +4,11 @@ import {
 	UserSettings,
 } from 'n8n-core';
 import { Command, flags } from '@oclif/command';
-const open = require('open');
 import * as Redis from 'ioredis';
 
+import { IDataObject ,
+	LoggerProxy,
+} from 'n8n-workflow';
 import * as config from '../config';
 import {
 	ActiveExecutions,
@@ -17,21 +19,19 @@ import {
 	Db,
 	ExternalHooks,
 	GenericHelpers,
-	IExecutionsCurrentSummary,
 	LoadNodesAndCredentials,
 	NodeTypes,
 	Server,
 	TestWebhooks,
 } from '../src';
-import { IDataObject } from 'n8n-workflow';
 
-import { 
+import {
 	getLogger,
 } from '../src/Logger';
 
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
+
+
+const open = require('open');
 
 let activeWorkflowRunner: ActiveWorkflowRunner.ActiveWorkflowRunner | undefined;
 let processExistCode = 0;
@@ -65,7 +65,7 @@ export class Start extends Command {
 		const editorUrl = GenericHelpers.getBaseUrl();
 
 		open(editorUrl, { wait: true })
-			.catch((error: Error) => {
+			.catch((_: Error) => {
 				console.log(`\nWas not able to open URL in browser. Please open manually by visiting:\n${editorUrl}\n`);
 			});
 	}
@@ -104,12 +104,13 @@ export class Start extends Command {
 
 			// Wait for active workflow executions to finish
 			const activeExecutionsInstance = ActiveExecutions.getInstance();
-			let executingWorkflows = activeExecutionsInstance.getActiveExecutions() as IExecutionsCurrentSummary[];
+			let executingWorkflows = activeExecutionsInstance.getActiveExecutions() ;
 
 			let count = 0;
 			while (executingWorkflows.length !== 0) {
 				if (count++ % 4 === 0) {
 					console.log(`Waiting for ${executingWorkflows.length} active executions to finish...`);
+					// eslint-disable-next-line array-callback-return
 					executingWorkflows.map(execution => {
 						console.log(` - Execution ID ${execution.id}, workflow ID: ${execution.workflowId}`);
 					});
@@ -188,6 +189,7 @@ export class Start extends Command {
 					let lastTimer = 0, cumulativeTimeout = 0;
 
 					const settings = {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						retryStrategy: (times: number): number | null => {
 							const now = Date.now();
 							if (now - lastTimer > 30000) {
@@ -198,7 +200,7 @@ export class Start extends Command {
 								cumulativeTimeout += now - lastTimer;
 								lastTimer = now;
 								if (cumulativeTimeout > redisConnectionTimeoutLimit) {
-									logger.error('Unable to connect to Redis after ' + redisConnectionTimeoutLimit + ". Exiting process.");
+									logger.error(`Unable to connect to Redis after ${  redisConnectionTimeoutLimit  }. Exiting process.`);
 									process.exit(1);
 								}
 							}
@@ -268,12 +270,13 @@ export class Start extends Command {
 						subdomain: tunnelSubdomain,
 					};
 
-					const port = config.get('port') as number;
+					const port = config.get('port') ;
 
 					// @ts-ignore
+					// eslint-disable-next-line @typescript-eslint/await-thenable
 					const webhookTunnel = await localtunnel(port, tunnelSettings);
 
-					process.env.WEBHOOK_URL = webhookTunnel.url + '/';
+					process.env.WEBHOOK_URL = `${webhookTunnel.url  }/`;
 					this.log(`Tunnel URL: ${process.env.WEBHOOK_URL}\n`);
 					this.log('IMPORTANT! Do not share with anybody as it would give people access to your n8n instance!');
 				}
@@ -307,12 +310,14 @@ export class Start extends Command {
 							Start.stopProcess();
 						} else {
 							// When anything else got pressed, record it and send it on enter into the child process
+							// eslint-disable-next-line no-lonely-if
 							if (key.charCodeAt(0) === 13) {
 								// send to child process and print in terminal
 								process.stdout.write('\n');
 								inputText = '';
 							} else {
 								// record it and write into terminal
+								// eslint-disable-next-line @typescript-eslint/no-unused-vars
 								inputText += key;
 								process.stdout.write(key);
 							}

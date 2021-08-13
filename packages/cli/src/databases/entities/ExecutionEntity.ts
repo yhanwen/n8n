@@ -3,21 +3,21 @@ import {
 } from 'n8n-workflow';
 
 import {
-	IExecutionFlattedDb,
-	IWorkflowDb,
-} from '../../';
-
-import {
-	resolveDataType
-} from '../utils';
-
-import {
 	Column,
 	ColumnOptions,
 	Entity,
 	Index,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
+import {
+	IExecutionFlattedDb,
+	IWorkflowDb,
+} from "../..";
+
+import {
+	resolveDataType,
+} from '../utils';
+
 
 @Entity()
 export class ExecutionEntity implements IExecutionFlattedDb {

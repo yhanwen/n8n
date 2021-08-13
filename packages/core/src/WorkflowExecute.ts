@@ -60,6 +60,7 @@ export class WorkflowExecute {
 	 * @returns {(Promise<string>)}
 	 * @memberof WorkflowExecute
 	 */
+	// @ts-ignore
 	async run(workflow: Workflow, startNode?: INode, destinationNode?: string): PCancelable<IRun> {
 		// Get the nodes to start workflow execution from
 		startNode = startNode || workflow.getStartNode(destinationNode);
@@ -488,6 +489,7 @@ export class WorkflowExecute {
 	 * @returns {Promise<string>}
 	 * @memberof WorkflowExecute
 	 */
+	// @ts-ignore
 	async processRunExecutionData(workflow: Workflow): PCancelable<IRun> {
 		Logger.verbose('Workflow execution started', { workflowId: workflow.id });
 

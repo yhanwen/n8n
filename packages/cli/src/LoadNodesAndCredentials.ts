@@ -11,11 +11,7 @@ import {
 	LoggerProxy,
 } from 'n8n-workflow';
 
-import * as config from '../config';
 
-import {
-	getLogger,
-} from '../src/Logger';
 
 import {
 	access as fsAccess,
@@ -25,6 +21,10 @@ import {
  } from 'fs/promises';
 import * as glob from 'glob-promise';
 import * as path from 'path';
+import {
+	getLogger,
+} from "./Logger";
+import * as config from '../config';
 
 const CUSTOM_NODES_CATEGORY = 'Custom Nodes';
 
@@ -33,7 +33,7 @@ class LoadNodesAndCredentialsClass {
 	nodeTypes: INodeTypeData = {};
 
 	credentialTypes: {
-		[key: string]: ICredentialType
+		[key: string]: ICredentialType;
 	} = {};
 
 	excludeNodes: string[] | undefined = undefined;
@@ -138,16 +138,16 @@ class LoadNodesAndCredentialsClass {
 	 * @returns {Promise<void>}
 	 */
 	async loadCredentialsFromFile(credentialName: string, filePath: string): Promise<void> {
-		const tempModule = require(filePath);
+		const tempModule = require(filePath); // eslint-disable-line
 
 		let tempCredential: ICredentialType;
 		try {
 			tempCredential = new tempModule[credentialName]() as ICredentialType;
-		} catch (e) {
-			if (e instanceof TypeError) {
+		} catch (error) {
+			if (error instanceof TypeError) {
 				throw new Error(`Class with name "${credentialName}" could not be found. Please check if the class is named correctly!`);
 			} else {
-				throw e;
+				throw error;
 			}
 		}
 
@@ -167,7 +167,7 @@ class LoadNodesAndCredentialsClass {
 		let tempNode: INodeType;
 		let fullNodeName: string;
 
-		const tempModule = require(filePath);
+		const tempModule = require(filePath); // eslint-disable-line
 		try {
 			tempNode = new tempModule[nodeName]() as INodeType;
 			this.addCodex({ node: tempNode, filePath, isCustom: packageName === 'CUSTOM' });
@@ -176,13 +176,14 @@ class LoadNodesAndCredentialsClass {
 			throw error;
 		}
 
-		fullNodeName = packageName + '.' + tempNode.description.name;
+		// eslint-disable-next-line prefer-const
+		fullNodeName = `${packageName  }.${  tempNode.description.name}`;
 		tempNode.description.name = fullNodeName;
 
 		if (tempNode.description.icon !== undefined &&
 			tempNode.description.icon.startsWith('file:')) {
 			// If a file icon gets used add the full path
-			tempNode.description.icon = 'file:' + path.join(path.dirname(filePath), tempNode.description.icon.substr(5));
+			tempNode.description.icon = `file:${  path.join(path.dirname(filePath), tempNode.description.icon.substr(5))}`;
 		}
 
 		if (tempNode.executeSingle) {
@@ -212,6 +213,7 @@ class LoadNodesAndCredentialsClass {
 	 * @returns {CodexData}
 	 */
 	getCodex(filePath: string): CodexData {
+		// eslint-disable-next-line
 		const { categories, subcategories, alias } = require(`${filePath}on`); // .js to .json
 		return {
 			...(categories && { categories }),
@@ -317,6 +319,7 @@ class LoadNodesAndCredentialsClass {
 		if (packageFile.n8n.hasOwnProperty('credentials') && Array.isArray(packageFile.n8n.credentials)) {
 			for (filePath of packageFile.n8n.credentials) {
 				tempPath = path.join(packagePath, filePath);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				[fileName, type] = path.parse(filePath).name.split('.');
 				this.loadCredentialsFromFile(fileName, tempPath);
 			}

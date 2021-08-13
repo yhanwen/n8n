@@ -9,24 +9,23 @@ import {
 } from 'n8n-core';
 
 import {
-	IDataObject
-} from 'n8n-workflow';
-
-import {
-	Db,
-	ICredentialsDecryptedDb,
-} from '../../src';
-
-import { 
-	getLogger,
-} from '../../src/Logger';
-
-import {
+	IDataObject,
 	LoggerProxy,
 } from 'n8n-workflow';
 
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+	Db,
+	ICredentialsDecryptedDb,
+} from '../../src';
+
+import {
+	getLogger,
+} from '../../src/Logger';
+
+
+
 
 export class ExportCredentialsCommand extends Command {
 	static description = 'Export credentials';
@@ -70,7 +69,7 @@ export class ExportCredentialsCommand extends Command {
 		LoggerProxy.init(logger);
 
 		const { flags } = this.parse(ExportCredentialsCommand);
-		
+
 		if (flags.backup) {
 			flags.all = true;
 			flags.pretty = true;
@@ -102,12 +101,12 @@ export class ExportCredentialsCommand extends Command {
 				} else {
 					fs.mkdirSync(flags.output, { recursive: true });
 				}
-			} catch (e) {
+			} catch (error) {
 				console.error('Aborting execution as a filesystem error has been encountered while creating the output directory. See log messages for details.');
 				logger.error('\nFILESYSTEM ERROR');
 				logger.info('====================================');
-				logger.error(e.message);
-				logger.error(e.stack);
+				logger.error(error.message);
+				logger.error(error.stack);
 				this.exit(1);
 			}
 		} else if (flags.output) {
@@ -151,14 +150,14 @@ export class ExportCredentialsCommand extends Command {
 				let fileContents: string, i: number;
 				for (i = 0; i < credentials.length; i++) {
 					fileContents = JSON.stringify(credentials[i], null, flags.pretty ? 2 : undefined);
-					const filename = (flags.output!.endsWith(path.sep) ? flags.output! : flags.output + path.sep) + credentials[i].id + '.json';
+					const filename = `${(flags.output!.endsWith(path.sep) ? flags.output! : flags.output + path.sep) + credentials[i].id  }.json`;
 					fs.writeFileSync(filename, fileContents);
 				}
 				console.info(`Successfully exported ${i} credentials.`);
 			} else {
 				const fileContents = JSON.stringify(credentials, null, flags.pretty ? 2 : undefined);
 				if (flags.output) {
-					fs.writeFileSync(flags.output!, fileContents);
+					fs.writeFileSync(flags.output, fileContents);
 					console.info(`Successfully exported ${credentials.length} credentials.`);
 				} else {
 					console.info(fileContents);

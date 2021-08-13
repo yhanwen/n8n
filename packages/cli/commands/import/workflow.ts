@@ -3,13 +3,7 @@ import {
 	flags,
 } from '@oclif/command';
 
-import {
-	Db,
-} from '../../src';
 
-import { 
-	getLogger,
-} from '../../src/Logger';
 
 import {
 	LoggerProxy,
@@ -21,6 +15,12 @@ import * as path from 'path';
 import { 
 	UserSettings,
 } from 'n8n-core';
+import { 
+	getLogger,
+} from '../../src/Logger';
+import {
+	Db,
+} from '../../src';
 
 export class ImportWorkflowsCommand extends Command {
 	static description = 'Import workflows';
@@ -68,7 +68,7 @@ export class ImportWorkflowsCommand extends Command {
 			await UserSettings.prepareUserSettings();
 			let i;
 			if (flags.separate) {
-				const files = await glob((flags.input.endsWith(path.sep) ? flags.input : flags.input + path.sep) + '*.json');
+				const files = await glob(`${flags.input.endsWith(path.sep) ? flags.input : flags.input + path.sep  }*.json`);
 				for (i = 0; i < files.length; i++) {
 					const workflow = JSON.parse(fs.readFileSync(files[i], { encoding: 'utf8' }));
 					await Db.collections.Workflow!.save(workflow);

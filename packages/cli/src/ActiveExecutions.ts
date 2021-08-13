@@ -6,6 +6,9 @@ import {
 	createDeferredPromise,
 } from 'n8n-core';
 
+
+import { ChildProcess } from 'child_process';
+import * as PCancelable from 'p-cancelable';
 import {
 	Db,
 	IExecutingWorkflowData,
@@ -16,9 +19,6 @@ import {
 	ResponseHelper,
 	WorkflowHelpers,
 } from '.';
-
-import { ChildProcess } from 'child_process';
-import * as PCancelable from 'p-cancelable';
 
 
 export class ActiveExecutions {
@@ -58,7 +58,7 @@ export class ActiveExecutions {
 		// Save the Execution in DB
 		const executionResult = await Db.collections.Execution!.save(execution as IExecutionFlattedDb);
 
-		const executionId = typeof executionResult.id === "object" ? executionResult.id!.toString() : executionResult.id + "";
+		const executionId = typeof executionResult.id === "object" ? executionResult.id.toString() : `${executionResult.id  }`;
 
 		this.activeExecutions[executionId] = {
 			executionData,
@@ -132,7 +132,7 @@ export class ActiveExecutions {
 				setTimeout(() => {
 				// execute on next event loop tick;
 					this.activeExecutions[executionId].process!.send({
-						type: timeout ? timeout : 'stopExecution',
+						type: timeout || 'stopExecution',
 					});
 				}, 1);
 			}
@@ -186,7 +186,7 @@ export class ActiveExecutions {
 					startedAt: data.startedAt,
 					mode: data.executionData.executionMode,
 					workflowId: data.executionData.workflowData.id! as string,
-				}
+				},
 			);
 		}
 

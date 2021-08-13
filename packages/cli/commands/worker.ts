@@ -7,20 +7,19 @@ import {
 } from 'n8n-core';
 
 import {
-	IDataObject,
 	INodeTypes,
 	IRun,
-	IWorkflowExecuteHooks,
 	Workflow,
-	WorkflowHooks,
+
+	LoggerProxy,
 } from 'n8n-workflow';
 
 import {
 	FindOneOptions,
 } from 'typeorm';
 
+import * as Bull from 'bull';
 import {
-	ActiveExecutions,
 	CredentialsOverwrites,
 	CredentialTypes,
 	Db,
@@ -29,7 +28,6 @@ import {
 	IBullJobData,
 	IBullJobResponse,
 	IExecutionFlattedDb,
-	IExecutionResponse,
 	LoadNodesAndCredentials,
 	NodeTypes,
 	ResponseHelper,
@@ -37,16 +35,13 @@ import {
 	WorkflowExecuteAdditionalData,
 } from '../src';
 
-import { 
+import {
 	getLogger,
 } from '../src/Logger';
 
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
+
 
 import * as config from '../config';
-import * as Bull from 'bull';
 import * as Queue from '../src/Queue';
 
 export class Worker extends Command {
@@ -120,15 +115,15 @@ export class Worker extends Command {
 	async runJob(job: Bull.Job, nodeTypes: INodeTypes): Promise<IBullJobResponse> {
 		const jobData = job.data as IBullJobData;
 		const executionDb = await Db.collections.Execution!.findOne(jobData.executionId) as IExecutionFlattedDb;
-		const currentExecutionDb = ResponseHelper.unflattenExecutionData(executionDb) as IExecutionResponse;
+		const currentExecutionDb = ResponseHelper.unflattenExecutionData(executionDb) ;
 		LoggerProxy.info(`Start job: ${job.id} (Workflow ID: ${currentExecutionDb.workflowData.id} | Execution: ${jobData.executionId})`);
 
-		let staticData = currentExecutionDb.workflowData!.staticData;
+		let {staticData} = currentExecutionDb.workflowData;
 		if (jobData.loadStaticData === true) {
 			const findOptions = {
 				select: ['id', 'staticData'],
 			} as FindOneOptions;
-			const workflowData = await Db.collections!.Workflow!.findOne(currentExecutionDb.workflowData.id, findOptions);
+			const workflowData = await Db.collections.Workflow!.findOne(currentExecutionDb.workflowData.id, findOptions);
 			if (workflowData === undefined) {
 				throw new Error(`The workflow with the ID "${currentExecutionDb.workflowData.id}" could not be found`);
 			}
@@ -137,7 +132,7 @@ export class Worker extends Command {
 
 		let workflowTimeout = config.get('executions.timeout') as number; // initialize with default
 		if (currentExecutionDb.workflowData.settings && currentExecutionDb.workflowData.settings.executionTimeout) {
-			workflowTimeout = currentExecutionDb.workflowData.settings!.executionTimeout as number; // preference on workflow setting
+			workflowTimeout = currentExecutionDb.workflowData.settings.executionTimeout as number; // preference on workflow setting
 		}
 
 		let executionTimeoutTimestamp: number | undefined;
@@ -146,7 +141,7 @@ export class Worker extends Command {
 			executionTimeoutTimestamp = Date.now() + workflowTimeout * 1000;
 		}
 
-		const workflow = new Workflow({ id: currentExecutionDb.workflowData.id as string, name: currentExecutionDb.workflowData.name, nodes: currentExecutionDb.workflowData!.nodes, connections: currentExecutionDb.workflowData!.connections, active: currentExecutionDb.workflowData!.active, nodeTypes, staticData, settings: currentExecutionDb.workflowData!.settings });
+		const workflow = new Workflow({ id: currentExecutionDb.workflowData.id as string, name: currentExecutionDb.workflowData.name, nodes: currentExecutionDb.workflowData.nodes, connections: currentExecutionDb.workflowData.connections, active: currentExecutionDb.workflowData.active, nodeTypes, staticData, settings: currentExecutionDb.workflowData.settings });
 
 		const credentials = await WorkflowCredentials(currentExecutionDb.workflowData.nodes);
 
@@ -168,6 +163,7 @@ export class Worker extends Command {
 		Worker.runningJobs[job.id] = workflowRun;
 
 		// Wait till the execution is finished
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const runData = await workflowRun;
 
 		delete Worker.runningJobs[job.id];
@@ -229,7 +225,7 @@ export class Worker extends Command {
 				const redisConnectionTimeoutLimit = config.get('queue.bull.redis.timeoutThreshold');
 
 				Worker.jobQueue = Queue.getInstance().getBullObjectInstance();
-				Worker.jobQueue.process(flags.concurrency, (job) => this.runJob(job, nodeTypes));
+				Worker.jobQueue.process(flags.concurrency, async (job) => this.runJob(job, nodeTypes));
 
 				const versions = await GenericHelpers.getVersions();
 
@@ -264,7 +260,7 @@ export class Worker extends Command {
 							cumulativeTimeout += now - lastTimer;
 							lastTimer = now;
 							if (cumulativeTimeout > redisConnectionTimeoutLimit) {
-								logger.error('Unable to connect to Redis after ' + redisConnectionTimeoutLimit + ". Exiting process.");
+								logger.error(`Unable to connect to Redis after ${  redisConnectionTimeoutLimit  }. Exiting process.`);
 								process.exit(1);
 							}
 						}

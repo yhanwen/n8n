@@ -1,11 +1,11 @@
-import * as config from '../config';
 import * as express from 'express';
 import { join as pathJoin } from 'path';
 import { readFile as fsReadFile } from 'fs/promises';
 import { readFileSync as fsReadFileSync } from 'fs';
 import { IDataObject } from 'n8n-workflow';
+import * as config from '../config';
 
-import { IPackageVersions } from './';
+import { IPackageVersions } from ".";
 
 let versionCache: IPackageVersions | undefined;
 
@@ -16,10 +16,10 @@ let versionCache: IPackageVersions | undefined;
  * @returns {string}
  */
 export function getBaseUrl(): string {
-	const protocol = config.get('protocol') as string;
-	const host = config.get('host') as string;
-	const port = config.get('port') as number;
-	const path = config.get('path') as string;
+	const protocol = config.get('protocol') ;
+	const host = config.get('host') ;
+	const port = config.get('port') ;
+	const path = config.get('path') ;
 
 	if (protocol === 'http' && port === 80 || protocol === 'https' && port === 443) {
 		return `${protocol}://${host}${path}`;
@@ -51,7 +51,7 @@ export async function getVersions(): Promise<IPackageVersions> {
 		return versionCache;
 	}
 
-	const packageFile = await fsReadFile(pathJoin(__dirname, '../../package.json'), 'utf8') as string;
+	const packageFile = await fsReadFile(pathJoin(__dirname, '../../package.json'), 'utf8') ;
 	const packageData = JSON.parse(packageFile);
 
 	versionCache = {
@@ -102,7 +102,7 @@ export async function getConfigValue(configKey: string): Promise<string | boolea
 	}
 
 	// Check if special file enviroment variable exists
-	const fileEnvironmentVariable = process.env[currentSchema.env + '_FILE'];
+	const fileEnvironmentVariable = process.env[`${currentSchema.env  }_FILE`];
 	if (fileEnvironmentVariable === undefined) {
 		// Does not exist, so return value from config
 		return config.get(configKey);
@@ -110,7 +110,7 @@ export async function getConfigValue(configKey: string): Promise<string | boolea
 
 	let data;
 	try {
-		data = await fsReadFile(fileEnvironmentVariable, 'utf8') as string;
+		data = await fsReadFile(fileEnvironmentVariable, 'utf8') ;
 	} catch (error) {
 		if (error.code === 'ENOENT') {
 			throw new Error(`The file "${fileEnvironmentVariable}" could not be found.`);
@@ -141,7 +141,7 @@ export function getConfigValueSync(configKey: string): string | boolean | number
 	}
 
 	// Check if special file enviroment variable exists
-	const fileEnvironmentVariable = process.env[currentSchema.env + '_FILE'];
+	const fileEnvironmentVariable = process.env[`${currentSchema.env  }_FILE`];
 	if (fileEnvironmentVariable === undefined) {
 		// Does not exist, so return value from config
 		return config.get(configKey);
@@ -149,7 +149,7 @@ export function getConfigValueSync(configKey: string): string | boolean | number
 
 	let data;
 	try {
-		data = fsReadFileSync(fileEnvironmentVariable, 'utf8') as string;
+		data = fsReadFileSync(fileEnvironmentVariable, 'utf8') ;
 	} catch (error) {
 		if (error.code === 'ENOENT') {
 			throw new Error(`The file "${fileEnvironmentVariable}" could not be found.`);

@@ -16,7 +16,7 @@ export class MakeStoppedAtNullable1607431743769 implements MigrationInterface {
 		await queryRunner.query(`PRAGMA writable_schema = 0;`, undefined);
 	}
 
-	async down(queryRunner: QueryRunner): Promise<void> {
+	async down(_: QueryRunner): Promise<void> {
 		// This cannot be undone as the table might already have nullable values
 	}
 

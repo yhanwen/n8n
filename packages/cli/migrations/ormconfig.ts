@@ -10,16 +10,16 @@ module.exports = [
         "entities": Object.values(entities),
         "database": path.join(UserSettings.getUserN8nFolderPath(), 'database.sqlite'),
         "migrations": [
-           "./src/databases/sqlite/migrations/*.ts"
+           "./src/databases/sqlite/migrations/*.ts",
         ],
         "subscribers": [
-            "./src/databases/sqlite/subscribers/*.ts"
+            "./src/databases/sqlite/subscribers/*.ts",
         ],
         "cli": {
            "entitiesDir": "./src/databases/entities",
            "migrationsDir": "./src/databases/sqlite/migrations",
-           "subscribersDir": "./src/databases/sqlite/subscribers"
-        }
+           "subscribersDir": "./src/databases/sqlite/subscribers",
+        },
     },
     {
         "name": "postgres",
@@ -33,16 +33,16 @@ module.exports = [
         "schema": "public",
         "entities": Object.values(entities),
         "migrations": [
-           "./src/databases/postgresdb/migrations/*.ts"
+           "./src/databases/postgresdb/migrations/*.ts",
         ],
         "subscribers": [
-           "src/subscriber/**/*.ts"
+           "src/subscriber/**/*.ts",
         ],
         "cli": {
            "entitiesDir": "./src/databases/entities",
            "migrationsDir": "./src/databases/postgresdb/migrations",
-           "subscribersDir": "./src/databases/postgresdb/subscribers"
-        }
+           "subscribersDir": "./src/databases/postgresdb/subscribers",
+        },
     },
     {
         "name": "mysql",
@@ -55,16 +55,16 @@ module.exports = [
         "logging": false,
         "entities": Object.values(entities),
         "migrations": [
-           "./src/databases/mysqldb/migrations/*.ts"
+           "./src/databases/mysqldb/migrations/*.ts",
         ],
         "subscribers": [
-           "src/subscriber/**/*.ts"
+           "src/subscriber/**/*.ts",
         ],
         "cli": {
            "entitiesDir": "./src/databases/entities",
            "migrationsDir": "./src/databases/mysqldb/migrations",
-           "subscribersDir": "./src/databases/mysqldb/Subscribers"
-        }
+           "subscribersDir": "./src/databases/mysqldb/Subscribers",
+        },
     },
         {
         "name": "mariadb",
@@ -77,15 +77,15 @@ module.exports = [
         "logging": false,
         "entities": Object.values(entities),
         "migrations": [
-           "./src/databases/mysqldb/migrations/*.ts"
+           "./src/databases/mysqldb/migrations/*.ts",
         ],
         "subscribers": [
-           "src/subscriber/**/*.ts"
+           "src/subscriber/**/*.ts",
         ],
         "cli": {
            "entitiesDir": "./src/databases/entities",
            "migrationsDir": "./src/databases/mysqldb/migrations",
-           "subscribersDir": "./src/databases/mysqldb/Subscribers"
-        }
+           "subscribersDir": "./src/databases/mysqldb/Subscribers",
+        },
     },
 ];

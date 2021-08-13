@@ -9,7 +9,7 @@ export class CreateTagEntity1617270242566 implements MigrationInterface {
 			const tablePrefixPure = tablePrefix;
 			const schema = config.get('database.postgresdb.schema');
 			if (schema) {
-				tablePrefix = schema + '.' + tablePrefix;
+				tablePrefix = `${schema  }.${  tablePrefix}`;
 			}
 
 			// create tags table + relationship with workflow entity
@@ -44,7 +44,7 @@ export class CreateTagEntity1617270242566 implements MigrationInterface {
 			const tablePrefixPure = tablePrefix;
 			const schema = config.get('database.postgresdb.schema');
 			if (schema) {
-				tablePrefix = schema + '.' + tablePrefix;
+				tablePrefix = `${schema  }.${  tablePrefix}`;
 			}
 
 			// `createdAt` and `updatedAt`

@@ -1,15 +1,4 @@
 
-import {
-	CredentialsOverwrites,
-	CredentialTypes,
-	Db,
-	ExternalHooks,
-	IWorkflowExecuteProcess,
-	IWorkflowExecutionDataProcessWithExecution,
-	NodeTypes,
-	WorkflowExecuteAdditionalData,
-	WorkflowHelpers,
-} from './';
 
 import {
 	IProcessMessage,
@@ -34,10 +23,21 @@ import {
 	WorkflowHooks,
 	WorkflowOperationError,
 } from 'n8n-workflow';
+import {
+	CredentialsOverwrites,
+	CredentialTypes,
+	Db,
+	ExternalHooks,
+	IWorkflowExecuteProcess,
+	IWorkflowExecutionDataProcessWithExecution,
+	NodeTypes,
+	WorkflowExecuteAdditionalData,
+	WorkflowHelpers,
+} from ".";
 
 import {
 	getLogger,
-} from '../src/Logger';
+} from "./Logger";
 
 import * as config from '../config';
 
@@ -47,9 +47,10 @@ export class WorkflowRunnerProcess {
 	startedAt = new Date();
 	workflow: Workflow | undefined;
 	workflowExecute: WorkflowExecute | undefined;
+	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 	executionIdCallback: (executionId: string) => void | undefined;
 	childExecutions: {
-		[key: string]: IWorkflowExecuteProcess,
+		[key: string]: IWorkflowExecuteProcess;
 	} = {};
 
 	static async stopProcess() {
@@ -64,6 +65,7 @@ export class WorkflowRunnerProcess {
 		process.on('SIGTERM', WorkflowRunnerProcess.stopProcess);
 		process.on('SIGINT', WorkflowRunnerProcess.stopProcess);
 
+		// eslint-disable-next-line no-multi-assign
 		const logger = this.logger = getLogger();
 		LoggerProxy.init(logger);
 
@@ -82,7 +84,7 @@ export class WorkflowRunnerProcess {
 			className = this.data.nodeTypeData[nodeTypeName].className;
 
 			filePath = this.data.nodeTypeData[nodeTypeName].sourcePath;
-			const tempModule = require(filePath);
+			const tempModule = require(filePath); // eslint-disable-line
 
 			try {
 				tempNode = new tempModule[className]() as INodeType;
@@ -127,18 +129,18 @@ export class WorkflowRunnerProcess {
 		// Start timeout for the execution
 		let workflowTimeout = config.get('executions.timeout') as number; // initialize with default
 		if (this.data.workflowData.settings && this.data.workflowData.settings.executionTimeout) {
-			workflowTimeout = this.data.workflowData.settings!.executionTimeout as number; // preference on workflow setting
+			workflowTimeout = this.data.workflowData.settings.executionTimeout as number; // preference on workflow setting
 		}
 
 		if (workflowTimeout > 0) {
 			workflowTimeout = Math.min(workflowTimeout, config.get('executions.maxTimeout') as number);
 		}
 
-		this.workflow = new Workflow({ id: this.data.workflowData.id as string | undefined, name: this.data.workflowData.name, nodes: this.data.workflowData!.nodes, connections: this.data.workflowData!.connections, active: this.data.workflowData!.active, nodeTypes, staticData: this.data.workflowData!.staticData, settings: this.data.workflowData!.settings });
+		this.workflow = new Workflow({ id: this.data.workflowData.id as string | undefined, name: this.data.workflowData.name, nodes: this.data.workflowData.nodes, connections: this.data.workflowData.connections, active: this.data.workflowData.active, nodeTypes, staticData: this.data.workflowData.staticData, settings: this.data.workflowData.settings });
 		const additionalData = await WorkflowExecuteAdditionalData.getBase(this.data.credentials, undefined, workflowTimeout <= 0 ? undefined : Date.now() + workflowTimeout * 1000);
 		additionalData.hooks = this.getProcessForwardHooks();
 
-		additionalData.sendMessageToUI = async (source: string, message: any) => { // tslint:disable-line:no-any
+		additionalData.sendMessageToUI = async (source: string, message: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
 			if (workflowRunner.data!.executionMode !== 'manual') {
 				return;
 			}
@@ -161,19 +163,19 @@ export class WorkflowRunnerProcess {
 			});
 			let result: IRun;
 			try {
-				const executeWorkflowFunctionOutput = await executeWorkflowFunction(workflowInfo, additionalData, inputData, executionId, workflowData, runData) as {workflowExecute: WorkflowExecute, workflow: Workflow} as IWorkflowExecuteProcess;
-				const workflowExecute = executeWorkflowFunctionOutput.workflowExecute;
+				const executeWorkflowFunctionOutput = await executeWorkflowFunction(workflowInfo, additionalData, inputData, executionId, workflowData, runData) as {workflowExecute: WorkflowExecute; workflow: Workflow} as IWorkflowExecuteProcess;
+				const {workflowExecute} = executeWorkflowFunctionOutput;
 				this.childExecutions[executionId] = executeWorkflowFunctionOutput;
-				const workflow = executeWorkflowFunctionOutput.workflow;
-				result = await workflowExecute.processRunExecutionData(workflow) as IRun;
+				const {workflow} = executeWorkflowFunctionOutput;
+				result = await workflowExecute.processRunExecutionData(workflow) ;
 				await externalHooks.run('workflow.postExecute', [result, workflowData]);
 				await sendToParentProcess('finishExecution', { executionId, result });
 				delete this.childExecutions[executionId];
-			} catch (e) {
+			} catch (error) {
 				await sendToParentProcess('finishExecution', { executionId });
 				delete this.childExecutions[executionId];
 				// Throw same error we had
-				throw e;
+				throw error;
 			}
 
 			await sendToParentProcess('finishExecution', { executionId, result });
@@ -206,7 +208,7 @@ export class WorkflowRunnerProcess {
 	 * @param {any[]} parameters
 	 * @memberof WorkflowRunnerProcess
 	 */
-	async sendHookToParentProcess(hook: string, parameters: any[]) { // tslint:disable-line:no-any
+	async sendHookToParentProcess(hook: string, parameters: any[]) { // eslint-disable-line @typescript-eslint/no-explicit-any
 		try {
 			await sendToParentProcess('processHook', {
 				hook,
@@ -271,7 +273,7 @@ export class WorkflowRunnerProcess {
  * @param {*} data The data
  * @returns {Promise<void>}
  */
-async function sendToParentProcess(type: string, data: any): Promise<void> { // tslint:disable-line:no-any
+async function sendToParentProcess(type: string, data: any): Promise<void> { // eslint-disable-line @typescript-eslint/no-explicit-any
 	return new Promise((resolve, reject) => {
 		process.send!({
 			type,
@@ -338,7 +340,7 @@ process.on('message', async (message: IProcessMessage) => {
 						},
 					},
 					finished: false,
-					mode: workflowRunner.data ? workflowRunner.data!.executionMode : 'own' as WorkflowExecuteMode,
+					mode: workflowRunner.data ? workflowRunner.data.executionMode : 'own' as WorkflowExecuteMode,
 					startedAt: workflowRunner.startedAt,
 					stoppedAt: new Date(),
 				};
@@ -360,9 +362,9 @@ process.on('message', async (message: IProcessMessage) => {
 		// Catch all uncaught errors and forward them to parent process
 		const executionError = {
 			...error,
-			name: error!.name || 'Error',
-			message: error!.message,
-			stack: error!.stack,
+			name: error.name || 'Error',
+			message: error.message,
+			stack: error.stack,
 		} as ExecutionError;
 
 		await sendToParentProcess('processError', {

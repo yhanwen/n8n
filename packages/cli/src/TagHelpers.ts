@@ -64,7 +64,7 @@ export function throwDuplicateEntryError(error: Error) {
 /**
  * Retrieve all tags and the number of workflows each tag is related to.
  */
-export function getTagsWithCountDb(tablePrefix: string): Promise<ITagWithCountDb[]> {
+export async function getTagsWithCountDb(tablePrefix: string): Promise<ITagWithCountDb[]> {
 	return getConnection()
 	.createQueryBuilder()
 	.select(`${tablePrefix}tag_entity.id`, 'id')
@@ -90,7 +90,7 @@ export function getTagsWithCountDb(tablePrefix: string): Promise<ITagWithCountDb
 /**
  * Relate a workflow to one or more tags.
  */
-export function createRelations(workflowId: string, tagIds: string[], tablePrefix: string) {
+export async function createRelations(workflowId: string, tagIds: string[], tablePrefix: string) {
 	return getConnection()
 		.createQueryBuilder()
 		.insert()
@@ -102,7 +102,7 @@ export function createRelations(workflowId: string, tagIds: string[], tablePrefi
 /**
  * Remove all tags for a workflow during a tag update operation.
  */
-export function removeRelations(workflowId: string, tablePrefix: string) {
+export async function removeRelations(workflowId: string, tablePrefix: string) {
 	return getConnection()
 		.createQueryBuilder()
 		.delete()

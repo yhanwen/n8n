@@ -85,7 +85,7 @@ export interface ITagDb {
 }
 
 export type UsageCount = {
-	usageCount: number
+	usageCount: number;
 };
 
 export type ITagWithCountDb = ITagDb & UsageCount;
@@ -236,22 +236,22 @@ export interface IExecutingWorkflowData {
 
 export interface IExternalHooks {
 	credentials?: {
-		create?: Array<{ (this: IExternalHooksFunctions, credentialsData: ICredentialsEncrypted): Promise<void>; }>
-		delete?: Array<{ (this: IExternalHooksFunctions, credentialId: string): Promise<void>; }>
-		update?: Array<{ (this: IExternalHooksFunctions, credentialsData: ICredentialsDb): Promise<void>; }>
+		create?: Array<{ (this: IExternalHooksFunctions, credentialsData: ICredentialsEncrypted): Promise<void> }>;
+		delete?: Array<{ (this: IExternalHooksFunctions, credentialId: string): Promise<void> }>;
+		update?: Array<{ (this: IExternalHooksFunctions, credentialsData: ICredentialsDb): Promise<void> }>;
 	};
 	workflow?: {
-		activate?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb): Promise<void>; }>
-		create?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowBase): Promise<void>; }>
-		delete?: Array<{ (this: IExternalHooksFunctions, workflowId: string): Promise<void>; }>
-		execute?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb, mode: WorkflowExecuteMode): Promise<void>; }>
-		update?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb): Promise<void>; }>
+		activate?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb): Promise<void> }>;
+		create?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowBase): Promise<void> }>;
+		delete?: Array<{ (this: IExternalHooksFunctions, workflowId: string): Promise<void> }>;
+		execute?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb, mode: WorkflowExecuteMode): Promise<void> }>;
+		update?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb): Promise<void> }>;
 	};
 }
 
 export interface IExternalHooksFileData {
 	[key: string]: {
-		[key: string]: Array<(...args: any[]) => Promise<void>>; //tslint:disable-line:no-any
+		[key: string]: Array<(...args: any[]) => Promise<void>>; // eslint-disable-line @typescript-eslint/no-explicit-any
 	};
 }
 
@@ -261,7 +261,7 @@ export interface IExternalHooksFunctions {
 
 export interface IExternalHooksClass {
 	init(): Promise<void>;
-	run(hookName: string, hookParameters?: any[]): Promise<void>; // tslint:disable-line:no-any
+	run(hookName: string, hookParameters?: any[]): Promise<void>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface IN8nConfig {
@@ -291,12 +291,14 @@ export interface IN8nConfigEndpoints {
 	webhookTest: string;
 }
 
+// eslint-disable-next-line import/export
 export interface IN8nConfigExecutions {
 	saveDataOnError: SaveExecutionDataType;
 	saveDataOnSuccess: SaveExecutionDataType;
 	saveDataManualExecutions: boolean;
 }
 
+// eslint-disable-next-line import/export
 export interface IN8nConfigExecutions {
 	saveDataOnError: SaveExecutionDataType;
 	saveDataOnSuccess: SaveExecutionDataType;
@@ -453,7 +455,7 @@ export interface IWorkflowErrorData {
 
 export interface IProcessMessageDataHook {
 	hook: string;
-	parameters: any[]; // tslint:disable-line:no-any
+	parameters: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface IWorkflowExecutionDataProcess {
