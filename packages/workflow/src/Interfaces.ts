@@ -706,6 +706,7 @@ export interface IWorkflowDataProxyData {
 	$json: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 	$node: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 	$parameter: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+	$position: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 	$workflow: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 

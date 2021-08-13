@@ -13,3 +13,4 @@ _START_PACKAGE
 .vscode
 .idea
 vetur.config.js
+nodelinter.config.js
