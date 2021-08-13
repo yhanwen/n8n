@@ -5,8 +5,8 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist --no-ci",
     "build": "lerna exec npm run build",
-    "dev": "lerna exec npm run dev --parallel",
     "clean:dist": "lerna exec -- rimraf ./dist",
+    "dev": "lerna exec npm run dev --parallel",
     "optimize-svg": "find ./packages -name '*.svg' ! -name 'pipedrive.svg' -print0 | xargs -0 -P16 -L20 npx svgo",
     "start": "run-script-os",
     "start:default": "cd packages/cli/bin && ./n8n",

@@ -22,7 +22,8 @@
 		"**/*.d.ts",
 		"commands/**/*",
 		"index.ts",
-		"src/**/*"
+		"src/**/*",
+		"templates/**/*"
 	],
 	"exclude": [
 		"dist",
