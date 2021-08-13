@@ -4,12 +4,13 @@ import * as inquirer from 'inquirer';
 import { Command } from '@oclif/command';
 import { join } from 'path';
 
-const { promisify } = require('util');
-const fsAccess = promisify(fs.access);
-
 import {
-	createTemplate
+	createTemplate,
 } from '../src';
+
+const { promisify } = require('util');
+
+const fsAccess = promisify(fs.access);
 
 export class New extends Command {
 	static description = 'Create new credentials/node';
@@ -150,12 +151,12 @@ export class New extends Command {
 			this.log('\nExecution was successfull:');
 			this.log('====================================');
 
-			this.log('Node got created: ' + destinationFilePath);
+			this.log(`Node got created: ${  destinationFilePath}`);
 		} catch (error) {
 			this.log(`\nGOT ERROR: "${error.message}"`);
 			this.log('====================================');
 			this.log(error.stack);
-			return;
+			
 		}
 	}
 }

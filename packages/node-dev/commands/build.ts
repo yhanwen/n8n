@@ -52,7 +52,7 @@ export class Build extends Command {
 			this.log(`\nGOT ERROR: "${error.message}"`);
 			this.log('====================================');
 			this.log(error.stack);
-			return;
+			
 		}
 
 	}

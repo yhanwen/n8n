@@ -58,12 +58,12 @@ export class ClassNameReplace implements INodeType {
 				params: this.getParamsData(),
 				query: this.getQueryData(),
 				body: this.getBodyData(),
-			}
+			},
 		);
 
 		return {
 			workflowData: [
-				this.helpers.returnJsonArray(returnData)
+				this.helpers.returnJsonArray(returnData),
 			],
 		};
 

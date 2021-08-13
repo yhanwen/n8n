@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import {replaceInFile, ReplaceInFileConfig } from 'replace-in-file';
 
 const { promisify } = require('util');
+
 const fsCopyFile = promisify(fs.copyFile);
 
 

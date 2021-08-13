@@ -12,7 +12,7 @@ module.exports = {
 		],
 		sourceType: 'module',
 	},
-	ignorePatterns: ['node_modules/**', 'dist/**', 'test/**', '.js'],
+	ignorePatterns: ['.eslintrc.js', '**/node_modules/**', '**/dist/**', '**/test/**', '.js'],
 
 	extends: [
 		/**
@@ -279,9 +279,11 @@ module.exports = {
 		'@typescript-eslint/no-unused-expressions': 'error',
 
 		/**
+		 * TODO: Agreement on underscore as unused var marker?
+		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-vars.md
 		 */
-		'@typescript-eslint/no-unused-vars': 'error',
+		'@typescript-eslint/no-unused-vars': ['error', {argsIgnorePattern: "_"}],
 
 		/**
 		 * TODO: Given the codebase style, this rule triggers multiple warnings

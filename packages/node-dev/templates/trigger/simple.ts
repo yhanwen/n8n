@@ -32,7 +32,7 @@ export class ClassNameReplace implements INodeType {
 				default: 1,
 				description: 'Every how many minutes the workflow should be triggered.',
 			},
-		]
+		],
 	};
 
 
@@ -48,7 +48,7 @@ export class ClassNameReplace implements INodeType {
 			// Every time the emit function gets called a new workflow
 			// executions gets started with the provided entries.
 			const entry = {
-				'exampleKey': 'exampleData'
+				'exampleKey': 'exampleData',
 			};
 			this.emit([this.helpers.returnJsonArray([entry])]);
 		};

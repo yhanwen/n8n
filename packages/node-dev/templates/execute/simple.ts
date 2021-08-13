@@ -29,8 +29,8 @@ export class ClassNameReplace implements INodeType {
 				default: '',
 				placeholder: 'Placeholder value',
 				description: 'The description text',
-			}
-		]
+			},
+		],
 	};
 
 
@@ -48,7 +48,7 @@ export class ClassNameReplace implements INodeType {
 			myString = this.getNodeParameter('myString', itemIndex, '') as string;
 			item = items[itemIndex];
 
-			item.json['myString'] = myString;
+			item.json.myString = myString;
 		}
 
 		return this.prepareOutputData(items);
