@@ -7,12 +7,17 @@ module.exports = {
 
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
-		project: [
-			'./packages/*/tsconfig.json'
-		],
+		project: ['./packages/*/tsconfig.json'],
 		sourceType: 'module',
+		extraFileExtensions: ['.vue'],
 	},
-	ignorePatterns: ['.eslintrc.js', '**/node_modules/**', '**/dist/**', '**/test/**', '.js'],
+	ignorePatterns: [
+		'.eslintrc.js',
+		'**/node_modules/**',
+		'**/dist/**',
+		'**/test/**',
+		'**/*.js',
+	],
 
 	extends: [
 		/**
@@ -22,10 +27,10 @@ module.exports = {
 		'airbnb-typescript/base',
 
 		/**
-		 * Config to disable lint rules covered by Prettier
+		 * Config to disable ESLint rules covered by Prettier
 		 * https://github.com/prettier/eslint-config-prettier
 		 */
-		'prettier'
+		'prettier',
 	],
 
 	plugins: [
@@ -45,20 +50,21 @@ module.exports = {
 		 * Plugin to report formatting violations as lint violations
 		 * https://github.com/prettier/eslint-plugin-prettier
 		 */
-		 'prettier'
+		'prettier',
 	],
 
 	rules: {
-
 		// ******************************************************************
 		//             modern rules required by prettier plugin
 		// ******************************************************************
 
 		// https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
 
-    'prettier/prettier': 'off', // TODO: Restore to `'error'`
-    'arrow-body-style': 'off',
-    'prefer-arrow-callback': 'off',
+		// TODO: Restore to `'error'` after dealing with lintings in all packages.
+		'prettier/prettier': 'off',
+
+		'arrow-body-style': 'off',
+		'prefer-arrow-callback': 'off',
 
 		// ******************************************************************
 		//                    base modern rules (enabled)
@@ -69,8 +75,6 @@ module.exports = {
 		// since they are part of the config.
 
 		// https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base/rules
-
-
 
 		// ******************************************************************
 		//                 additional modern rules (enabled)
@@ -85,7 +89,7 @@ module.exports = {
 		/**
 		 * https://eslint.org/docs/rules/id-denylist
 		 */
-		 'id-denylist': [
+		'id-denylist': [
 			'error',
 			'e',
 			'err',
@@ -109,9 +113,7 @@ module.exports = {
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/array-type.md
 		 */
-		 '@typescript-eslint/array-type': [
-			'error', { default: 'array-simple' },
-		],
+		'@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
 
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/await-thenable.md
@@ -122,7 +124,8 @@ module.exports = {
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/ban-types.md
 		 */
 		'@typescript-eslint/ban-types': [
-			'error', {
+			'error',
+			{
 				types: {
 					Object: {
 						message: 'Use object instead',
@@ -165,15 +168,14 @@ module.exports = {
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/explicit-member-accessibility.md
 		 */
-		'@typescript-eslint/explicit-member-accessibility': [
-			'error', { accessibility: 'no-public' },
-		],
+		'@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'no-public' }],
 
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/member-delimiter-style.md
 		 */
 		'@typescript-eslint/member-delimiter-style': [
-			'error', {
+			'error',
+			{
 				multiline: {
 					delimiter: 'semi',
 					requireLast: true,
@@ -189,7 +191,8 @@ module.exports = {
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
 		 */
 		'@typescript-eslint/naming-convention': [
-			'error', {
+			'error',
+			{
 				selector: 'default',
 				format: ['camelCase'],
 			},
@@ -199,10 +202,22 @@ module.exports = {
 				leadingUnderscore: 'allowSingleOrDouble',
 				trailingUnderscore: 'allowSingleOrDouble',
 			},
+			/**
+			 * ASKBEN: Remove `I` prefix for interfaces?
+			 * - Reasons: TS team advises against I prefix
+			 * 	https://github.com/microsoft/TypeScript-Handbook/issues/121
+			 * - Type aliases are preferable over interfaces:
+			 * 	https://fettblog.eu/tidy-typescript-prefer-type-aliases/
+			 * - General recommendations to remove this
+			 * https://passionfordev.com/you-dont-need-to-prefix-interfaces-in-typescript-with-i/
+			 * https://til.hashrocket.com/posts/cfnlyzxcrc-do-not-prefix-typescript-interface-names
+			 *
+			 * BUT: Still prevalent in codebase.
+			 */
 			{
 				selector: 'interface',
 				format: ['PascalCase'],
-				prefix: ['I'], // TODO: Do away with this?
+				prefix: ['I'],
 			},
 			{
 				selector: 'property',
@@ -249,9 +264,7 @@ module.exports = {
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-misused-promises.md
 		 */
-		'@typescript-eslint/no-misused-promises': [
-			'error', { checksVoidReturn: false },
-		],
+		'@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
 
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-namespace.md
@@ -279,25 +292,25 @@ module.exports = {
 		'@typescript-eslint/no-unused-expressions': 'error',
 
 		/**
-		 * TODO: Agreement on underscore as unused var marker?
-		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-vars.md
 		 */
-		'@typescript-eslint/no-unused-vars': ['error', {argsIgnorePattern: "_"}],
+		'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '_' }],
 
 		/**
-		 * TODO: Given the codebase style, this rule triggers multiple warnings
-		 * that clutter up the lint report. Disable permanently?
-		 * Disabled for now until we decide.
+		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time. Disable permanently?
+		 *
+		 * Temporarily disabled until we decide.
 		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-nullish-coalescing.md
 		 */
 		'@typescript-eslint/prefer-nullish-coalescing': 'off',
 
 		/**
-		 * TODO: Given the codebase style, this rule triggers multiple warnings
-		 * that clutter up the lint report. Disable permanently?
-		 * Disabled for now until we decide.
+		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time. Disable permanently?
+		 *
+		 * Temporarily disabled until we decide.
 		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-optional-chain.md
 		 */
@@ -320,14 +333,12 @@ module.exports = {
 		/**
 		 * https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/no-default-export.md
 		 */
-		 'import/no-default-export': 'error',
+		'import/no-default-export': 'error',
 
-		 /**
-			* https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/order.md
-			*/
-		 'import/order': 'error',
-
-
+		/**
+		 * https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/order.md
+		 */
+		'import/order': 'error',
 
 		// ******************************************************************
 		//                 modern rule overrides (enabled)
@@ -342,13 +353,15 @@ module.exports = {
 		/**
 		 * https://eslint.org/docs/rules/no-unused-vars
 		 */
- 		'no-unused-vars': 'off',
+		'no-unused-vars': 'off',
 
 		/**
-		 * TODO: Given the codebase style, this rule triggers multiple warnings
-		 * that clutter up the lint report. Disable permanently?
-		 * Disabled for now until we decide.
-		 * Risky regex change!
+		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time. Disable permanently?
+		 *
+		 * Temporarily disabled until we decide.
+		 *
+		 * RISKY REGEX CHANGE
 		 *
 		 * https://eslint.org/docs/rules/no-useless-escape
 		 */
@@ -357,65 +370,73 @@ module.exports = {
 		/**
 		 * https://eslint.org/docs/rules/prefer-spread
 		 *
-		 * We changed the default 'err' to 'warn', but for now disabled temporarily.
+		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time. Disable permanently?
 		 *
-		 * TODO: Given the codebase style, this rule triggers multiple warnings
-		 * that clutter up the lint report. Disable permanently?
-		 * Disabled for now until we decide.
+		 * Temporarily disabled until we decide.
 		 */
-		'prefer-spread': 'off',
+		'prefer-spread': 'off', // originally 'warn', not 'err'
 
 		/**
-		 * ESLint equivalent of `trailing-comma` from TSLint.
-		 * https://eslint.org/docs/rules/comma-dangle
+		 * ASKBEN: The following five overrides need to be included here because the
+		 * Airbnb base specifies an option while we do not, but lint types are the same.
+		 *
+		 * Do we adopt the options from the Airbnb base and remove these overrides?
 		 */
-		 'comma-dangle': [
-			'error',
-			{
-				objects: 'always-multiline',
-				arrays: 'always-multiline',
-				functions: 'always-multiline',
-				imports: 'always-multiline',
-				exports: 'always-multiline',
-			},
-		],
-
-		// TODO: The following overrides are only included because
-		// the Airbnb base specifies an option while we do not.
-		// Lint types are the same. Do we adopt the options
-		// from the Airbnb base and remove these overrides?
 
 		/**
 		 * ESLint equivalent of `switch-default` from TSLint.
 		 * https://eslint.org/docs/rules/default-case
+		 *
+		 * Airbnb: 'default-case': ['error', { commentPattern: '^no default$' }],
+		 *
+		 * We do not specify a comment pattern.
 		 */
 		'default-case': 'error',
 
 		/**
 		 * ESLint equivalent of `triple-equals` from TSLint.
 		 * https://eslint.org/docs/rules/eqeqeq
+		 *
+		 * Airbnb: eqeqeq: ['error', 'always', { null: 'ignore' }]
+		 *
+		 * We are not using the additional option
 		 */
-		'eqeqeq': 'error',
+		eqeqeq: 'error',
 
 		/**
 		 * ESLint equivalent of `no-conditional-assignment` from TSLint.
 		 * https://eslint.org/docs/rules/no-cond-assign
+		 *
+		 * Airbnb: 'no-cond-assign': ['error', 'always']
+		 *
+		 * We are using the default `except-parens` instead of always
 		 */
 		'no-cond-assign': 'error',
 
 		/**
 		 * ESLint equivalent of our setting in `object-literal-shorthand` from TSLint.
 		 * https://eslint.org/docs/rules/object-shorthand
+		 *
+		 * Airbnb: 'object-shorthand': ['error', 'always', {
+      	ignoreConstructors: false,
+      	avoidQuotes: true,
+    	}],
+		 * We are not using the additional options
 		 */
 		'object-shorthand': 'error',
 
 		/**
 		 * ESLint equivalent of `prefer-const` from TSLint.
 		 * https://eslint.org/docs/rules/prefer-const
+		 *
+		 * Airbnb: 'prefer-const': ['error', {
+      	destructuring: 'any',
+      	ignoreReadBeforeAssign: true,
+    	}],
+     * We are not using the additional options
 		 */
 		'prefer-const': 'error',
-
-
 
 		// ******************************************************************
 		//                   base modern rules (disabled)
@@ -432,22 +453,22 @@ module.exports = {
 		/**
 		 * https://eslint.org/docs/rules/func-names
 		 */
- 		'func-names': 'off',
+		'func-names': 'off',
 
 		/**
 		 * https://eslint.org/docs/rules/no-labels
 		 */
- 		'no-labels': 'off',
+		'no-labels': 'off',
 
 		/**
 		 * https://eslint.org/docs/rules/new-cap
 		 */
- 		'new-cap': 'off',
+		'new-cap': 'off',
 
 		/**
 		 * https://eslint.org/docs/rules/no-invalid-this
 		 */
-		 'no-invalid-this': 'off',
+		'no-invalid-this': 'off',
 
 		/**
 		 * https://eslint.org/docs/rules/class-methods-use-this
@@ -532,7 +553,7 @@ module.exports = {
 		 * Partial ESLint equivalent of `no-string-throw` from TSLint.
 		 * https://eslint.org/docs/rules/no-throw-literal
 		 */
- 		'no-throw-literal': 'off',
+		'no-throw-literal': 'off',
 
 		// ----------------------------------
 		//        @typescript-eslint
@@ -561,7 +582,7 @@ module.exports = {
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
 		 */
-	 '@typescript-eslint/naming-convention': 'off',
+		'@typescript-eslint/naming-convention': 'off',
 
 		// ----------------------------------
 		//             import
@@ -581,12 +602,8 @@ module.exports = {
 		 * https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/prefer-default-export.md
 		 */
 		'import/prefer-default-export': 'off',
-
 	},
 };
-
-
-
 
 // ******************************************************************
 //                           removed rules
@@ -608,6 +625,20 @@ module.exports = {
 // @typescript-eslint/semi
 // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/semi.md
 
+/**
+ * ESLint equivalent of `trailing-comma` from TSLint.
+ * https://eslint.org/docs/rules/comma-dangle
+ */
+//  'comma-dangle': [
+// 	'error',
+// 	{
+// 		objects: 'always-multiline',
+// 		arrays: 'always-multiline',
+// 		functions: 'always-multiline',
+// 		imports: 'always-multiline',
+// 		exports: 'always-multiline',
+// 	},
+// ],
 
 // ---------------------------------------------------
 //       rules removed for miscellaneous reasons
@@ -629,7 +660,6 @@ module.exports = {
 
 // @typescript-eslint/no-require-imports
 // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-require-imports.md
-
 
 // ---------------------------------------------------
 //             rules covered by Airbnb base
@@ -690,7 +720,6 @@ module.exports = {
 // no-unused-expressions
 // Covered by @typescript-eslint/no-unused-expressions
 
-
 // ---------------------------------------------------
 //        rules overriden due to prettier plugin
 // ---------------------------------------------------
@@ -703,23 +732,20 @@ module.exports = {
 // arrow-body-style
 // https://eslint.org/docs/rules/arrow-body-style
 
+// ASKBEN: Currently, most ESLint dependencies are in /node_modules because
+// of /workflow. A few additional Vue/ESLint dependencies are added by /editor-ui.
+// Should we add these dependencies to all other package.json files?
+// /core + /cli + /nodes-base + /node-dev
 
+// ASKBEN: Do we want a lint command that checks all six packages?
+// Or one per package? Example: eslint packages/**/*.ts
 
+// ASKBEN: ESLint reads from the `include` key in every tsconfig.json to decide
+// which files to lint. This means we have to transpile what we lint.
+// Examples: The templates in /node-dev are not being transpiled, so they trigger
+// errors when linting. The TypeORM config in cli/migrations also triggers them.
+// Therefore, I had to add `templates/**/*` and `cli/migrations` in `include` in
+// their respective tsconfig.json files. Any better way?
 
-// TODO: Install from 1 or all packages?
-// The ESLint config file is global and the module is shared
-// but it should be added to the package.json of a single package? (/workflow)
-
-// TODO: Global lint command for all packages?
-// Entire project: eslint packages/**/*.ts
-
-// TODO: ESLint reads from the `include` key in every tsconfig.json
-// in order to determine what to lint. The templates in node-dev
-// are not being transpiled, so they triggered an error when linting.
-// Therefore had to add "templates/**/*" in `include` in that tsconfig.
-// Downside is transpiling files that do not need transpilation.
-// Same for cli/migrations
-
-// TODO: Adding lint exceptions most non-autofixed lintings,
-// to avoid breaking functionality, except for id-denylist, deleting
-// unused imports other similar simple minor rules.
+// ASKBEN: I added lint exceptions for most non-autofixable lintings, in order
+// to avoid breaking functionality. Is this what we want or should I fix as well?
