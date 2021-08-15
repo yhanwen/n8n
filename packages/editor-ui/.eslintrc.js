@@ -76,6 +76,7 @@ module.exports = {
 		'array-callback-return': 'off',
 		'no-nested-ternary': 'off',
 		'no-restricted-globals': 'off',
+		'vue/max-attributes-per-line': 'off',
 
 		// ASKBEN: This conflicts with our global ESLint config. Remove?
 		// 'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
