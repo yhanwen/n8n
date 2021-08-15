@@ -2,7 +2,7 @@ root = true
 
 [*]
 charset = utf-8
-indent_style = tab
+indent_style = tab # indent_size = 2 is in global but missing here ASKBEN
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
@@ -12,4 +12,4 @@ indent_style = space
 indent_size = 2
 
 [*.ts]
-quote_type = single
+# quote_type = single # delegate to Prettier ASKBEN
