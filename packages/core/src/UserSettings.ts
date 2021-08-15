@@ -1,5 +1,3 @@
-
-
 import * as fs from 'fs';
 import * as path from 'path';
 import { randomBytes } from 'crypto';
@@ -19,10 +17,7 @@ const fsReadFile = promisify(fs.readFile);
 const fsMkdir = promisify(fs.mkdir);
 const fsWriteFile = promisify(fs.writeFile);
 
-
-
 let settingsCache: IUserSettings | undefined;
-
 
 /**
  * Creates the user settings if they do not exist yet
@@ -56,7 +51,6 @@ export async function prepareUserSettings(): Promise<IUserSettings> {
 	return writeUserSettings(userSettings, settingsPath);
 }
 
-
 /**
  * Returns the encryption key which is used to encrypt
  * the credentials.
@@ -82,7 +76,6 @@ export async function getEncryptionKey() {
 	return userSettings.encryptionKey;
 }
 
-
 /**
  * Adds/Overwrite the given settings in the currently
  * saved user settings
@@ -92,7 +85,10 @@ export async function getEncryptionKey() {
  * @param {string} [settingsPath] Optional settings file path
  * @returns {Promise<IUserSettings>}
  */
-export async function addToUserSettings(addSettings: IUserSettings, settingsPath?: string): Promise<IUserSettings> {
+export async function addToUserSettings(
+	addSettings: IUserSettings,
+	settingsPath?: string,
+): Promise<IUserSettings> {
 	if (settingsPath === undefined) {
 		settingsPath = getUserSettingsPath();
 	}
@@ -109,7 +105,6 @@ export async function addToUserSettings(addSettings: IUserSettings, settingsPath
 	return writeUserSettings(userSettings, settingsPath);
 }
 
-
 /**
  * Writes a user settings file
  *
@@ -118,7 +113,10 @@ export async function addToUserSettings(addSettings: IUserSettings, settingsPath
  * @param {string} [settingsPath] Optional settings file path
  * @returns {Promise<IUserSettings>}
  */
-export async function writeUserSettings(userSettings: IUserSettings, settingsPath?: string): Promise<IUserSettings> {
+export async function writeUserSettings(
+	userSettings: IUserSettings,
+	settingsPath?: string,
+): Promise<IUserSettings> {
 	if (settingsPath === undefined) {
 		settingsPath = getUserSettingsPath();
 	}
@@ -141,14 +139,16 @@ export async function writeUserSettings(userSettings: IUserSettings, settingsPat
 	return userSettings;
 }
 
-
 /**
  * Returns the content of the user settings
  *
  * @export
  * @returns {UserSettings}
  */
-export async function getUserSettings(settingsPath?: string, ignoreCache?: boolean): Promise<IUserSettings | undefined> {
+export async function getUserSettings(
+	settingsPath?: string,
+	ignoreCache?: boolean,
+): Promise<IUserSettings | undefined> {
 	if (settingsCache !== undefined && ignoreCache !== true) {
 		return settingsCache;
 	}
@@ -169,12 +169,13 @@ export async function getUserSettings(settingsPath?: string, ignoreCache?: boole
 	try {
 		settingsCache = JSON.parse(settingsFile);
 	} catch (error) {
-		throw new Error(`Error parsing n8n-config file "${settingsPath}". It does not seem to be valid JSON.`);
+		throw new Error(
+			`Error parsing n8n-config file "${settingsPath}". It does not seem to be valid JSON.`,
+		);
 	}
 
 	return settingsCache as IUserSettings;
 }
-
 
 /**
  * Returns the path to the user settings
@@ -187,8 +188,6 @@ export function getUserSettingsPath(): string {
 
 	return path.join(n8nFolder, USER_SETTINGS_FILE_NAME);
 }
-
-
 
 /**
  * Retruns the path to the n8n folder in which all n8n
@@ -208,7 +207,6 @@ export function getUserN8nFolderPath(): string {
 	return path.join(userFolder, USER_SETTINGS_SUBFOLDER);
 }
 
-
 /**
  * Returns the path to the n8n user folder with the custom
  * extensions like nodes and credentials
@@ -219,7 +217,6 @@ export function getUserN8nFolderPath(): string {
 export function getUserN8nFolderCustomExtensionPath(): string {
 	return path.join(getUserN8nFolderPath(), EXTENSIONS_SUBDIRECTORY);
 }
-
 
 /**
  * Returns the home folder path of the user if

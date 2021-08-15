@@ -6,7 +6,7 @@ export interface IDeferredPromise<T> {
 }
 
 export async function createDeferredPromise<T>(): Promise<IDeferredPromise<T>> {
-	return new Promise<IDeferredPromise<T>>(resolveCreate => {
+	return new Promise<IDeferredPromise<T>>((resolveCreate) => {
 		const promise = new Promise<T>((resolve, reject) => {
 			resolveCreate({ promise: async () => promise, resolve, reject });
 		});
