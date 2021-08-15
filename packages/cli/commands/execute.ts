@@ -1,13 +1,7 @@
 import { promises as fs } from 'fs';
 import { Command, flags } from '@oclif/command';
-import {
-	UserSettings,
-} from 'n8n-core';
-import {
-	INode,
-
-	LoggerProxy,
-} from 'n8n-workflow';
+import { UserSettings } from 'n8n-core';
+import { INode, LoggerProxy } from 'n8n-workflow';
 
 import {
 	ActiveExecutions,
@@ -24,19 +18,12 @@ import {
 	WorkflowRunner,
 } from '../src';
 
-import {
-	getLogger,
-} from '../src/Logger';
-
-
+import { getLogger } from '../src/Logger';
 
 export class Execute extends Command {
 	static description = '\nExecutes a given workflow';
 
-	static examples = [
-		`$ n8n execute --id=5`,
-		`$ n8n execute --file=workflow.json`,
-	];
+	static examples = [`$ n8n execute --id=5`, `$ n8n execute --file=workflow.json`];
 
 	static flags = {
 		help: flags.help({ char: 'h' }),
@@ -50,7 +37,6 @@ export class Execute extends Command {
 			description: 'Outputs only JSON data, with no other text',
 		}),
 	};
-
 
 	async run() {
 		const logger = getLogger();
@@ -92,7 +78,11 @@ export class Execute extends Command {
 
 			// Do a basic check if the data in the file looks right
 			// TODO: Later check with the help of TypeScript data if it is valid or not
-			if (workflowData === undefined || workflowData.nodes === undefined || workflowData.connections === undefined) {
+			if (
+				workflowData === undefined ||
+				workflowData.nodes === undefined ||
+				workflowData.connections === undefined
+			) {
 				console.info(`The file "${flags.file}" does not contain valid workflow data.`);
 				return;
 			}

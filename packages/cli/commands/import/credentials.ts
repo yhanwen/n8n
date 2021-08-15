@@ -1,28 +1,14 @@
-import {
-	Command,
-	flags,
-} from '@oclif/command';
+import { Command, flags } from '@oclif/command';
 
-import {
-	Credentials,
-	UserSettings,
-} from 'n8n-core';
+import { Credentials, UserSettings } from 'n8n-core';
 
-
-
-import {
-	LoggerProxy,
-} from 'n8n-workflow';
+import { LoggerProxy } from 'n8n-workflow';
 
 import * as fs from 'fs';
 import * as glob from 'glob-promise';
 import * as path from 'path';
-import { 
-	getLogger,
-} from '../../src/Logger';
-import {
-	Db,
-} from '../../src';
+import { getLogger } from '../../src/Logger';
+import { Db } from '../../src';
 
 export class ImportCredentialsCommand extends Command {
 	static description = 'Import credentials';
@@ -76,7 +62,9 @@ export class ImportCredentialsCommand extends Command {
 			}
 
 			if (flags.separate) {
-				const files = await glob(`${flags.input.endsWith(path.sep) ? flags.input : flags.input + path.sep  }*.json`);
+				const files = await glob(
+					`${flags.input.endsWith(path.sep) ? flags.input : flags.input + path.sep}*.json`,
+				);
 				for (i = 0; i < files.length; i++) {
 					const credential = JSON.parse(fs.readFileSync(files[i], { encoding: 'utf8' }));
 
@@ -97,7 +85,11 @@ export class ImportCredentialsCommand extends Command {
 				for (i = 0; i < fileContents.length; i++) {
 					if (typeof fileContents[i].data === 'object') {
 						// plain data / decrypted input. Should be encrypted first.
-						Credentials.prototype.setData.call(fileContents[i], fileContents[i].data, encryptionKey);
+						Credentials.prototype.setData.call(
+							fileContents[i],
+							fileContents[i].data,
+							encryptionKey,
+						);
 					}
 					await Db.collections.Credentials!.save(fileContents[i]);
 				}

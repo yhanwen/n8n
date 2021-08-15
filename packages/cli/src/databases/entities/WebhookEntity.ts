@@ -1,18 +1,10 @@
-import {
-	Column,
-	Entity,
-	Index,
-	PrimaryColumn,
-} from 'typeorm';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
-import {
-	IWebhookDb,
- } from '../../Interfaces';
+import { IWebhookDb } from '../../Interfaces';
 
 @Entity()
 @Index(['webhookId', 'method', 'pathLength'])
 export class WebhookEntity implements IWebhookDb {
-
 	@Column()
 	workflowId: number;
 

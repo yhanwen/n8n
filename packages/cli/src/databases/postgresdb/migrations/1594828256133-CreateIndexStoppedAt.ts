@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 import * as config from '../../../../config';
 
@@ -10,10 +10,12 @@ export class CreateIndexStoppedAt1594828256133 implements MigrationInterface {
 		const tablePrefixPure = tablePrefix;
 		const schema = config.get('database.postgresdb.schema');
 		if (schema) {
-			tablePrefix = `${schema  }.${  tablePrefix}`;
+			tablePrefix = `${schema}.${tablePrefix}`;
 		}
 
-		await queryRunner.query(`CREATE INDEX IF NOT EXISTS IDX_${tablePrefixPure}33228da131bb1112247cf52a42 ON ${tablePrefix}execution_entity ("stoppedAt") `);
+		await queryRunner.query(
+			`CREATE INDEX IF NOT EXISTS IDX_${tablePrefixPure}33228da131bb1112247cf52a42 ON ${tablePrefix}execution_entity ("stoppedAt") `,
+		);
 	}
 
 	async down(queryRunner: QueryRunner): Promise<void> {
@@ -21,5 +23,4 @@ export class CreateIndexStoppedAt1594828256133 implements MigrationInterface {
 
 		await queryRunner.query(`DROP INDEX IDX_${tablePrefix}33228da131bb1112247cf52a42`);
 	}
-
 }

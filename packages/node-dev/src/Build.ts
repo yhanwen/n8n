@@ -1,26 +1,19 @@
 import { ChildProcess, spawn } from 'child_process';
 
-import {
-	readFile as fsReadFile,
-} from 'fs/promises';
-import {
-	write as fsWrite,
-} from 'fs';
+import { readFile as fsReadFile } from 'fs/promises';
+import { write as fsWrite } from 'fs';
 
 import { join } from 'path';
 import { file } from 'tmp-promise';
 import { promisify } from 'util';
 
-import {
-	UserSettings,
-} from 'n8n-core';
+import { UserSettings } from 'n8n-core';
 import { IBuildOptions } from '.';
 
 const copyfiles = require('copyfiles');
 
 // const fsReadFileAsync = promisify(fsReadFile); // unused
 const fsWriteAsync = promisify(fsWrite);
-
 
 /**
  * Create a custom tsconfig file as tsc currently has no way to define a base
@@ -30,13 +23,12 @@ const fsWriteAsync = promisify(fsWrite);
  * @export
  * @returns
  */
-export async function createCustomTsconfig () {
-
+export async function createCustomTsconfig() {
 	// Get path to simple tsconfig file which should be used for build
 	const tsconfigPath = join(__dirname, '../../src/tsconfig-build.json');
 
 	// Read the tsconfi file
-	const tsConfigString = await fsReadFile(tsconfigPath, { encoding: 'utf8'}) ;
+	const tsConfigString = await fsReadFile(tsconfigPath, { encoding: 'utf8' });
 	const tsConfig = JSON.parse(tsConfigString);
 
 	// Set absolute include paths
@@ -56,7 +48,6 @@ export async function createCustomTsconfig () {
 	};
 }
 
-
 /**
  * Builds and copies credentials and nodes
  *
@@ -64,7 +55,7 @@ export async function createCustomTsconfig () {
  * @param {IBuildOptions} [options] Options to overwrite default behaviour
  * @returns {Promise<string>}
  */
-export async function buildFiles (options?: IBuildOptions): Promise<string> {
+export async function buildFiles(options?: IBuildOptions): Promise<string> {
 	options = options || {};
 
 	let typescriptPath;
@@ -79,18 +70,24 @@ export async function buildFiles (options?: IBuildOptions): Promise<string> {
 
 	const tsconfigData = await createCustomTsconfig();
 
-	const outputDirectory = options.destinationFolder || UserSettings.getUserN8nFolderCustomExtensionPath();
+	const outputDirectory =
+		options.destinationFolder || UserSettings.getUserN8nFolderCustomExtensionPath();
 
 	// Supply a node base path so that it finds n8n-core and n8n-workflow
 	const nodeModulesPath = join(__dirname, '../../node_modules/');
-	let buildCommand = `${tscPath} --p ${tsconfigData.path} --outDir ${outputDirectory} --rootDir ${process.cwd()} --baseUrl ${nodeModulesPath}`;
+	let buildCommand = `${tscPath} --p ${
+		tsconfigData.path
+	} --outDir ${outputDirectory} --rootDir ${process.cwd()} --baseUrl ${nodeModulesPath}`;
 	if (options.watch === true) {
 		buildCommand += ' --watch';
 	}
 
 	let buildProcess: ChildProcess;
 	try {
-		buildProcess = spawn('node', buildCommand.split(' '), { windowsVerbatimArguments: true, cwd: process.cwd() });
+		buildProcess = spawn('node', buildCommand.split(' '), {
+			windowsVerbatimArguments: true,
+			cwd: process.cwd(),
+		});
 
 		// Forward the output of the child process to the main one
 		// that the user can see what is happening
@@ -118,13 +115,12 @@ export async function buildFiles (options?: IBuildOptions): Promise<string> {
 	}
 
 	return new Promise((resolve, _) => {
-		['*.png', '*.node.json'].forEach(filenamePattern => {
-			copyfiles(
-				[join(process.cwd(), `./${filenamePattern}`), outputDirectory],
-				{ up: true },
-				() => resolve(outputDirectory));
+		['*.png', '*.node.json'].forEach((filenamePattern) => {
+			copyfiles([join(process.cwd(), `./${filenamePattern}`), outputDirectory], { up: true }, () =>
+				resolve(outputDirectory),
+			);
 		});
-		buildProcess.on('exit', _ => {
+		buildProcess.on('exit', (_) => {
 			// Remove the tmp tsconfig file
 			tsconfigData.cleanup();
 		});

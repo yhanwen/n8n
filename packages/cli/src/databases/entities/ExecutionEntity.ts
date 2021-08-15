@@ -1,27 +1,12 @@
-import {
-	WorkflowExecuteMode,
-} from 'n8n-workflow';
+import { WorkflowExecuteMode } from 'n8n-workflow';
 
-import {
-	Column,
-	ColumnOptions,
-	Entity,
-	Index,
-	PrimaryGeneratedColumn,
-} from 'typeorm';
-import {
-	IExecutionFlattedDb,
-	IWorkflowDb,
-} from "../..";
+import { Column, ColumnOptions, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { IExecutionFlattedDb, IWorkflowDb } from '../..';
 
-import {
-	resolveDataType,
-} from '../utils';
-
+import { resolveDataType } from '../utils';
 
 @Entity()
 export class ExecutionEntity implements IExecutionFlattedDb {
-
 	@PrimaryGeneratedColumn()
 	id: number;
 

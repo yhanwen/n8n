@@ -1,7 +1,5 @@
-import {
-	DatabaseType,
-} from '../index';
-import { getConfigValueSync } from "../GenericHelpers";
+import { DatabaseType } from '../index';
+import { getConfigValueSync } from '../GenericHelpers';
 
 /**
  * Resolves the data type for the used database type
@@ -32,11 +30,10 @@ export function getTimestampSyntax() {
 
 	const map: { [key in DatabaseType]: string } = {
 		sqlite: "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')",
-		postgresdb: "CURRENT_TIMESTAMP(3)",
-		mysqldb: "CURRENT_TIMESTAMP(3)",
-		mariadb: "CURRENT_TIMESTAMP(3)",
+		postgresdb: 'CURRENT_TIMESTAMP(3)',
+		mysqldb: 'CURRENT_TIMESTAMP(3)',
+		mariadb: 'CURRENT_TIMESTAMP(3)',
 	};
 
 	return map[dbType];
 }
-

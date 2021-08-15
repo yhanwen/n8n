@@ -5,7 +5,7 @@ import { readFileSync as fsReadFileSync } from 'fs';
 import { IDataObject } from 'n8n-workflow';
 import * as config from '../config';
 
-import { IPackageVersions } from ".";
+import { IPackageVersions } from '.';
 
 let versionCache: IPackageVersions | undefined;
 
@@ -16,17 +16,16 @@ let versionCache: IPackageVersions | undefined;
  * @returns {string}
  */
 export function getBaseUrl(): string {
-	const protocol = config.get('protocol') ;
-	const host = config.get('host') ;
-	const port = config.get('port') ;
-	const path = config.get('path') ;
+	const protocol = config.get('protocol');
+	const host = config.get('host');
+	const port = config.get('port');
+	const path = config.get('path');
 
-	if (protocol === 'http' && port === 80 || protocol === 'https' && port === 443) {
+	if ((protocol === 'http' && port === 80) || (protocol === 'https' && port === 443)) {
 		return `${protocol}://${host}${path}`;
 	}
 	return `${protocol}://${host}:${port}${path}`;
 }
-
 
 /**
  * Returns the session id if one is set
@@ -39,7 +38,6 @@ export function getSessionId(req: express.Request): string | undefined {
 	return req.headers.sessionid as string | undefined;
 }
 
-
 /**
  * Returns information which version of the packages are installed
  *
@@ -51,7 +49,7 @@ export async function getVersions(): Promise<IPackageVersions> {
 		return versionCache;
 	}
 
-	const packageFile = await fsReadFile(pathJoin(__dirname, '../../package.json'), 'utf8') ;
+	const packageFile = await fsReadFile(pathJoin(__dirname, '../../package.json'), 'utf8');
 	const packageData = JSON.parse(packageFile);
 
 	versionCache = {
@@ -90,7 +88,9 @@ function extractSchemaForKey(configKey: string, configSchema: IDataObject): IDat
  * @param {string} configKey The key of the config data to get
  * @returns {(Promise<string | boolean | number | undefined>)}
  */
-export async function getConfigValue(configKey: string): Promise<string | boolean | number | undefined> {
+export async function getConfigValue(
+	configKey: string,
+): Promise<string | boolean | number | undefined> {
 	// Get the environment variable
 	const configSchema = config.getSchema();
 	// @ts-ignore
@@ -102,7 +102,7 @@ export async function getConfigValue(configKey: string): Promise<string | boolea
 	}
 
 	// Check if special file enviroment variable exists
-	const fileEnvironmentVariable = process.env[`${currentSchema.env  }_FILE`];
+	const fileEnvironmentVariable = process.env[`${currentSchema.env}_FILE`];
 	if (fileEnvironmentVariable === undefined) {
 		// Does not exist, so return value from config
 		return config.get(configKey);
@@ -110,7 +110,7 @@ export async function getConfigValue(configKey: string): Promise<string | boolea
 
 	let data;
 	try {
-		data = await fsReadFile(fileEnvironmentVariable, 'utf8') ;
+		data = await fsReadFile(fileEnvironmentVariable, 'utf8');
 	} catch (error) {
 		if (error.code === 'ENOENT') {
 			throw new Error(`The file "${fileEnvironmentVariable}" could not be found.`);
@@ -141,7 +141,7 @@ export function getConfigValueSync(configKey: string): string | boolean | number
 	}
 
 	// Check if special file enviroment variable exists
-	const fileEnvironmentVariable = process.env[`${currentSchema.env  }_FILE`];
+	const fileEnvironmentVariable = process.env[`${currentSchema.env}_FILE`];
 	if (fileEnvironmentVariable === undefined) {
 		// Does not exist, so return value from config
 		return config.get(configKey);
@@ -149,7 +149,7 @@ export function getConfigValueSync(configKey: string): string | boolean | number
 
 	let data;
 	try {
-		data = fsReadFileSync(fileEnvironmentVariable, 'utf8') ;
+		data = fsReadFileSync(fileEnvironmentVariable, 'utf8');
 	} catch (error) {
 		if (error.code === 'ENOENT') {
 			throw new Error(`The file "${fileEnvironmentVariable}" could not be found.`);

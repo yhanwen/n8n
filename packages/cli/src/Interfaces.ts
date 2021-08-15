@@ -15,9 +15,7 @@ import {
 	WorkflowExecuteMode,
 } from 'n8n-workflow';
 
-import {
-	IDeferredPromise, WorkflowExecute,
-} from 'n8n-core';
+import { IDeferredPromise, WorkflowExecute } from 'n8n-core';
 
 import * as PCancelable from 'p-cancelable';
 import { Repository } from 'typeorm';
@@ -210,7 +208,6 @@ export interface IExecutionsSummary {
 	workflowName?: string;
 }
 
-
 export interface IExecutionsCurrentSummary {
 	id: string;
 	retryOf?: string;
@@ -218,7 +215,6 @@ export interface IExecutionsCurrentSummary {
 	mode: WorkflowExecuteMode;
 	workflowId: string;
 }
-
 
 export interface IExecutionDeleteFilter {
 	deleteBefore?: Date;
@@ -236,15 +232,25 @@ export interface IExecutingWorkflowData {
 
 export interface IExternalHooks {
 	credentials?: {
-		create?: Array<{ (this: IExternalHooksFunctions, credentialsData: ICredentialsEncrypted): Promise<void> }>;
+		create?: Array<{
+			(this: IExternalHooksFunctions, credentialsData: ICredentialsEncrypted): Promise<void>;
+		}>;
 		delete?: Array<{ (this: IExternalHooksFunctions, credentialId: string): Promise<void> }>;
-		update?: Array<{ (this: IExternalHooksFunctions, credentialsData: ICredentialsDb): Promise<void> }>;
+		update?: Array<{
+			(this: IExternalHooksFunctions, credentialsData: ICredentialsDb): Promise<void>;
+		}>;
 	};
 	workflow?: {
 		activate?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb): Promise<void> }>;
 		create?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowBase): Promise<void> }>;
 		delete?: Array<{ (this: IExternalHooksFunctions, workflowId: string): Promise<void> }>;
-		execute?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb, mode: WorkflowExecuteMode): Promise<void> }>;
+		execute?: Array<{
+			(
+				this: IExternalHooksFunctions,
+				workflowData: IWorkflowDb,
+				mode: WorkflowExecuteMode,
+			): Promise<void>;
+		}>;
 		update?: Array<{ (this: IExternalHooksFunctions, workflowData: IWorkflowDb): Promise<void> }>;
 	};
 }
@@ -407,12 +413,10 @@ export interface IPushDataNodeExecuteAfter {
 	nodeName: string;
 }
 
-
 export interface IPushDataNodeExecuteBefore {
 	executionId: string;
 	nodeName: string;
 }
-
 
 export interface IPushDataTestWebhook {
 	executionId: string;
@@ -430,14 +434,12 @@ export interface IResponseCallbackData {
 	responseCode?: number;
 }
 
-
 export interface ITransferNodeTypes {
 	[key: string]: {
 		className: string;
 		sourcePath: string;
 	};
 }
-
 
 export interface IWorkflowErrorData {
 	[key: string]: IDataObject | string | number | ExecutionError;
@@ -469,7 +471,6 @@ export interface IWorkflowExecutionDataProcess {
 	startNodes?: string[];
 	workflowData: IWorkflowBase;
 }
-
 
 export interface IWorkflowExecutionDataProcessWithExecution extends IWorkflowExecutionDataProcess {
 	credentialsOverwrite: ICredentialsOverwrite;

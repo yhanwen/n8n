@@ -1,12 +1,8 @@
-import {
-	UserSettings,
-} from 'n8n-core';
+import { UserSettings } from 'n8n-core';
 import { Command, flags } from '@oclif/command';
 import * as Redis from 'ioredis';
 
-import { IDataObject ,
-	LoggerProxy,
-} from 'n8n-workflow';
+import { IDataObject, LoggerProxy } from 'n8n-workflow';
 import * as config from '../config';
 import {
 	ActiveExecutions,
@@ -21,22 +17,15 @@ import {
 	WebhookServer,
 } from '../src';
 
-import {
-	getLogger,
-} from '../src/Logger';
-
-
+import { getLogger } from '../src/Logger';
 
 let activeWorkflowRunner: ActiveWorkflowRunner.ActiveWorkflowRunner | undefined;
 let processExistCode = 0;
 
-
 export class Webhook extends Command {
 	static description = 'Starts n8n webhook process. Intercepts only production URLs.';
 
-	static examples = [
-		`$ n8n webhook`,
-	];
+	static examples = [`$ n8n webhook`];
 
 	static flags = {
 		help: flags.help({ char: 'h' }),
@@ -67,21 +56,21 @@ export class Webhook extends Command {
 			let count = 0;
 			while (executingWorkflows.length !== 0) {
 				if (count++ % 4 === 0) {
-					LoggerProxy.info(`Waiting for ${executingWorkflows.length} active executions to finish...`);
+					LoggerProxy.info(
+						`Waiting for ${executingWorkflows.length} active executions to finish...`,
+					);
 				}
 				await new Promise((resolve) => {
 					setTimeout(resolve, 500);
 				});
 				executingWorkflows = activeExecutionsInstance.getActiveExecutions();
 			}
-
 		} catch (error) {
 			LoggerProxy.error('There was an error shutting down n8n.', error);
 		}
 
 		process.exit(processExistCode);
 	}
-
 
 	async run() {
 		const logger = getLogger();
@@ -114,7 +103,7 @@ export class Webhook extends Command {
 
 			try {
 				// Start directly with the init of the database to improve startup time
-				const startDbInitPromise = Db.init().catch(error => {
+				const startDbInitPromise = Db.init().catch((error) => {
 					logger.error(`There was an error initializing DB: "${error.message}"`);
 
 					processExistCode = 1;
@@ -154,7 +143,8 @@ export class Webhook extends Command {
 					const redisPort = config.get('queue.bull.redis.port');
 					const redisDB = config.get('queue.bull.redis.db');
 					const redisConnectionTimeoutLimit = config.get('queue.bull.redis.timeoutThreshold');
-					let lastTimer = 0, cumulativeTimeout = 0;
+					let lastTimer = 0,
+						cumulativeTimeout = 0;
 
 					const settings = {
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -168,7 +158,9 @@ export class Webhook extends Command {
 								cumulativeTimeout += now - lastTimer;
 								lastTimer = now;
 								if (cumulativeTimeout > redisConnectionTimeoutLimit) {
-									logger.error(`Unable to connect to Redis after ${  redisConnectionTimeoutLimit  }. Exiting process.`);
+									logger.error(
+										`Unable to connect to Redis after ${redisConnectionTimeoutLimit}. Exiting process.`,
+									);
 									process.exit(1);
 								}
 							}
@@ -213,7 +205,6 @@ export class Webhook extends Command {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const editorUrl = GenericHelpers.getBaseUrl();
 				console.info('Webhook listener waiting for requests.');
-
 			} catch (error) {
 				console.error('Exiting due to error. See log message for details.');
 				logger.error(`Webhook process cannot continue. "${error.message}"`);

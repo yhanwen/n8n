@@ -1,13 +1,6 @@
-import {
-	Length,
-} from 'class-validator';
+import { Length } from 'class-validator';
 
-import {
-	IConnections,
-	IDataObject,
-	INode,
-	IWorkflowSettings,
-} from 'n8n-workflow';
+import { IConnections, IDataObject, INode, IWorkflowSettings } from 'n8n-workflow';
 
 import {
 	BeforeUpdate,
@@ -22,22 +15,14 @@ import {
 	UpdateDateColumn,
 } from 'typeorm';
 
-import {
-	IWorkflowDb,
-} from "../..";
+import { IWorkflowDb } from '../..';
 
-import {
-	getTimestampSyntax,
-	resolveDataType,
-} from '../utils';
+import { getTimestampSyntax, resolveDataType } from '../utils';
 
-import {
-	TagEntity,
-} from './TagEntity';
+import { TagEntity } from './TagEntity';
 
 @Entity()
 export class WorkflowEntity implements IWorkflowDb {
-
 	@PrimaryGeneratedColumn()
 	id: number;
 
@@ -58,7 +43,11 @@ export class WorkflowEntity implements IWorkflowDb {
 	@CreateDateColumn({ precision: 3, default: () => getTimestampSyntax() })
 	createdAt: Date;
 
-	@UpdateDateColumn({ precision: 3, default: () => getTimestampSyntax(), onUpdate: getTimestampSyntax() })
+	@UpdateDateColumn({
+		precision: 3,
+		default: () => getTimestampSyntax(),
+		onUpdate: getTimestampSyntax(),
+	})
 	updatedAt: Date;
 
 	@Column({
@@ -73,16 +62,16 @@ export class WorkflowEntity implements IWorkflowDb {
 	})
 	staticData?: IDataObject;
 
-	@ManyToMany(() => TagEntity, tag => tag.workflows)
+	@ManyToMany(() => TagEntity, (tag) => tag.workflows)
 	@JoinTable({
-		name: "workflows_tags", // table name for the junction table of this relation
+		name: 'workflows_tags', // table name for the junction table of this relation
 		joinColumn: {
-				name: "workflowId",
-				referencedColumnName: "id",
+			name: 'workflowId',
+			referencedColumnName: 'id',
 		},
 		inverseJoinColumn: {
-				name: "tagId",
-				referencedColumnName: "id",
+			name: 'tagId',
+			referencedColumnName: 'id',
 		},
 	})
 	tags: TagEntity[];

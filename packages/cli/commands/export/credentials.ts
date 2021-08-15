@@ -1,31 +1,14 @@
-import {
-	Command,
-	flags,
-} from '@oclif/command';
+import { Command, flags } from '@oclif/command';
 
-import {
-	Credentials,
-	UserSettings,
-} from 'n8n-core';
+import { Credentials, UserSettings } from 'n8n-core';
 
-import {
-	IDataObject,
-	LoggerProxy,
-} from 'n8n-workflow';
+import { IDataObject, LoggerProxy } from 'n8n-workflow';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {
-	Db,
-	ICredentialsDecryptedDb,
-} from '../../src';
+import { Db, ICredentialsDecryptedDb } from '../../src';
 
-import {
-	getLogger,
-} from '../../src/Logger';
-
-
-
+import { getLogger } from '../../src/Logger';
 
 export class ExportCredentialsCommand extends Command {
 	static description = 'Export credentials';
@@ -44,7 +27,8 @@ export class ExportCredentialsCommand extends Command {
 			description: 'Export all credentials',
 		}),
 		backup: flags.boolean({
-			description: 'Sets --all --pretty --separate for simple backups. Only --output has to be set additionally.',
+			description:
+				'Sets --all --pretty --separate for simple backups. Only --output has to be set additionally.',
 		}),
 		id: flags.string({
 			description: 'The ID of the credential to export',
@@ -57,10 +41,12 @@ export class ExportCredentialsCommand extends Command {
 			description: 'Format the output in an easier to read fashion',
 		}),
 		separate: flags.boolean({
-			description: 'Exports one file per credential (useful for versioning). Must inform a directory via --output.',
+			description:
+				'Exports one file per credential (useful for versioning). Must inform a directory via --output.',
 		}),
 		decrypted: flags.boolean({
-			description: 'Exports data decrypted / in plain text. ALL SENSITIVE INFORMATION WILL BE VISIBLE IN THE FILES. Use to migrate from a installation to another that have a different secret key (in the config file).',
+			description:
+				'Exports data decrypted / in plain text. ALL SENSITIVE INFORMATION WILL BE VISIBLE IN THE FILES. Use to migrate from a installation to another that have a different secret key (in the config file).',
 		}),
 	};
 
@@ -102,7 +88,9 @@ export class ExportCredentialsCommand extends Command {
 					fs.mkdirSync(flags.output, { recursive: true });
 				}
 			} catch (error) {
-				console.error('Aborting execution as a filesystem error has been encountered while creating the output directory. See log messages for details.');
+				console.error(
+					'Aborting execution as a filesystem error has been encountered while creating the output directory. See log messages for details.',
+				);
 				logger.error('\nFILESYSTEM ERROR');
 				logger.info('====================================');
 				logger.error(error.message);
@@ -150,7 +138,10 @@ export class ExportCredentialsCommand extends Command {
 				let fileContents: string, i: number;
 				for (i = 0; i < credentials.length; i++) {
 					fileContents = JSON.stringify(credentials[i], null, flags.pretty ? 2 : undefined);
-					const filename = `${(flags.output!.endsWith(path.sep) ? flags.output! : flags.output + path.sep) + credentials[i].id  }.json`;
+					const filename = `${
+						(flags.output!.endsWith(path.sep) ? flags.output! : flags.output + path.sep) +
+						credentials[i].id
+					}.json`;
 					fs.writeFileSync(filename, fileContents);
 				}
 				console.info(`Successfully exported ${i} credentials.`);

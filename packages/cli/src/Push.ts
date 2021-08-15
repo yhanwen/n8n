@@ -2,21 +2,14 @@
 import * as sseChannel from 'sse-channel';
 import * as express from 'express';
 
-import {
-	LoggerProxy as Logger,
-} from 'n8n-workflow';
-import {
-	IPushData,
-	IPushDataType,
-} from '.';
-
+import { LoggerProxy as Logger } from 'n8n-workflow';
+import { IPushData, IPushDataType } from '.';
 
 export class Push {
 	private channel: sseChannel;
 	private connections: {
 		[key: string]: express.Response;
 	} = {};
-
 
 	constructor() {
 		this.channel = new sseChannel({
@@ -33,7 +26,6 @@ export class Push {
 			}
 		});
 	}
-
 
 	/**
 	 * Adds a new push connection
@@ -57,7 +49,6 @@ export class Push {
 		this.channel.addClient(req, res);
 	}
 
-
 	/**
 	 * Sends data to the client which is connected via a specific session
 	 *
@@ -67,9 +58,8 @@ export class Push {
 	 * @memberof Push
 	 */
 
-
-
-	send(type: IPushDataType, data: any, sessionId?: string) { // eslint-disable-line @typescript-eslint/no-explicit-any
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	send(type: IPushDataType, data: any, sessionId?: string) {
 		if (sessionId !== undefined && this.connections[sessionId] === undefined) {
 			Logger.error(`The session "${sessionId}" is not registred.`, { sessionId });
 			return;
@@ -89,7 +79,6 @@ export class Push {
 			// Send only to a specific client
 			this.channel.send(JSON.stringify(sendData), [this.connections[sessionId]]);
 		}
-
 	}
 }
 

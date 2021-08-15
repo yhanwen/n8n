@@ -1,24 +1,13 @@
-import {
-	Command, flags,
-} from '@oclif/command';
+import { Command, flags } from '@oclif/command';
 
-import {
-	IDataObject,
-	LoggerProxy,
-} from 'n8n-workflow';
+import { IDataObject, LoggerProxy } from 'n8n-workflow';
 
-import {
-	Db,
-} from '../../src';
+import { Db } from '../../src';
 
-import {
-	getLogger,
-} from '../../src/Logger';
-
-
+import { getLogger } from '../../src/Logger';
 
 export class UpdateWorkflowCommand extends Command {
-	static description = '\Update workflows';
+	static description = 'Update workflows';
 
 	static examples = [
 		`$ n8n update:workflow --all --active=false`,
@@ -50,7 +39,9 @@ export class UpdateWorkflowCommand extends Command {
 		}
 
 		if (flags.all && flags.id) {
-			console.info(`Either something else on top should be "--all" or "--id" can be set never both!`);
+			console.info(
+				`Either something else on top should be "--all" or "--id" can be set never both!`,
+			);
 			return;
 		}
 

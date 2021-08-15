@@ -7,7 +7,8 @@ import {
 	ITaskData,
 	IWorkflowCredentials,
 	LoggerProxy as Logger,
-	Workflow} from 'n8n-workflow';
+	Workflow,
+} from 'n8n-workflow';
 import { validate } from 'class-validator';
 import {
 	CredentialTypes,
@@ -20,14 +21,12 @@ import {
 	ResponseHelper,
 	WorkflowCredentials,
 	WorkflowRunner,
-} from ".";
-
+} from '.';
 
 import * as config from '../config';
 import { WorkflowEntity } from './databases/entities/WorkflowEntity';
 
 const ERROR_TRIGGER_TYPE = config.get('nodes.errorTriggerType') as string;
-
 
 /**
  * Returns the data of the last executed node
@@ -37,8 +36,8 @@ const ERROR_TRIGGER_TYPE = config.get('nodes.errorTriggerType') as string;
  * @returns {(ITaskData | undefined)}
  */
 export function getDataLastExecutedNodeData(inputData: IRun): ITaskData | undefined {
-	const {runData} = inputData.data.resultData;
-	const {lastNodeExecuted} = inputData.data.resultData;
+	const { runData } = inputData.data.resultData;
+	const { lastNodeExecuted } = inputData.data.resultData;
 
 	if (lastNodeExecuted === undefined) {
 		return undefined;
@@ -51,8 +50,6 @@ export function getDataLastExecutedNodeData(inputData: IRun): ITaskData | undefi
 	return runData[lastNodeExecuted][runData[lastNodeExecuted].length - 1];
 }
 
-
-
 /**
  * Returns if the given id is a valid workflow id
  *
@@ -60,7 +57,7 @@ export function getDataLastExecutedNodeData(inputData: IRun): ITaskData | undefi
  * @returns {boolean}
  * @memberof App
  */
-export function isWorkflowIdValid (id: string | null | undefined | number): boolean {
+export function isWorkflowIdValid(id: string | null | undefined | number): boolean {
 	if (typeof id === 'string') {
 		id = parseInt(id, 10);
 	}
@@ -68,12 +65,9 @@ export function isWorkflowIdValid (id: string | null | undefined | number): bool
 	// eslint-disable-next-line no-restricted-globals
 	if (isNaN(id as number)) {
 		return false;
-
 	}
 	return true;
 }
-
-
 
 /**
  * Executes the error workflow
@@ -83,21 +77,36 @@ export function isWorkflowIdValid (id: string | null | undefined | number): bool
  * @param {IWorkflowErrorData} workflowErrorData The error data
  * @returns {Promise<void>}
  */
-export async function executeErrorWorkflow(workflowId: string, workflowErrorData: IWorkflowErrorData): Promise<void> {
+export async function executeErrorWorkflow(
+	workflowId: string,
+	workflowErrorData: IWorkflowErrorData,
+): Promise<void> {
 	// Wrap everything in try/catch to make sure that no errors bubble up and all get caught here
 	try {
 		const workflowData = await Db.collections.Workflow!.findOne({ id: Number(workflowId) });
 
 		if (workflowData === undefined) {
 			// The error workflow could not be found
-			Logger.error(`Calling Error Workflow for "${workflowErrorData.workflow.id}". Could not find error workflow "${workflowId}"`, { workflowId });
+			Logger.error(
+				`Calling Error Workflow for "${workflowErrorData.workflow.id}". Could not find error workflow "${workflowId}"`,
+				{ workflowId },
+			);
 			return;
 		}
 
 		const executionMode = 'error';
 		const nodeTypes = NodeTypes();
 
-		const workflowInstance = new Workflow({ id: workflowId, name: workflowData.name, nodeTypes, nodes: workflowData.nodes, connections: workflowData.connections, active: workflowData.active, staticData: workflowData.staticData, settings: workflowData.settings});
+		const workflowInstance = new Workflow({
+			id: workflowId,
+			name: workflowData.name,
+			nodeTypes,
+			nodes: workflowData.nodes,
+			connections: workflowData.connections,
+			active: workflowData.active,
+			staticData: workflowData.staticData,
+			settings: workflowData.settings,
+		});
 
 		let node: INode;
 		let workflowStartNode: INode | undefined;
@@ -109,7 +118,9 @@ export async function executeErrorWorkflow(workflowId: string, workflowErrorData
 		}
 
 		if (workflowStartNode === undefined) {
-			Logger.error(`Calling Error Workflow for "${workflowErrorData.workflow.id}". Could not find "${ERROR_TRIGGER_TYPE}" in workflow "${workflowId}"`);
+			Logger.error(
+				`Calling Error Workflow for "${workflowErrorData.workflow.id}". Could not find "${ERROR_TRIGGER_TYPE}" in workflow "${workflowId}"`,
+			);
 			return;
 		}
 
@@ -117,24 +128,21 @@ export async function executeErrorWorkflow(workflowId: string, workflowErrorData
 
 		// Initialize the data of the webhook node
 		const nodeExecutionStack: IExecuteData[] = [];
-		nodeExecutionStack.push(
-			{
-				node: workflowStartNode,
-				data: {
-					main: [
-						[
-							{
-								json: workflowErrorData,
-							},
-						],
+		nodeExecutionStack.push({
+			node: workflowStartNode,
+			data: {
+				main: [
+					[
+						{
+							json: workflowErrorData,
+						},
 					],
-				},
+				],
 			},
-		);
+		});
 
 		const runExecutionData: IRunExecutionData = {
-			startData: {
-			},
+			startData: {},
 			resultData: {
 				runData: {},
 			},
@@ -157,11 +165,12 @@ export async function executeErrorWorkflow(workflowId: string, workflowErrorData
 		const workflowRunner = new WorkflowRunner();
 		await workflowRunner.run(runData);
 	} catch (error) {
-		Logger.error(`Calling Error Workflow for "${workflowErrorData.workflow.id}": "${error.message}"`, { workflowId: workflowErrorData.workflow.id });
+		Logger.error(
+			`Calling Error Workflow for "${workflowErrorData.workflow.id}": "${error.message}"`,
+			{ workflowId: workflowErrorData.workflow.id },
+		);
 	}
 }
-
-
 
 /**
  * Returns all the defined NodeTypes
@@ -188,8 +197,6 @@ export function getAllNodeTypeData(): ITransferNodeTypes {
 
 	return returnData;
 }
-
-
 
 /**
  * Returns the data of the node types that are needed
@@ -222,8 +229,6 @@ export function getNodeTypeData(nodes: INode[]): ITransferNodeTypes {
 	return returnData;
 }
 
-
-
 /**
  * Returns the credentials data of the given type and its parent types
  * it extends
@@ -255,8 +260,6 @@ export function getCredentialsDataWithParents(type: string): ICredentialsTypeDat
 	return credentialTypeData;
 }
 
-
-
 /**
  * Returns all the credentialTypes which are needed to resolve
  * the given workflow credentials
@@ -279,8 +282,6 @@ export function getCredentialsData(credentials: IWorkflowCredentials): ICredenti
 	return credentialTypeData;
 }
 
-
-
 /**
  * Returns the names of the NodeTypes which are are needed
  * to execute the gives nodes
@@ -301,8 +302,6 @@ export function getNeededNodeTypes(nodes: INode[]): string[] {
 	return neededNodeTypes;
 }
 
-
-
 /**
  * Saves the static data if it changed
  *
@@ -310,7 +309,7 @@ export function getNeededNodeTypes(nodes: INode[]): string[] {
  * @param {Workflow} workflow
  * @returns {Promise <void>}
  */
-export async function saveStaticData(workflow: Workflow): Promise <void> {
+export async function saveStaticData(workflow: Workflow): Promise<void> {
 	if (workflow.staticData.__dataChanged === true) {
 		// Static data of workflow changed and so has to be saved
 		if (isWorkflowIdValid(workflow.id) === true) {
@@ -319,13 +318,14 @@ export async function saveStaticData(workflow: Workflow): Promise <void> {
 				await saveStaticDataById(workflow.id!, workflow.staticData);
 				workflow.staticData.__dataChanged = false;
 			} catch (error) {
-				Logger.error(`There was a problem saving the workflow with id "${workflow.id}" to save changed staticData: "${error.message}"`, { workflowId: workflow.id });
+				Logger.error(
+					`There was a problem saving the workflow with id "${workflow.id}" to save changed staticData: "${error.message}"`,
+					{ workflowId: workflow.id },
+				);
 			}
 		}
 	}
 }
-
-
 
 /**
  * Saves the given static data on workflow
@@ -335,14 +335,14 @@ export async function saveStaticData(workflow: Workflow): Promise <void> {
  * @param {IDataObject} newStaticData The static data to save
  * @returns {Promise<void>}
  */
-export async function saveStaticDataById(workflowId: string | number, newStaticData: IDataObject): Promise<void> {
-	await Db.collections.Workflow!
-		.update(workflowId, {
-			staticData: newStaticData,
-		});
+export async function saveStaticDataById(
+	workflowId: string | number,
+	newStaticData: IDataObject,
+): Promise<void> {
+	await Db.collections.Workflow!.update(workflowId, {
+		staticData: newStaticData,
+	});
 }
-
-
 
 /**
  * Returns the static data of workflow
@@ -352,8 +352,9 @@ export async function saveStaticDataById(workflowId: string | number, newStaticD
  * @returns
  */
 export async function getStaticDataById(workflowId: string | number) {
-	const workflowData = await Db.collections.Workflow!
-		.findOne(workflowId, { select: ['staticData']});
+	const workflowData = await Db.collections.Workflow!.findOne(workflowId, {
+		select: ['staticData'],
+	});
 
 	if (workflowData === undefined) {
 		return {};
@@ -361,7 +362,6 @@ export async function getStaticDataById(workflowId: string | number) {
 
 	return workflowData.staticData || {};
 }
-
 
 // TODO: Deduplicate `validateWorkflow` and `throwDuplicateEntryError` with TagHelpers?
 
@@ -377,7 +377,11 @@ export async function validateWorkflow(newWorkflow: WorkflowEntity) {
 export function throwDuplicateEntryError(error: Error) {
 	const errorMessage = error.message.toLowerCase();
 	if (errorMessage.includes('unique') || errorMessage.includes('duplicate')) {
-		throw new ResponseHelper.ResponseError('There is already a workflow with this name', undefined, 400);
+		throw new ResponseHelper.ResponseError(
+			'There is already a workflow with this name',
+			undefined,
+			400,
+		);
 	}
 
 	throw new ResponseHelper.ResponseError(errorMessage, undefined, 400);
@@ -389,4 +393,3 @@ export type WorkflowNameRequest = Express.Request & {
 		offset?: string;
 	};
 };
-

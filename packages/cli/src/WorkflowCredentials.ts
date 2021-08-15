@@ -1,11 +1,5 @@
-import {
-	INode,
-	IWorkflowCredentials,
-} from 'n8n-workflow';
-import {
-	Db,
-} from ".";
-
+import { INode, IWorkflowCredentials } from 'n8n-workflow';
+import { Db } from '.';
 
 export async function WorkflowCredentials(nodes: INode[]): Promise<IWorkflowCredentials> {
 	// Go through all nodes to find which credentials are needed to execute the workflow
@@ -32,7 +26,6 @@ export async function WorkflowCredentials(nodes: INode[]): Promise<IWorkflowCred
 				returnCredentials[type][name] = foundCredentials[0];
 			}
 		}
-
 	}
 
 	return returnCredentials;

@@ -18,7 +18,7 @@ export class Queue {
 	}
 
 	async add(jobData: IBullJobData, jobOptions: object): Promise<Bull.Job> {
-		return this.jobQueue.add(jobData,jobOptions);
+		return this.jobQueue.add(jobData, jobOptions);
 	}
 
 	async getJob(jobId: Bull.JobId): Promise<Bull.Job | null> {

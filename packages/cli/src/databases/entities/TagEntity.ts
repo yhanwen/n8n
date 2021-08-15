@@ -1,4 +1,13 @@
-import { BeforeUpdate, Column, CreateDateColumn, Entity, Index, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+	BeforeUpdate,
+	Column,
+	CreateDateColumn,
+	Entity,
+	Index,
+	ManyToMany,
+	PrimaryGeneratedColumn,
+	UpdateDateColumn,
+} from 'typeorm';
 import { IsDate, IsOptional, IsString, Length } from 'class-validator';
 
 import { ITagDb } from '../../Interfaces';
@@ -7,7 +16,6 @@ import { getTimestampSyntax } from '../utils';
 
 @Entity()
 export class TagEntity implements ITagDb {
-
 	@PrimaryGeneratedColumn()
 	id: number;
 
@@ -22,12 +30,16 @@ export class TagEntity implements ITagDb {
 	@IsDate()
 	createdAt: Date;
 
-	@UpdateDateColumn({ precision: 3, default: () => getTimestampSyntax(), onUpdate: getTimestampSyntax() })
+	@UpdateDateColumn({
+		precision: 3,
+		default: () => getTimestampSyntax(),
+		onUpdate: getTimestampSyntax(),
+	})
 	@IsOptional() // ignored by validation because set at DB level
 	@IsDate()
 	updatedAt: Date;
 
-	@ManyToMany(() => WorkflowEntity, workflow => workflow.tags)
+	@ManyToMany(() => WorkflowEntity, (workflow) => workflow.tags)
 	workflows: WorkflowEntity[];
 
 	@BeforeUpdate()
