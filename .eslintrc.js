@@ -202,23 +202,6 @@ module.exports = {
 				leadingUnderscore: 'allowSingleOrDouble',
 				trailingUnderscore: 'allowSingleOrDouble',
 			},
-			/**
-			 * ASKBEN: Remove `I` prefix for interfaces?
-			 * - Reasons: TS team advises against I prefix
-			 * 	https://github.com/microsoft/TypeScript-Handbook/issues/121
-			 * - Type aliases are preferable over interfaces:
-			 * 	https://fettblog.eu/tidy-typescript-prefer-type-aliases/
-			 * - General recommendations to remove this
-			 * https://passionfordev.com/you-dont-need-to-prefix-interfaces-in-typescript-with-i/
-			 * https://til.hashrocket.com/posts/cfnlyzxcrc-do-not-prefix-typescript-interface-names
-			 *
-			 * BUT: Still prevalent in codebase.
-			 */
-			{
-				selector: 'interface',
-				format: ['PascalCase'],
-				prefix: ['I'],
-			},
 			{
 				selector: 'property',
 				format: ['camelCase', 'snake_case'],
@@ -297,26 +280,31 @@ module.exports = {
 		'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '_' }],
 
 		/**
-		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time. Disable permanently?
+		 * Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time.
 		 *
-		 * Temporarily disabled until we decide.
+		 * TODO: Disabled temporarily until we decide to disable permanently or not.
 		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-nullish-coalescing.md
 		 */
 		'@typescript-eslint/prefer-nullish-coalescing': 'off',
 
 		/**
-		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time. Disable permanently?
+		 * Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time.
 		 *
-		 * Temporarily disabled until we decide.
+		 * TODO: Disabled temporarily until we decide to disable permanently or not.
 		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-optional-chain.md
 		 */
 		'@typescript-eslint/prefer-optional-chain': 'off',
 
 		/**
+		 * Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time.
+		 *
+		 * TODO: Disabled temporarily until we decide to disable permanently or not.
+		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/promise-function-async.md
 		 */
 		'@typescript-eslint/promise-function-async': 'error',
@@ -356,85 +344,40 @@ module.exports = {
 		'no-unused-vars': 'off',
 
 		/**
-		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time. Disable permanently?
+		 * Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time. #excessiveReports
 		 *
-		 * Temporarily disabled until we decide.
-		 *
-		 * RISKY REGEX CHANGE
+		 * TODO: Disabled temporarily until we decide to disable permanently or not.
 		 *
 		 * https://eslint.org/docs/rules/no-useless-escape
 		 */
 		'no-useless-escape': 'off',
 
 		/**
+		 * Given the codebase style, this rule triggers multiple warnings that will
+		 * clutter up the lint report every time. #excessiveReports
+		 *
+		 * TODO: Disabled temporarily until we decide to disable permanently or not.
+		 *
 		 * https://eslint.org/docs/rules/prefer-spread
-		 *
-		 * ASKBEN: Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time. Disable permanently?
-		 *
-		 * Temporarily disabled until we decide.
 		 */
 		'prefer-spread': 'off', // originally 'warn', not 'err'
 
 		/**
-		 * ASKBEN: The following five overrides need to be included here because the
-		 * Airbnb base specifies an option while we do not, but lint types are the same.
-		 *
-		 * Do we adopt the options from the Airbnb base and remove these overrides?
-		 */
-
-		/**
-		 * ESLint equivalent of `switch-default` from TSLint.
-		 * https://eslint.org/docs/rules/default-case
-		 *
-		 * Airbnb: 'default-case': ['error', { commentPattern: '^no default$' }],
-		 *
-		 * We do not specify a comment pattern.
-		 */
-		'default-case': 'error',
-
-		/**
 		 * ESLint equivalent of `triple-equals` from TSLint.
 		 * https://eslint.org/docs/rules/eqeqeq
-		 *
-		 * Airbnb: eqeqeq: ['error', 'always', { null: 'ignore' }]
-		 *
-		 * We are not using the additional option
 		 */
 		eqeqeq: 'error',
 
 		/**
-		 * ESLint equivalent of `no-conditional-assignment` from TSLint.
-		 * https://eslint.org/docs/rules/no-cond-assign
-		 *
-		 * Airbnb: 'no-cond-assign': ['error', 'always']
-		 *
-		 * We are using the default `except-parens` instead of always
-		 */
-		'no-cond-assign': 'error',
-
-		/**
 		 * ESLint equivalent of our setting in `object-literal-shorthand` from TSLint.
 		 * https://eslint.org/docs/rules/object-shorthand
-		 *
-		 * Airbnb: 'object-shorthand': ['error', 'always', {
-      	ignoreConstructors: false,
-      	avoidQuotes: true,
-    	}],
-		 * We are not using the additional options
 		 */
 		'object-shorthand': 'error',
 
 		/**
 		 * ESLint equivalent of `prefer-const` from TSLint.
 		 * https://eslint.org/docs/rules/prefer-const
-		 *
-		 * Airbnb: 'prefer-const': ['error', {
-      	destructuring: 'any',
-      	ignoreReadBeforeAssign: true,
-    	}],
-     * We are not using the additional options
 		 */
 		'prefer-const': 'error',
 
@@ -732,20 +675,13 @@ module.exports = {
 // arrow-body-style
 // https://eslint.org/docs/rules/arrow-body-style
 
-// ASKBEN: Currently, most ESLint dependencies are in /node_modules because
-// of /workflow. A few additional Vue/ESLint dependencies are added by /editor-ui.
-// Should we add these dependencies to all other package.json files?
-// /core + /cli + /nodes-base + /node-dev
 
-// ASKBEN: Do we want a lint command that checks all six packages?
-// Or one per package? Example: eslint packages/**/*.ts
-
-// ASKBEN: ESLint reads from the `include` key in every tsconfig.json to decide
-// which files to lint. This means we have to transpile what we lint.
-// Examples: The templates in /node-dev are not being transpiled, so they trigger
-// errors when linting. The TypeORM config in cli/migrations also triggers them.
-// Therefore, I had to add `templates/**/*` and `cli/migrations` in `include` in
-// their respective tsconfig.json files. Any better way?
-
-// ASKBEN: I added lint exceptions for most non-autofixable lintings, in order
-// to avoid breaking functionality. Is this what we want or should I fix as well?
+/**
+ * TODO LIST:
+ * 1. One command to lint each package + one global command for all packages
+ * 2. Lint-ignore and transpile-ignore ormconfig
+ * 3. Lint and transpile ignore node-dev/templates
+ * 4. Decide on nodes-base
+ * 5. Decide on editor-ui
+ * 6. Decide on #excessiveReports
+ */

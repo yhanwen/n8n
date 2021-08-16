@@ -10,6 +10,3 @@ trim_trailing_whitespace = true
 [package.json]
 indent_style = space
 indent_size = 2
-
-[*.ts]
-# quote_type = single # delegate to Prettier ASKBEN

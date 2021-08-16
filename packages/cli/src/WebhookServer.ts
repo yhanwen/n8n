@@ -211,8 +211,8 @@ class App {
 		);
 
 		// Support application/xml type post data
-		// @ts-ignore
 		this.app.use(
+			// @ts-ignore
 			bodyParser.xml({
 				limit: '16mb',
 				xmlParseOptions: {
