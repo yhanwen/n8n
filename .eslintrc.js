@@ -61,7 +61,7 @@ module.exports = {
 		// https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
 
 		// TODO: Restore to `'error'` after dealing with lintings in all packages.
-		'prettier/prettier': 'off',
+		'prettier/prettier': 'error',
 
 		'arrow-body-style': 'off',
 		'prefer-arrow-callback': 'off',
