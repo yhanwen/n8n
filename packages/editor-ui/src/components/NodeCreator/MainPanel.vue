@@ -152,11 +152,21 @@ export default mixins(externalHooks).extend({
 				selectedType: this.selectedType,
 				filteredNodes: this.filteredNodeTypes,
 			});
+			this.$telemetry.trackNodesPanel('nodeCreateList.nodeFilterChanged', {
+				oldValue,
+				newValue,
+				selectedType: this.selectedType,
+				filteredNodes: this.filteredNodeTypes,
+			});
 		},
 		selectedType(newValue, oldValue) {
 			this.$externalHooks().run('nodeCreateList.selectedTypeChanged', {
 				oldValue,
 				newValue,
+			});
+			this.$telemetry.trackNodesPanel('nodeCreateList.selectedTypeChanged', {
+				old_filter: oldValue,
+				new_filter: newValue,
 			});
 		},
 	},
@@ -243,6 +253,7 @@ export default mixins(externalHooks).extend({
 				);
 			} else {
 				this.activeCategory = [...this.activeCategory, category];
+				this.$telemetry.trackNodesPanel('nodeCreateList.onCategoryExpanded', { category_name: category });
 			}
 
 			this.activeIndex = this.categorized.findIndex(
@@ -252,6 +263,7 @@ export default mixins(externalHooks).extend({
 		onSubcategorySelected(selected: INodeCreateElement) {
 			this.activeSubcategoryIndex = 0;
 			this.activeSubcategory = selected;
+			this.$telemetry.trackNodesPanel('nodeCreateList.onSubcategorySelected', { selected });
 		},
 
 		onSubcategoryClose() {
@@ -273,6 +285,7 @@ export default mixins(externalHooks).extend({
 	},
 	async destroyed() {
 		this.$externalHooks().run('nodeCreateList.destroyed');
+		this.$telemetry.trackNodesPanel('nodeCreateList.destroyed');
 	},
 });
 </script>

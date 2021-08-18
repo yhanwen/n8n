@@ -68,7 +68,7 @@
 				<SaveButton
 					:saved="!this.isDirty && !this.isNewWorkflow"
 					:disabled="isWorkflowSaving"
-					@click="saveCurrentWorkflow"
+					@click="onSaveButtonClick"
 				/>
 			</template>
 		</PushConnectionTracker>
@@ -79,6 +79,7 @@
 import Vue from "vue";
 import mixins from "vue-typed-mixins";
 import { mapGetters } from "vuex";
+import { TelemetryHelpers } from 'n8n-workflow';
 import { MAX_WORKFLOW_NAME_LENGTH } from "@/constants";
 
 import WorkflowNameShort from "@/components/WorkflowNameShort.vue";
@@ -135,11 +136,15 @@ export default mixins(workflowHelpers).extend({
 		isWorkflowSaving(): boolean {
 			return this.$store.getters.isActionActive("workflowSaving");
 		},
-		currentWorkflowId() {
+		currentWorkflowId(): string {
 			return this.$route.params.name;
 		},
 	},
 	methods: {
+		onSaveButtonClick () {
+			this.saveCurrentWorkflow();
+			this.$telemetry.track('User saved workflow', { workflow_id: this.currentWorkflowId, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+		},
 		onTagsEditEnable() {
 			this.$data.appliedTagIds = this.currentWorkflowTagIds;
 			this.$data.isTagsEditEnabled = true;
@@ -168,6 +173,8 @@ export default mixins(workflowHelpers).extend({
 			this.$data.tagsSaving = true;
 
 			const saved = await this.saveCurrentWorkflow({ tags });
+			this.$telemetry.track('User edited workflow tags', { workflow_id: this.currentWorkflowId as string, new_tag_count: tags.length });
+			
 			this.$data.tagsSaving = false;
 			if (saved) {
 				this.$data.isTagsEditEnabled = false;

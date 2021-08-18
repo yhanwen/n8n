@@ -654,6 +654,8 @@ export default mixins(showMessage, nodeHelpers).extend({
 				credentialTypeData: this.credentialData,
 			});
 
+			this.$telemetry.track('User created credentials', { credential_type: credentialDetails.type });
+
 			return credential;
 		},
 

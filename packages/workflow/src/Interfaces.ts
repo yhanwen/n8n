@@ -1046,3 +1046,12 @@ export type PropertiesOf<M extends { resource: string; operation: string }> = Ar
 		};
 	}
 >;
+export interface ITelemetryClientConfig {
+	url: string;
+	key: string;
+}
+
+export interface ITelemetrySettings {
+	enabled: boolean;
+	config?: ITelemetryClientConfig;
+}
