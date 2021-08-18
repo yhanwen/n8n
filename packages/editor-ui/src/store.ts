@@ -88,6 +88,7 @@ const state: IRootState = {
 	},
 	sidebarMenuItems: [],
 	instanceId: '',
+	telemetry: {},
 };
 
 const modules = {
@@ -552,6 +553,9 @@ export const store = new Vuex.Store({
 		setInstanceId(state, instanceId: string) {
 			Vue.set(state, 'instanceId', instanceId);
 		},
+		setTelemetry(state, telemetry: IDataObject) {
+			Vue.set(state, 'telemetry', telemetry);
+		},
 		setOauthCallbackUrls(state, urls: IDataObject) {
 			Vue.set(state, 'oauthCallbackUrls', urls);
 		},
@@ -702,6 +706,9 @@ export const store = new Vuex.Store({
 		},
 		versionCli: (state): string => {
 			return state.versionCli;
+		},
+		telemetry: (state): IDataObject => {
+			return state.telemetry;
 		},
 		oauthCallbackUrls: (state): object => {
 			return state.oauthCallbackUrls;

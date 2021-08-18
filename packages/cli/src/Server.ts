@@ -28,13 +28,13 @@ import * as express from 'express';
 import { readFileSync } from 'fs';
 import { dirname as pathDirname, join as pathJoin, resolve as pathResolve } from 'path';
 import {
-	getConnectionManager,
-	In,
-	Like,
 	FindManyOptions,
 	FindOneOptions,
+	getConnectionManager,
+	In,
 	IsNull,
 	LessThanOrEqual,
+	Like,
 	Not,
 } from 'typeorm';
 import * as bodyParser from 'body-parser';
@@ -62,7 +62,9 @@ import {
 	INodeParameters,
 	INodePropertyOptions,
 	INodeTypeDescription,
+	IRudderAnalyticsConfig,
 	IRunData,
+	ITelemetrySettings,
 	IWorkflowBase,
 	IWorkflowCredentials,
 	LoggerProxy,
@@ -126,9 +128,13 @@ import {
 	WorkflowHelpers,
 	WorkflowRunner,
 } from '.';
+
 import * as config from '../config';
 
 import * as TagHelpers from './TagHelpers';
+import { Telemetry } from './telemetry';
+import { IInternalHooksClass } from './Interfaces';
+import { InternalHooks } from './internalHooks';
 import { TagEntity } from './databases/entities/TagEntity';
 import { WorkflowEntity } from './databases/entities/WorkflowEntity';
 import { WorkflowNameRequest } from './WorkflowHelpers';
@@ -153,6 +159,8 @@ class App {
 	externalHooks: IExternalHooksClass;
 
 	waitTracker: WaitTrackerClass;
+
+	internalHooks: IInternalHooksClass;
 
 	defaultWorkflowName: string;
 
@@ -219,10 +227,19 @@ class App {
 
 		this.externalHooks = ExternalHooks();
 
+
 		this.presetCredentialsLoaded = false;
 		this.endpointPresetCredentials = config.get('credentials.overwrite.endpoint') as string;
 
 		const urlBaseWebhook = WebhookHelpers.getWebhookBaseUrl();
+
+		const telemetrySettings: ITelemetrySettings = {
+			enabled: config.get('telemetry.enabled') as boolean,
+		};
+
+		if (telemetrySettings.enabled) {
+			telemetrySettings.config = config.get('telemetry.config.frontend') as IRudderAnalyticsConfig;
+		}
 
 		this.frontendSettings = {
 			endpointWebhook: this.endpointWebhook,
@@ -245,6 +262,7 @@ class App {
 				infoUrl: config.get('versionNotifications.infoUrl'),
 			},
 			instanceId: '',
+			telemetry: telemetrySettings,
 		};
 	}
 
@@ -272,6 +290,9 @@ class App {
 		this.versions = await GenericHelpers.getVersions();
 		this.frontendSettings.versionCli = this.versions.cli;
 		this.frontendSettings.instanceId = (await generateInstanceId()) as string;
+
+		const telemetry = new Telemetry(this.frontendSettings.instanceId, this.versions.cli);
+		this.internalHooks = new InternalHooks(telemetry);
 
 		await this.externalHooks.run('frontend.settings', [this.frontendSettings]);
 
@@ -862,6 +883,7 @@ class App {
 					}
 
 					await this.externalHooks.run('workflow.afterUpdate', [workflow]);
+					this.internalHooks.onWorkflowSave(workflow);
 
 					if (workflow.active) {
 						// When the workflow is supposed to be active add it again
@@ -2687,6 +2709,7 @@ export async function start(): Promise<void> {
 		console.log(`Version: ${versions.cli}`);
 
 		await app.externalHooks.run('n8n.ready', [app]);
+		app.internalHooks.onServerStarted();
 	});
 }
 

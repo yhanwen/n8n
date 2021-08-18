@@ -643,6 +643,46 @@ const config = convict({
 			env: 'N8N_VERSION_NOTIFICATIONS_INFO_URL',
 		},
 	},
+
+	telemetry: {
+		enabled: {
+			doc: 'Whether telemetry is enabled.',
+			format: Boolean,
+			default: true,
+			env: 'N8N_TELEMETRY_ENABLED',
+		},
+		config: {
+			frontend: {
+				key: {
+					doc: 'Rudder key for frontend.',
+					format: String,
+					default: '1wfyHJrZGsJmqh86XcncyX2SN3T',// todo update KEY
+					env: 'N8N_TELEMETRY_RUDDER_KEY_FRONTEND',
+				},
+				url: {
+					doc: 'Rudder data plane URL for frontend.',
+					format: String,
+					default: 'http://telemetry-stage.n8n.io',// todo update URL
+					env: 'N8N_TELEMETRY_RUDDER_DATA_PLANE_URL_FRONTEND',
+				},
+			},
+			backend: {
+				key: {
+					doc: 'Rudder key for backend.',
+					format: String,
+					default: '1wfxw1YdRGrntY8intaq53hui51',// todo update KEY
+					env: 'N8N_TELEMETRY_RUDDER_KEY_BACKEND',
+				},
+				url: {
+					doc: 'Rudder data plane URL for backend.',
+					format: String,
+					default: 'http://telemetry-stage.n8n.io/v1/batch',// todo update URL
+					env: 'N8N_TELEMETRY_RUDDER_DATA_PLANE_URL_BACKEND',
+				},
+			},
+		},
+	},
+
 });
 
 // Overwrite default configuration with settings which got defined in

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-cycle */
 import {
+	ITelemetrySettings,
 	ExecutionError,
 	ICredentialDataDecryptedObject,
 	ICredentialsDecrypted,
@@ -280,6 +281,11 @@ export interface IExternalHooksClass {
 	run(hookName: string, hookParameters?: any[]): Promise<void>;
 }
 
+export interface IInternalHooksClass {
+	onServerStarted(): Promise<void>;
+	onWorkflowSave(workflow: WorkflowEntity): Promise<void>;
+}
+
 export interface IN8nConfig {
 	database: IN8nConfigDatabase;
 	endpoints: IN8nConfigEndpoints;
@@ -356,6 +362,7 @@ export interface IN8nUISettings {
 	};
 	versionNotifications: IVersionNotificationSettings;
 	instanceId: string;
+	telemetry: ITelemetrySettings;
 }
 
 export interface IPackageVersions {

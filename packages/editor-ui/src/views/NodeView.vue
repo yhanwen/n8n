@@ -104,6 +104,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { TelemetryPlugin } from '../plugins/telemetry';
 import {
 	OverlaySpec,
 } from 'jsplumb';
@@ -2195,6 +2196,7 @@ export default mixins(
 				this.$store.commit('setOauthCallbackUrls', settings.oauthCallbackUrls);
 				this.$store.commit('setN8nMetadata', settings.n8nMetadata || {});
 				this.$store.commit('versions/setVersionNotificationSettings', settings.versionNotifications);
+				this.$store.commit('setTelemetry', settings.telemetry);
 			},
 			async loadNodeTypes (): Promise<void> {
 				const nodeTypes = await this.restApi().getNodeTypes();
