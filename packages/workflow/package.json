@@ -19,6 +19,9 @@
     "build": "tsc",
     "eslint": "eslint '*/**/*.ts' -c .eslintrc.js",
     "eslintfix": "eslint '*/**/*.ts' -c .eslintrc.js --fix",
+    "format": "cd ../.. && node_modules/prettier/bin-prettier.js packages/workflow --write",
+    "lint": "cd ../.. && node_modules/eslint/bin/eslint.js packages/workflow",
+    "lintfix": "cd ../.. && node_modules/eslint/bin/eslint.js packages/workflow --fix",
     "watch": "tsc --watch",
     "test": "jest"
   },
