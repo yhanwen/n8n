@@ -29,7 +29,6 @@
 		"config/**/*",
 		"src/**/*",
 		"test/**/*",
-		"migrations/**/*"
 	],
 	"exclude": [
 		"dist/**/*",

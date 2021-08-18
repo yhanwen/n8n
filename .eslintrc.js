@@ -17,6 +17,8 @@ module.exports = {
 		'**/dist/**',
 		'**/test/**',
 		'**/*.js',
+		'**/ormconfig.ts',
+		'**/.eslintrc.js'
 	],
 
 	extends: [

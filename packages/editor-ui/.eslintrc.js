@@ -22,11 +22,6 @@ module.exports = {
 		sourceType: 'module',
 	},
 
-	// ignorePatterns: [
-		// '.eslintrc.js',
-		// '**/.eslintrc.js',
-	// ],
-
 	rules: {
 		// ******************************************************************
 		//             modern rules disabled due to Vue needs
