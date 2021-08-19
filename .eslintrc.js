@@ -13,26 +13,42 @@ module.exports = {
 	},
 	ignorePatterns: [
 		'.eslintrc.js',
+		'**/*.js',
 		'**/node_modules/**',
 		'**/dist/**',
 		'**/test/**',
-		'**/*.js',
 		'**/ormconfig.ts',
-		'**/.eslintrc.js'
 	],
 
 	extends: [
 		/**
-		 * Config for Airbnb style guide for TS, /base to remove React rules
-		 * https://github.com/iamturns/eslint-config-airbnb-typescript
+		 * Config for typescript-eslint recommended ruleset (without type checking)
+		 *
+		 * https://github.com/typescript-eslint/typescript-eslint/blob/1c1b572c3000d72cfe665b7afbada0ec415e7855/packages/eslint-plugin/src/configs/recommended.ts
 		 */
-		'airbnb-typescript/base',
+		'plugin:@typescript-eslint/recommended',
+
+		/**
+		 * Config for typescript-eslint recommended ruleset (with type checking)
+		 *
+		 * https://github.com/typescript-eslint/typescript-eslint/blob/1c1b572c3000d72cfe665b7afbada0ec415e7855/packages/eslint-plugin/src/configs/recommended-requiring-type-checking.ts
+		 */
+		'plugin:@typescript-eslint/recommended-requiring-type-checking',
+
+		/**
+		 * Config for Airbnb style guide for TS, /base to remove React rules
+		 *
+		 * https://github.com/iamturns/eslint-config-airbnb-typescript
+		 * https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base/rules
+		 */
+		'eslint-config-airbnb-typescript/base',
 
 		/**
 		 * Config to disable ESLint rules covered by Prettier
+		 *
 		 * https://github.com/prettier/eslint-config-prettier
 		 */
-		'prettier',
+		'eslint-config-prettier',
 	],
 
 	plugins: [
@@ -52,37 +68,35 @@ module.exports = {
 		 * Plugin to report formatting violations as lint violations
 		 * https://github.com/prettier/eslint-plugin-prettier
 		 */
-		'prettier',
+		'eslint-plugin-prettier',
 	],
 
 	rules: {
 		// ******************************************************************
-		//             modern rules required by prettier plugin
+		//                   required by prettier plugin
 		// ******************************************************************
 
-		// https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
+		// The following rule enables eslint-plugin-prettier
+		// See: https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
 
-		// TODO: Restore to `'error'` after dealing with lintings in all packages.
-		'prettier/prettier': 'off',
+		'prettier/prettier': 'error',
 
+		// The following two rules must be disabled when using eslint-plugin-prettier:
+		// See: https://github.com/prettier/eslint-plugin-prettier#arrow-body-style-and-prefer-arrow-callback-issue
+
+		/**
+		 * https://eslint.org/docs/rules/arrow-body-style
+		 */
 		'arrow-body-style': 'off',
+
+		/**
+		 * https://eslint.org/docs/rules/prefer-arrow-callback
+		 */
 		'prefer-arrow-callback': 'off',
 
 		// ******************************************************************
-		//                    base modern rules (enabled)
+		//                     additions to base ruleset
 		// ******************************************************************
-
-		// These modern rules are added by eslint-config-airbnb-typescript and
-		// @typescript-eslint/eslint-plugin and are all enabled by default,
-		// since they are part of the config.
-
-		// https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base/rules
-
-		// ******************************************************************
-		//                 additional modern rules (enabled)
-		// ******************************************************************
-
-		// These rules are added on top of the base modern rules.
 
 		// ----------------------------------
 		//              ESLint
@@ -93,7 +107,6 @@ module.exports = {
 		 */
 		'id-denylist': [
 			'error',
-			'e',
 			'err',
 			'cb',
 			'callback',
@@ -118,9 +131,9 @@ module.exports = {
 		'@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
 
 		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/await-thenable.md
+		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/ban-ts-comment.md
 		 */
-		'@typescript-eslint/await-thenable': 'error',
+		 '@typescript-eslint/ban-ts-comment': 'off',
 
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/ban-types.md
@@ -227,21 +240,6 @@ module.exports = {
 		'@typescript-eslint/no-duplicate-imports': 'error',
 
 		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-empty-function.md
-		 */
-		'@typescript-eslint/no-empty-function': 'error',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md
-		 */
-		'@typescript-eslint/no-explicit-any': 'error',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-inferrable-types.md
-		 */
-		'@typescript-eslint/no-inferrable-types': 'error',
-
-		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-void-type.md
 		 */
 		'@typescript-eslint/no-invalid-void-type': 'error',
@@ -252,24 +250,19 @@ module.exports = {
 		'@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
 
 		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-namespace.md
-		 */
-		'@typescript-eslint/no-namespace': 'error',
-
-		/**
 		 * https://eslint.org/docs/1.0.0/rules/no-throw-literal
 		 */
 		'@typescript-eslint/no-throw-literal': 'error',
 
 		/**
+		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-boolean-literal-compare.md
+		 */
+		 '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'error',
+
+		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-qualifier.md
 		 */
 		'@typescript-eslint/no-unnecessary-qualifier': 'error',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-type-assertion.md
-		 */
-		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 
 		/**
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-expressions.md
@@ -282,39 +275,19 @@ module.exports = {
 		'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '_' }],
 
 		/**
-		 * Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time.
-		 *
-		 * TODO: Disabled temporarily until we decide to disable permanently or not.
-		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-nullish-coalescing.md
 		 */
-		'@typescript-eslint/prefer-nullish-coalescing': 'off',
+		'@typescript-eslint/prefer-nullish-coalescing': 'error',
 
 		/**
-		 * Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time.
-		 *
-		 * TODO: Disabled temporarily until we decide to disable permanently or not.
-		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-optional-chain.md
 		 */
-		'@typescript-eslint/prefer-optional-chain': 'off',
+		'@typescript-eslint/prefer-optional-chain': 'error',
 
 		/**
-		 * Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time.
-		 *
-		 * TODO: Disabled temporarily until we decide to disable permanently or not.
-		 *
 		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/promise-function-async.md
 		 */
 		'@typescript-eslint/promise-function-async': 'error',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/triple-slash-reference.md
-		 */
-		'@typescript-eslint/triple-slash-reference': 'error',
 
 		// ----------------------------------
 		//       eslint-plugin-import
@@ -330,365 +303,32 @@ module.exports = {
 		 */
 		'import/order': 'error',
 
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-boolean-literal-compare.md
-		 */
-		'no-unnecessary-boolean-literal-compare': 'error',
-
 		// ******************************************************************
-		//                 modern rule overrides (enabled)
+		//                    overrides to base ruleset
 		// ******************************************************************
-
-		// These rules override default values in the base modern rules.
 
 		// ----------------------------------
 		//              ESLint
 		// ----------------------------------
 
 		/**
-		 * https://eslint.org/docs/rules/no-unused-vars
-		 */
-		'no-unused-vars': 'off',
-
-		/**
-		 * Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time. #excessiveReports
-		 *
-		 * TODO: Disabled temporarily until we decide to disable permanently or not.
-		 *
-		 * https://eslint.org/docs/rules/no-useless-escape
-		 */
-		'no-useless-escape': 'off',
-
-		/**
-		 * Given the codebase style, this rule triggers multiple warnings that will
-		 * clutter up the lint report every time. #excessiveReports
-		 *
-		 * TODO: Disabled temporarily until we decide to disable permanently or not.
-		 *
-		 * https://eslint.org/docs/rules/prefer-spread
-		 */
-		'prefer-spread': 'off', // originally 'warn', not 'err'
-
-		/**
-		 * ESLint equivalent of `triple-equals` from TSLint.
 		 * https://eslint.org/docs/rules/eqeqeq
 		 */
 		eqeqeq: 'error',
 
 		/**
-		 * ESLint equivalent of our setting in `object-literal-shorthand` from TSLint.
 		 * https://eslint.org/docs/rules/object-shorthand
 		 */
 		'object-shorthand': 'error',
 
 		/**
-		 * ESLint equivalent of `prefer-const` from TSLint.
 		 * https://eslint.org/docs/rules/prefer-const
 		 */
 		'prefer-const': 'error',
 
-		// ******************************************************************
-		//                   base modern rules (disabled)
-		// ******************************************************************
-
-		// These modern rules are added by eslint-config-airbnb-typescript and
-		// @typescript-eslint/eslint-plugin but are disabled for compatibility
-		// with the existing codebase style due to excessive violations.
-
-		// ----------------------------------
-		//              ESLint
-		// ----------------------------------
-
 		/**
-		 * https://eslint.org/docs/rules/func-names
+		 * https://eslint.org/docs/rules/prefer-spread
 		 */
-		'func-names': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-labels
-		 */
-		'no-labels': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/new-cap
-		 */
-		'new-cap': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-invalid-this
-		 */
-		'no-invalid-this': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/class-methods-use-this
-		 */
-		'class-methods-use-this': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-restricted-syntax
-		 *
-		 * Especially because of this restricted syntax: `iterators/generators require
-		 * regenerator-runtime, which is too heavyweight for this guide to allow them.
-		 * Separately, loops should be avoided in favor of array iterations`
-		 */
-		'no-restricted-syntax': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/max-classes-per-file
-		 */
-		'max-classes-per-file': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-param-reassign
-		 */
-		'no-param-reassign': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-continue
-		 */
-		'no-continue': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-console
-		 */
-		'no-console': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-plusplus
-		 */
-		'no-plusplus': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-underscore-dangle
-		 */
-		'no-underscore-dangle': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-empty
-		 */
-		'no-empty': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/one-var
-		 */
-		'one-var': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-prototype-builtins
-		 */
-		'no-prototype-builtins': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/consistent-return
-		 */
-		'consistent-return': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-else-return
-		 */
-		'no-else-return': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-await-in-loop
-		 */
-		'no-await-in-loop': 'off',
-
-		/**
-		 * https://eslint.org/docs/rules/no-underscore-dangle
-		 */
-		'no-underscore-dangle': 'off',
-
-		/**
-		 * Partial ESLint equivalent of `no-string-throw` from TSLint.
-		 * https://eslint.org/docs/rules/no-throw-literal
-		 */
-		'no-throw-literal': 'off',
-
-		// ----------------------------------
-		//        @typescript-eslint
-		// ----------------------------------
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/lines-between-class-members.md
-		 */
-		'@typescript-eslint/lines-between-class-members': 'off',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-shadow.md
-		 */
-		'@typescript-eslint/no-shadow': 'off',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-use-before-define.md
-		 */
-		'@typescript-eslint/no-use-before-define': 'off',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-loop-func.md
-		 */
-		'@typescript-eslint/no-loop-func': 'off',
-
-		/**
-		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
-		 */
-		'@typescript-eslint/naming-convention': 'off',
-
-		// ----------------------------------
-		//             import
-		// ----------------------------------
-
-		/**
-		 * https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/no-extraneous-dependencies.md
-		 */
-		'import/no-extraneous-dependencies': 'off',
-
-		/**
-		 * https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/no-cycle.md
-		 */
-		'import/no-cycle': 'off',
-
-		/**
-		 * https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/prefer-default-export.md
-		 */
-		'import/prefer-default-export': 'off',
+		'prefer-spread': 'error',
 	},
 };
-
-// ******************************************************************
-//                           removed rules
-// ******************************************************************
-
-// ---------------------------------------------------
-//            rules delegated to Prettier
-// ---------------------------------------------------
-
-// array-element-newline
-// https://eslint.org/docs/rules/array-element-newline
-
-// indent
-// https://eslint.org/docs/rules/indent
-
-// @typescript-eslint/indent
-// https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/indent.md
-
-// @typescript-eslint/semi
-// https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/semi.md
-
-/**
- * ESLint equivalent of `trailing-comma` from TSLint.
- * https://eslint.org/docs/rules/comma-dangle
- */
-//  'comma-dangle': [
-// 	'error',
-// 	{
-// 		objects: 'always-multiline',
-// 		arrays: 'always-multiline',
-// 		functions: 'always-multiline',
-// 		imports: 'always-multiline',
-// 		exports: 'always-multiline',
-// 	},
-// ],
-
-// ---------------------------------------------------
-//       rules removed for miscellaneous reasons
-// ---------------------------------------------------
-
-/**
- * Reasons listed in Notion document
- * https://www.notion.so/n8n/Linting-Formatting-caf1690c53aa438ba979539347ac40f7
- */
-
-// id-match
-// https://eslint.org/docs/rules/id-match
-
-// radix
-// https://eslint.org/docs/rules/radix
-
-// @typescript-eslint/explicit-module-boundary-types
-// https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/explicit-module-boundary-types.md
-
-// @typescript-eslint/no-require-imports
-// https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-require-imports.md
-
-// ---------------------------------------------------
-//             rules covered by Airbnb base
-// ---------------------------------------------------
-
-/**
- * Coverage must *exact*, meaning with the same default log type and options
- *
- * Checked using ruleset comparison app: https://sqren.github.io/eslint-compare
- *
- * And double-checked by searching in repo:
- * https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base/rules
- *
- * Example: https://github.com/airbnb/javascript/blob/f5c14cae2ff58000cead98290b8ec4b54dda2f14/packages/eslint-config-airbnb-base/rules/best-practices.js#L31
- */
-
-// guard-for-in
-// https://eslint.org/docs/rules/guard-for-in
-
-// no-caller
-// https://eslint.org/docs/rules/no-caller
-
-// no-duplicate-imports
-// https://eslint.org/docs/rules/no-duplicate-imports
-
-// no-new-wrappers
-// https://eslint.org/docs/rules/no-new-wrappers
-
-// no-redeclare
-// https://eslint.org/docs/rules/no-redeclare
-
-// no-unused-labels
-// https://eslint.org/docs/rules/no-unused-labels
-
-// curly
-// https://eslint.org/docs/rules/curly
-
-// no-array-constructor
-// ESLint equivalent of our setting in `ban` from TSLint.
-// https://eslint.org/docs/rules/no-array-constructor
-
-// no-var
-// ESLint equivalent of `no-var-keyword` from TSLint.
-// https://eslint.org/docs/rules/no-var
-
-// use-isnan
-// ESLint equivalent of `use-isnan` from TSLint.
-// https://eslint.org/docs/rules/use-isnan
-
-// no-debugger
-// ESLint equivalent of `no-debugger` from TSLint.
-// https://eslint.org/docs/rules/no-debugger
-
-// new-parens
-// ESLint equivalent of `new-parens` from TSLint.
-// https://eslint.org/docs/rules/new-parens
-
-// no-unused-expressions
-// Covered by @typescript-eslint/no-unused-expressions
-
-// ---------------------------------------------------
-//        rules overriden due to prettier plugin
-// ---------------------------------------------------
-
-// https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
-// prefer-arrow-callback
-// https://eslint.org/docs/rules/prefer-arrow-callback
-// original options: ['off', { allowNamedFunctions: true }],
-
-// arrow-body-style
-// https://eslint.org/docs/rules/arrow-body-style
-
-
-/**
- * TODO LIST:
- * 1. One command to lint each package + one global command for all packages
- * 2. Lint-ignore and transpile-ignore ormconfig
- * 3. Lint and transpile ignore node-dev/templates
- * 4. Decide on nodes-base
- * 5. Decide on editor-ui
- * 6. Decide on #excessiveReports
- */
