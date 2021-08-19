@@ -63,7 +63,7 @@ module.exports = {
 		// https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
 
 		// TODO: Restore to `'error'` after dealing with lintings in all packages.
-		'prettier/prettier': 'error',
+		'prettier/prettier': 'off',
 
 		'arrow-body-style': 'off',
 		'prefer-arrow-callback': 'off',
@@ -329,6 +329,11 @@ module.exports = {
 		 * https://github.com/import-js/eslint-plugin-import/blob/master/docs/rules/order.md
 		 */
 		'import/order': 'error',
+
+		/**
+		 * https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-boolean-literal-compare.md
+		 */
+		'no-unnecessary-boolean-literal-compare': 'error',
 
 		// ******************************************************************
 		//                 modern rule overrides (enabled)
