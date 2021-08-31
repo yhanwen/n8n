@@ -3,6 +3,7 @@ node_modules
 .tmp
 tmp
 dist
+dist_electron
 npm-debug.log*
 lerna-debug.log
 package-lock.json

@@ -8,12 +8,14 @@
     "name": "Jan Oberhauser",
     "email": "jan@n8n.io"
   },
-  "main": "index.js",
+  "main": "background.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/n8n-io/n8n.git"
   },
   "scripts": {
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "cross-env VUE_APP_URL_BASE_API=http://localhost:5678/ vue-cli-service electron:serve",
     "build": "cross-env VUE_APP_PUBLIC_PATH=\"/%BASE_PATH%/\" vue-cli-service build",
     "dev": "npm run serve",
     "format": "cd ../.. && node_modules/prettier/bin-prettier.js packages/editor-ui/**/**.ts --write",
@@ -25,9 +27,11 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "electron": "^14.0.0",
     "n8n-design-system": "~0.1.0",
     "timeago.js": "^4.0.2",
     "v-click-outside": "^3.1.2",
+    "vue-cli-plugin-electron-builder": "^2.1.1",
     "vue-fragment": "^1.5.2"
   },
   "devDependencies": {
@@ -57,6 +61,7 @@
     "axios": "^0.21.1",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.2.2",
     "cross-env": "^7.0.2",
     "dateformat": "^3.0.3",
     "element-ui": "~2.13.0",
@@ -72,11 +77,11 @@
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "n8n-workflow": "~0.66.0",
-    "sass": "^1.26.5",
     "normalize-wheel": "^1.0.1",
     "prismjs": "^1.17.1",
     "quill": "^2.0.0-dev.3",
     "quill-autoformat": "^0.1.1",
+    "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
     "string-template-parser": "^1.2.6",
     "ts-jest": "^26.3.0",

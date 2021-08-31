@@ -10,6 +10,20 @@ module.exports = {
 		webpackBundleAnalyzer: {
 			openAnalyzer: false,
 		},
+		electronBuilder: {
+			chainWebpackMainProcess: config => {
+				config.module
+					.rule("compile")
+					.test(/background/)
+					.exclude.add(/(node_modules|dist_electron)/)
+					.end()
+					.use("babel")
+					.loader("babel-loader")
+					.options({
+						presets: ["@babel/preset-typescript"]
+					});
+			}
+		}
 	},
 	configureWebpack: {
 		plugins: [
