@@ -247,17 +247,9 @@ export function getWorkflowWebhooksBasic(workflow: Workflow): IWebhookData[] {
 		}
 
 		if (responseMode === 'noBodyResponse' && didSendResponse === false) {
-			if (webhookResultData.webhookResponse !== undefined) {
-				// Data to respond with is given
-				responseCallback(null, {
-					data: webhookResultData.webhookResponse,
-					responseCode,
-				});
-			} else {
-				responseCallback(null, {
-					responseCode,
-				});
-			}
+			responseCallback(null, {
+				responseCode,
+			});
 
 			didSendResponse = true;
 		}

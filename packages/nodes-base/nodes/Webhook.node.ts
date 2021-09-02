@@ -159,6 +159,11 @@ export class Webhook implements INodeType {
 				type: 'options',
 				options: [
 					{
+						name: 'Empty body response',
+						value: 'noBodyResponse',
+						description: 'Responds with empty body',
+					},
+					{
 						name: 'On Received',
 						value: 'onReceived',
 						description: 'Returns directly with defined Response Code',
@@ -167,11 +172,6 @@ export class Webhook implements INodeType {
 						name: 'Last Node',
 						value: 'lastNode',
 						description: 'Returns data of the last executed node',
-					},
-					{
-						name: 'No Body Response',
-						value: 'noBodyResponse',
-						description: 'Returns data without a body',
 					},
 				],
 				default: 'onReceived',
