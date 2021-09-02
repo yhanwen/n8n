@@ -110,7 +110,9 @@ import {
 	IExecutionsStopData,
 	IExecutionsSummary,
 	IExternalHooksClass,
+	IInternalHooksClass,
 	IN8nUISettings,
+	InternalHooks,
 	IPackageVersions,
 	ITagWithCountDb,
 	IWorkflowExecutionDataProcess,
@@ -132,8 +134,6 @@ import {
 import * as config from '../config';
 
 import * as TagHelpers from './TagHelpers';
-import { IInternalHooksClass } from './Interfaces';
-import { InternalHooks } from './internalHooks';
 import { TagEntity } from './databases/entities/TagEntity';
 import { Telemetry } from './telemetry';
 import { WorkflowEntity } from './databases/entities/WorkflowEntity';
@@ -226,7 +226,6 @@ class App {
 		this.sslCert = config.get('ssl_cert');
 
 		this.externalHooks = ExternalHooks();
-
 
 		this.presetCredentialsLoaded = false;
 		this.endpointPresetCredentials = config.get('credentials.overwrite.endpoint') as string;
@@ -460,10 +459,13 @@ class App {
 				};
 
 				jwt.verify(token, getKey, jwtVerifyOptions, (err: jwt.VerifyErrors, decoded: object) => {
-					if (err) ResponseHelper.jwtAuthAuthorizationError(res, 'Invalid token');
-					else if (!isTenantAllowed(decoded))
+					if (err) {
+						ResponseHelper.jwtAuthAuthorizationError(res, 'Invalid token');
+					} else if (!isTenantAllowed(decoded)) {
 						ResponseHelper.jwtAuthAuthorizationError(res, 'Tenant not allowed');
-					else next();
+					} else {
+						next();
+					}
 				});
 			});
 		}
@@ -883,6 +885,7 @@ class App {
 					}
 
 					await this.externalHooks.run('workflow.afterUpdate', [workflow]);
+					// eslint-disable-next-line @typescript-eslint/no-floating-promises
 					this.internalHooks.onWorkflowSave(workflow);
 
 					if (workflow.active) {

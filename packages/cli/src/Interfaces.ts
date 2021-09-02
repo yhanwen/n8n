@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-cycle */
 import {
-	ITelemetrySettings,
 	ExecutionError,
 	ICredentialDataDecryptedObject,
 	ICredentialsDecrypted,
@@ -12,6 +11,7 @@ import {
 	IRunData,
 	IRunExecutionData,
 	ITaskData,
+	ITelemetrySettings,
 	IWorkflowBase as IWorkflowBaseWorkflow,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	IWorkflowCredentials,
