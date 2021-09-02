@@ -132,10 +132,10 @@ import {
 import * as config from '../config';
 
 import * as TagHelpers from './TagHelpers';
-import { Telemetry } from './telemetry';
 import { IInternalHooksClass } from './Interfaces';
 import { InternalHooks } from './internalHooks';
 import { TagEntity } from './databases/entities/TagEntity';
+import { Telemetry } from './telemetry';
 import { WorkflowEntity } from './databases/entities/WorkflowEntity';
 import { WorkflowNameRequest } from './WorkflowHelpers';
 
