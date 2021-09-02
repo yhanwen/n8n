@@ -112,7 +112,6 @@ import {
 	IExternalHooksClass,
 	IInternalHooksClass,
 	IN8nUISettings,
-	InternalHooks,
 	IPackageVersions,
 	ITagWithCountDb,
 	IWorkflowExecutionDataProcess,
@@ -133,6 +132,7 @@ import {
 
 import * as config from '../config';
 
+import { InternalHooks } from './InternalHooks';
 import * as TagHelpers from './TagHelpers';
 import { TagEntity } from './databases/entities/TagEntity';
 import { Telemetry } from './telemetry';
@@ -885,14 +885,12 @@ class App {
 					}
 
 					await this.externalHooks.run('workflow.afterUpdate', [workflow]);
-					// eslint-disable-next-line @typescript-eslint/no-floating-promises
-					this.internalHooks.onWorkflowSave(workflow);
+					void this.internalHooks.onWorkflowSave(workflow);
 
 					if (workflow.active) {
 						// When the workflow is supposed to be active add it again
 						try {
 							await this.externalHooks.run('workflow.activate', [workflow]);
-
 							await this.activeWorkflowRunner.add(id, isActive ? 'update' : 'activate');
 						} catch (error) {
 							// If workflow could not be activated set it again to inactive
@@ -2712,7 +2710,7 @@ export async function start(): Promise<void> {
 		console.log(`Version: ${versions.cli}`);
 
 		await app.externalHooks.run('n8n.ready', [app]);
-		app.internalHooks.onServerStarted();
+		void app.internalHooks.onServerStarted();
 	});
 }
 
