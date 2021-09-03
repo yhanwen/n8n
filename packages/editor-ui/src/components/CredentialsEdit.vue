@@ -20,7 +20,7 @@
 								</g>
 							</g>
 						</svg>
-						<span class="doc-link-text">Need help? <a class="doc-hyperlink" :href="documentationUrl" target="_blank">Open credential docs</a></span>
+						<span class="doc-link-text">Need help? <a class="doc-hyperlink" :href="documentationUrl" target="_blank" @click="onDocumentationUrlClick">Open credential docs</a></span>
 					</div>
 				</div>
 			</div>
@@ -306,6 +306,12 @@ export default mixins(
 			// Handle the close externally as the visible parameter is an external prop
 			// and is so not allowed to be changed here.
 			this.$emit('closeDialog');
+		},
+		onDocumentationUrlClick (): void {
+			this.$telemetry.track('User clicked credential modal docs link', {
+				docs_link: this.documentationUrl,
+				credential_type: this.credentialType,
+			});
 		},
 	},
 });
