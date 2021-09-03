@@ -83,6 +83,9 @@ export default mixins(
 				this.loadCredentialTypes();
 			}
 			this.$externalHooks().run('credentialsList.dialogVisibleChanged', { dialogVisible: newValue });
+			if(newValue) {
+				this.$telemetry.track('User opened Credentials panel');
+			}
 		},
 	},
 	methods: {
