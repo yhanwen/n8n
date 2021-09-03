@@ -159,6 +159,10 @@ export default mixins(externalHooks).extend({
 				oldValue,
 				newValue,
 			});
+			this.$telemetry.track('User changed nodes panel filter', {
+				old_filter: oldValue,
+				new_filter: newValue,
+			});
 		},
 	},
 	methods: {
