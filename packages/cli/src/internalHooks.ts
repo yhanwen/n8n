@@ -18,4 +18,24 @@ export class InternalHooks implements IInternalHooksClass {
 			nodesGraph,
 		});
 	}
+
+	async onWorkflowActivated(workflow: WorkflowEntity): Promise<void> {
+		await this.telemetry.track('User set workflow active status', {
+			workflow_id: workflow.id.toString(),
+			is_active: workflow.active,
+		});
+	}
+
+	async onWorkflowTagsUpdated(workflowId: string, tagsCount: number): Promise<void> {
+		await this.telemetry.track('User set workflow active status', {
+			workflow_id: workflowId,
+			new_tag_count: tagsCount,
+		});
+	}
+
+	async onWorkflowDeleted(workflowId: string): Promise<void> {
+		await this.telemetry.track('User set workflow active status', {
+			workflow_id: workflowId,
+		});
+	}
 }

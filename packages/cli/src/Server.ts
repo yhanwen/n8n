@@ -62,8 +62,8 @@ import {
 	INodeParameters,
 	INodePropertyOptions,
 	INodeTypeDescription,
-	ITelemetryClientConfig,
 	IRunData,
+	ITelemetryClientConfig,
 	ITelemetrySettings,
 	IWorkflowBase,
 	IWorkflowCredentials,
@@ -866,6 +866,8 @@ class App {
 						if (tags.length) {
 							await TagHelpers.createRelations(req.params.id, tags, tablePrefix);
 						}
+
+						void this.internalHooks.onWorkflowTagsUpdated(req.params.id, tags.length);
 					}
 
 					// We sadly get nothing back from "update". Neither if it updated a record
@@ -890,6 +892,7 @@ class App {
 					if (workflow.active) {
 						// When the workflow is supposed to be active add it again
 						try {
+							void this.internalHooks.onWorkflowActivated(workflow);
 							await this.externalHooks.run('workflow.activate', [workflow]);
 							await this.activeWorkflowRunner.add(id, isActive ? 'update' : 'activate');
 						} catch (error) {
@@ -929,6 +932,7 @@ class App {
 				}
 
 				await Db.collections.Workflow!.delete(id);
+				void this.internalHooks.onWorkflowDeleted(id);
 				await this.externalHooks.run('workflow.afterDelete', [id]);
 
 				return true;
