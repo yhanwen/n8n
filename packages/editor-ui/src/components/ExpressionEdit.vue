@@ -101,6 +101,11 @@ export default mixins(
 			(this.$refs.inputFieldExpression as any).itemSelected(eventData); // tslint:disable-line:no-any
 
 			this.$externalHooks().run('expressionEdit.itemSelected', { parameter: this.parameter, value: this.value, selectedItem: eventData });
+			this.$telemetry.track('User inserted item from Expression Editor variable selector', {
+				node_type_dest: this.$store.getters.activeNode.type.split('.')[1],
+				parameter_name_dest: this.parameter.displayName,
+				expression: eventData.variable,
+			});
 		},
 	},
 	watch: {
@@ -112,21 +117,25 @@ export default mixins(
 			this.$externalHooks().run('expressionEdit.dialogVisibleChanged', { dialogVisible: newValue, parameter: this.parameter, value: this.value, resolvedExpressionValue });
 
 			const nodeTypeSplit = this.$store.getters.activeNode.type.split('.');
-			
-			if(!!newValue && nodeTypeSplit.length === 2 && nodeTypeSplit[0] === 'n8n-nodes-base') {
-				let isValueDefault = false;
-				if(this.parameter.type === 'string') {
-					isValueDefault = this.value === `=${this.parameter.default}`;
-				} else {
-					isValueDefault = this.value === `={{${this.parameter.default}}}`;
-				}
 
+			let isValueDefault = false;
+			if(this.parameter.type === 'string') {
+				isValueDefault = this.value === `=${this.parameter.default}`;
+			} else {
+				isValueDefault = this.value === `={{${this.parameter.default}}}`;
+			}
+
+			if(!!newValue && nodeTypeSplit.length === 2 && nodeTypeSplit[0] === 'n8n-nodes-base') {
 				this.$telemetry.track('User opened Expression Editor', {
 					node_type: nodeTypeSplit[1],
 					parameter_name: this.parameter.displayName,
 					parameter_field_type: this.parameter.type,
 					new_expression: isValueDefault,
 				});
+			}
+
+			if(!newValue) {
+				this.$telemetry.track('User closed Expression Editor', { empty_expression: isValueDefault });
 			}
 		},
 	},
