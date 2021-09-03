@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import RudderAnalytics = require('@rudderstack/rudder-sdk-node');
+import TelemetryClient = require('@rudderstack/rudder-sdk-node');
 import { IDataObject } from 'n8n-workflow';
 import config = require('../../config');
 
@@ -14,7 +14,7 @@ export class Telemetry {
 
 		const enabled = config.get('telemetry.enabled') as boolean;
 		if (enabled) {
-			this.client = new RudderAnalytics(
+			this.client = new TelemetryClient(
 				config.get('telemetry.config.backend.key') as string,
 				config.get('telemetry.config.backend.url') as string,
 			);

@@ -654,30 +654,30 @@ const config = convict({
 		config: {
 			frontend: {
 				key: {
-					doc: 'Rudder key for frontend.',
+					doc: 'Telemetry key for frontend.',
 					format: String,
 					default: '1wfyHJrZGsJmqh86XcncyX2SN3T',
-					env: 'N8N_TELEMETRY_RUDDER_KEY_FRONTEND',
+					env: 'N8N_TELEMETRY_KEY_FRONTEND',
 				},
 				url: {
-					doc: 'Rudder data plane URL for frontend.',
+					doc: 'Telemetry data plane URL for frontend.',
 					format: String,
 					default: 'http://telemetry-stage.n8n.io',
-					env: 'N8N_TELEMETRY_RUDDER_DATA_PLANE_URL_FRONTEND',
+					env: 'N8N_TELEMETRY_DATA_PLANE_URL_FRONTEND',
 				},
 			},
 			backend: {
 				key: {
-					doc: 'Rudder key for backend.',
+					doc: 'Telemetry key for backend.',
 					format: String,
 					default: '1wfxw1YdRGrntY8intaq53hui51',
-					env: 'N8N_TELEMETRY_RUDDER_KEY_BACKEND',
+					env: 'N8N_TELEMETRY_KEY_BACKEND',
 				},
 				url: {
-					doc: 'Rudder data plane URL for backend.',
+					doc: 'Telemetry data plane URL for backend.',
 					format: String,
 					default: 'http://telemetry-stage.n8n.io/v1/batch',
-					env: 'N8N_TELEMETRY_RUDDER_DATA_PLANE_URL_BACKEND',
+					env: 'N8N_TELEMETRY_DATA_PLANE_URL_FRONTEND',
 				},
 			},
 		},

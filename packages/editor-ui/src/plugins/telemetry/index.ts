@@ -4,7 +4,7 @@ import {
 	IDataObject,
 } from 'n8n-workflow';
 
-import * as rudderanalytics from 'rudder-sdk-js';
+import * as telemetryClient from 'rudder-sdk-js';
 
 declare module 'vue/types/vue' {
 	interface Vue {
@@ -33,8 +33,8 @@ class Telemetry {
 				return;
 			}
 
-			rudderanalytics.load(options.config.key, options.config.url, { logLevel: 'DEBUG' });
-			this.telemetry = rudderanalytics;
+			telemetryClient.load(options.config.key, options.config.url, { logLevel: 'DEBUG' });
+			this.telemetry = telemetryClient;
 		}
 	}
 

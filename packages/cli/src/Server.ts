@@ -62,7 +62,7 @@ import {
 	INodeParameters,
 	INodePropertyOptions,
 	INodeTypeDescription,
-	IRudderAnalyticsConfig,
+	ITelemetryClientConfig,
 	IRunData,
 	ITelemetrySettings,
 	IWorkflowBase,
@@ -237,7 +237,7 @@ class App {
 		};
 
 		if (telemetrySettings.enabled) {
-			telemetrySettings.config = config.get('telemetry.config.frontend') as IRudderAnalyticsConfig;
+			telemetrySettings.config = config.get('telemetry.config.frontend') as ITelemetryClientConfig;
 		}
 
 		this.frontendSettings = {

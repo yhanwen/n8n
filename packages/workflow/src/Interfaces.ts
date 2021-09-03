@@ -925,12 +925,12 @@ export type JsonValue = string | number | boolean | null | JsonObject | JsonValu
 
 export type JsonObject = { [key: string]: JsonValue };
 
-export interface IRudderAnalyticsConfig {
+export interface ITelemetryClientConfig {
 	url: string;
 	key: string;
 }
 
 export interface ITelemetrySettings {
 	enabled: boolean;
-	config?: IRudderAnalyticsConfig;
+	config?: ITelemetryClientConfig;
 }
