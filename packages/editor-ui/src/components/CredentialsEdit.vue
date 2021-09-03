@@ -230,6 +230,13 @@ export default mixins(
 		},
 		async credentialType (newValue, oldValue) {
 			this.$externalHooks().run('credentialsEdit.credentialTypeChanged', { newValue, oldValue, editCredentials: !!this.editCredentials, credentialType: this.credentialType, setCredentialType: this.setCredentialType });
+			if(newValue) {
+				this.$telemetry.track('User opened Credentials modal', {
+					source: this.node ? 'node' : 'primary_menu',
+					new_credential: !this.editCredentials,
+					credential_type: this.credentialType,
+				});
+			}
 		},
 	},
 	methods: {
