@@ -4,6 +4,7 @@ export * from './CredentialsHelper';
 export * from './CredentialTypes';
 export * from './CredentialsOverwrites';
 export * from './ExternalHooks';
+export * from './InternalHooks';
 export * from './Interfaces';
 export * from './LoadNodesAndCredentials';
 export * from './NodeTypes';

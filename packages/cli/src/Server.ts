@@ -110,8 +110,8 @@ import {
 	IExecutionsStopData,
 	IExecutionsSummary,
 	IExternalHooksClass,
-	// IInternalHooksClass,
 	IN8nUISettings,
+	InternalHooks,
 	IPackageVersions,
 	ITagWithCountDb,
 	IWorkflowExecutionDataProcess,
@@ -132,7 +132,6 @@ import {
 
 import * as config from '../config';
 
-import { InternalHooks } from './InternalHooks';
 import * as TagHelpers from './TagHelpers';
 import { TagEntity } from './databases/entities/TagEntity';
 import { Telemetry } from './telemetry';
