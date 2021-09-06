@@ -13,6 +13,7 @@ import {
 	INodeIssueData,
 	INodeTypeDescription,
 	IRunData,
+	ITelemetrySettings,
 	ITaskData,
 	IWorkflowSettings,
 } from 'n8n-workflow';
@@ -88,7 +89,7 @@ const state: IRootState = {
 	},
 	sidebarMenuItems: [],
 	instanceId: '',
-	telemetry: {},
+	telemetry: null,
 };
 
 const modules = {
@@ -553,7 +554,7 @@ export const store = new Vuex.Store({
 		setInstanceId(state, instanceId: string) {
 			Vue.set(state, 'instanceId', instanceId);
 		},
-		setTelemetry(state, telemetry: IDataObject) {
+		setTelemetry(state, telemetry: ITelemetrySettings) {
 			Vue.set(state, 'telemetry', telemetry);
 		},
 		setOauthCallbackUrls(state, urls: IDataObject) {
@@ -711,7 +712,7 @@ export const store = new Vuex.Store({
 		versionCli: (state): string => {
 			return state.versionCli;
 		},
-		telemetry: (state): IDataObject => {
+		telemetry: (state): ITelemetrySettings | null => {
 			return state.telemetry;
 		},
 		oauthCallbackUrls: (state): object => {

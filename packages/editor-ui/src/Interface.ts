@@ -17,6 +17,7 @@ import {
 	IRun,
 	IRunData,
 	ITaskData,
+	ITelemetrySettings,
 	WorkflowExecuteMode,
 } from 'n8n-workflow';
 
@@ -617,7 +618,7 @@ export interface IRootState {
 	workflow: IWorkflowDb;
 	sidebarMenuItems: IMenuItem[];
 	instanceId: string;
-	telemetry: IDataObject;
+	telemetry: ITelemetrySettings | null;
 }
 
 export interface ITagsState {

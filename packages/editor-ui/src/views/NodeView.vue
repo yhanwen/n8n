@@ -104,7 +104,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { TelemetryPlugin } from '../plugins/telemetry';
 import {
 	OverlaySpec,
 } from 'jsplumb';
