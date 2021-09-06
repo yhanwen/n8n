@@ -4,7 +4,7 @@ import { IInternalHooksClass } from '.';
 import { Telemetry } from './telemetry';
 import { WorkflowEntity } from './databases/entities/WorkflowEntity';
 
-export class InternalHooks implements IInternalHooksClass {
+class InternalHooks implements IInternalHooksClass {
 	constructor(private telemetry: Telemetry) {}
 
 	async onServerStarted(): Promise<void> {
@@ -39,3 +39,5 @@ export class InternalHooks implements IInternalHooksClass {
 		});
 	}
 }
+
+export { InternalHooks };

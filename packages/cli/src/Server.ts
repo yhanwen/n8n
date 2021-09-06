@@ -110,7 +110,7 @@ import {
 	IExecutionsStopData,
 	IExecutionsSummary,
 	IExternalHooksClass,
-	IInternalHooksClass,
+	// IInternalHooksClass,
 	IN8nUISettings,
 	IPackageVersions,
 	ITagWithCountDb,
@@ -160,7 +160,7 @@ class App {
 
 	waitTracker: WaitTrackerClass;
 
-	internalHooks: IInternalHooksClass;
+	internalHooks: InternalHooks;
 
 	defaultWorkflowName: string;
 
