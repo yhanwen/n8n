@@ -370,6 +370,7 @@ export default mixins(
 				});
 
 				this.$externalHooks().run('execution.open', { workflowId: data.workflowData.id, workflowName: data.workflowData.name, executionId });
+				this.$telemetry.track('User opened read-only execution', { workflow_id: data.workflowData.id, execution_mode: data.mode, execution_finished: data.finished });
 
 				if (data.finished !== true && data.data.resultData.error) {
 					// Check if any node contains an error
