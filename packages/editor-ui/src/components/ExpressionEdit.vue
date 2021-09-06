@@ -97,15 +97,8 @@ export default mixins(
 		},
 
 		itemSelected (eventData: IVariableItemSelected) {
-			// User inserted item from Expression Editor variable selector
 			(this.$refs.inputFieldExpression as any).itemSelected(eventData); // tslint:disable-line:no-any
-
 			this.$externalHooks().run('expressionEdit.itemSelected', { parameter: this.parameter, value: this.value, selectedItem: eventData });
-			this.$telemetry.track('User inserted item from Expression Editor variable selector', {
-				node_type_dest: this.$store.getters.activeNode.type.split('.')[1],
-				parameter_name_dest: this.parameter.displayName,
-				expression: eventData.variable,
-			});
 		},
 	},
 	watch: {
