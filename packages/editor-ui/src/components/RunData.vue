@@ -626,7 +626,7 @@ export default mixins(
 				this.closeBinaryDataDisplay();
 				this.$externalHooks().run('runData.displayModeChanged', { newValue, oldValue });
 				if(this.node) {
-					const nodeType = this.node ? this.node.type.split('.')[1] : '';
+					const nodeType = this.node ? this.node.type : '';
 					this.$telemetry.track('User changed node output view mode', { old_mode: oldValue, new_mode: newValue, node_type: nodeType });
 				}
 			},
