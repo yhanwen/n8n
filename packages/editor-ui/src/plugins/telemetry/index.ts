@@ -27,20 +27,15 @@ class Telemetry {
 
 	private telemetry?: any; // tslint:disable-line:no-any
 
-	init(options: ITelemetrySettings) {
+	init(options: ITelemetrySettings, instanceId: string) {
 		if (options.enabled && !this.telemetry) {
 			if(!options.config) {
 				return;
 			}
 
-			telemetryClient.load(options.config.key, options.config.url, { logLevel: 'DEBUG' });
+			telemetryClient.load(options.config.key, options.config.url, { logLevel: 'DEBUG', integrations: { All: false }, loadIntegration: false });
 			this.telemetry = telemetryClient;
-		}
-	}
-
-	identify(event: string, properties?: IDataObject) {
-		if (this.telemetry) {
-			this.telemetry.identify(event, properties);
+			this.telemetry.identify(instanceId);
 		}
 	}
 

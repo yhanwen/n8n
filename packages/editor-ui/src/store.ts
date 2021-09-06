@@ -686,6 +686,10 @@ export const store = new Vuex.Store({
 			return state.stateIsDirty;
 		},
 
+		instanceId: (state): string => {
+			return state.instanceId;
+		},
+
 		saveDataErrorExecution: (state): string => {
 			return state.saveDataErrorExecution;
 		},

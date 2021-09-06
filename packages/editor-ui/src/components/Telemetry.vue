@@ -15,7 +15,7 @@ export default Vue.extend({
 	watch: {
 		telemetry(opts) {
 			if (opts.enabled) {
-				this.$telemetry.init(opts);
+				this.$telemetry.init(opts, this.$store.getters.instanceId);
 			}
 		},
 	},
