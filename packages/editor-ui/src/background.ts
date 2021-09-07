@@ -4,10 +4,8 @@ import { app, BrowserWindow } from "electron";
 class MainProcess {
 	mainWindow: BrowserWindow | null = null;
 
-	constructor() { // TODO: async needed?
-		app.on("ready", async () => {
-			this.createMainWindow();
-		});
+	constructor() {
+		app.whenReady().then(() => this.createMainWindow());
 		app.on("window-all-closed", app.quit);
 	}
 
@@ -17,18 +15,13 @@ class MainProcess {
 			height: 600,
 			resizable: true,
 			webPreferences: { nodeIntegration: true },
-		}); // renderer process
+		});
 
-		// Vue boilerplate
 		if (process.env.WEBPACK_DEV_SERVER_URL) {
 			this.mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
-			if (!process.env.IS_TEST) {
-				this.mainWindow.webContents.openDevTools();
-			}
 		} else {
-			console.log('PROD');
-			// createProtocol("app");
-			// this.mainWindow.loadURL("app://./index.html");
+			createProtocol("app");
+			this.mainWindow.loadURL("app://./index.html");
 		}
 
 		this.mainWindow.on("closed", () => {
