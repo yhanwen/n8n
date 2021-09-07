@@ -1,5 +1,7 @@
-import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
+// import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import { app, BrowserWindow } from "electron";
+const path = require('path');
+const url = require('url');
 
 class MainProcess {
 	mainWindow: BrowserWindow | null = null;
@@ -20,8 +22,14 @@ class MainProcess {
 		if (process.env.WEBPACK_DEV_SERVER_URL) {
 			this.mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
 		} else {
-			createProtocol("app");
-			this.mainWindow.loadURL("app://./index.html");
+			// createProtocol("app");
+			// this.mainWindow.loadURL("app://./index.html");
+
+			this.mainWindow.loadURL(url.format({
+				pathname: path.join(__dirname, 'index.html'),
+				protocol: 'file:',
+				slashes: true,
+			}));
 		}
 
 		this.mainWindow.on("closed", () => {

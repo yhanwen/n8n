@@ -8,7 +8,7 @@
     "name": "Jan Oberhauser",
     "email": "jan@n8n.io"
   },
-  "main": "background.js",
+  "main": "dist_electron/bundled/background.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/n8n-io/n8n.git"
@@ -24,7 +24,10 @@
     "serve": "cross-env VUE_APP_URL_BASE_API=http://localhost:5678/ vue-cli-service serve",
     "test": "npm run test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "dependencies": {
     "concurrently": "^6.2.1",
@@ -36,6 +39,11 @@
   },
   "devDependencies": {
     "@beyonk/google-fonts-webpack-plugin": "^1.5.0",
+    "@electron-forge/cli": "^6.0.0-beta.60",
+    "@electron-forge/maker-deb": "^6.0.0-beta.60",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.60",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.60",
+    "@electron-forge/maker-zip": "^6.0.0-beta.60",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/vue-fontawesome": "^2.0.2",
@@ -98,5 +106,32 @@
     "vue-typed-mixins": "^0.2.0",
     "vue2-touch-events": "^3.2.1",
     "vuex": "^3.1.1"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "n8n_editor_ui"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
