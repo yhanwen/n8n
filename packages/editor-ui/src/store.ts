@@ -21,6 +21,7 @@ import {
 	ICredentialsResponse,
 	IExecutionResponse,
 	IExecutionsCurrentSummaryExtended,
+	IRootState,
 	IMenuItem,
 	INodeUi,
 	INodeUpdatePropertiesInformation,
@@ -29,59 +30,77 @@ import {
 	IUpdateInformation,
 	IWorkflowDb,
 	XYPositon,
+	IRestApiContext,
 } from './Interface';
+
+import tags from './modules/tags';
+import ui from './modules/ui';
+import workflows from './modules/workflows';
+import versions from './modules/versions';
 
 Vue.use(Vuex);
 
+const state: IRootState = {
+	activeExecutions: [],
+	activeWorkflows: [],
+	activeActions: [],
+	activeNode: null,
+	// @ts-ignore
+	baseUrl: process.env.VUE_APP_URL_BASE_API ? process.env.VUE_APP_URL_BASE_API : (window.BASE_PATH === '/%BASE_PATH%/' ? '/' : window.BASE_PATH),
+	credentials: null,
+	credentialTypes: null,
+	endpointWebhook: 'webhook',
+	endpointWebhookTest: 'webhook-test',
+	executionId: null,
+	executingNode: '',
+	executionWaitingForWebhook: false,
+	pushConnectionActive: true,
+	saveDataErrorExecution: 'all',
+	saveDataSuccessExecution: 'all',
+	saveManualExecutions: false,
+	timezone: 'America/New_York',
+	stateIsDirty: false,
+	executionTimeout: -1,
+	maxExecutionTimeout: Number.MAX_SAFE_INTEGER,
+	versionCli: '0.0.0',
+	oauthCallbackUrls: {},
+	n8nMetadata: {},
+	workflowExecutionData: null,
+	lastSelectedNode: null,
+	lastSelectedNodeOutputIndex: null,
+	nodeIndex: [],
+	nodeTypes: [],
+	nodeViewOffsetPosition: [0, 0],
+	nodeViewMoveInProgress: false,
+	selectedNodes: [],
+	sessionId: Math.random().toString(36).substring(2, 15),
+	urlBaseWebhook: 'http://localhost:5678/',
+	workflow: {
+		id: PLACEHOLDER_EMPTY_WORKFLOW_ID,
+		name: '',
+		active: false,
+		createdAt: -1,
+		updatedAt: -1,
+		connections: {},
+		nodes: [],
+		settings: {},
+		tags: [],
+	},
+	sidebarMenuItems: [],
+	instanceId: '',
+};
+
+const modules = {
+	tags,
+	ui,
+	workflows,
+	versions,
+};
+
 export const store = new Vuex.Store({
 	strict: process.env.NODE_ENV !== 'production',
-	state: {
-		activeExecutions: [] as IExecutionsCurrentSummaryExtended[],
-		activeWorkflows: [] as string[],
-		activeActions: [] as string[],
-		activeNode: null as string | null,
-		// @ts-ignore
-		baseUrl: process.env.VUE_APP_URL_BASE_API ? process.env.VUE_APP_URL_BASE_API : (window.BASE_PATH === '/%BASE_PATH%/' ? '/' : window.BASE_PATH),
-		credentials: null as ICredentialsResponse[] | null,
-		credentialTypes: null as ICredentialType[] | null,
-		endpointWebhook: 'webhook',
-		endpointWebhookTest: 'webhook-test',
-		executionId: null as string | null,
-		executingNode: '' as string | null,
-		executionWaitingForWebhook: false,
-		pushConnectionActive: false,
-		saveDataErrorExecution: 'all',
-		saveDataSuccessExecution: 'all',
-		saveManualExecutions: false,
-		timezone: 'America/New_York',
-		stateIsDirty: false,
-		executionTimeout: -1,
-		maxExecutionTimeout: Number.MAX_SAFE_INTEGER,
-		versionCli: '0.0.0',
-		oauthCallbackUrls: {},
-		n8nMetadata: {},
-		workflowExecutionData: null as IExecutionResponse | null,
-		lastSelectedNode: null as string | null,
-		lastSelectedNodeOutputIndex: null as number | null,
-		nodeIndex: [] as Array<string | null>,
-		nodeTypes: [] as INodeTypeDescription[],
-		nodeViewOffsetPosition: [0, 0] as XYPositon,
-		nodeViewMoveInProgress: false,
-		selectedNodes: [] as INodeUi[],
-		sessionId: Math.random().toString(36).substring(2, 15),
-		urlBaseWebhook: 'http://localhost:5678/',
-		workflow: {
-			id: PLACEHOLDER_EMPTY_WORKFLOW_ID,
-			name: '',
-			active: false,
-			createdAt: -1,
-			updatedAt: -1,
-			connections: {} as IConnections,
-			nodes: [] as INodeUi[],
-			settings: {} as IWorkflowSettings,
-		} as IWorkflowDb,
-		sidebarMenuItems: [] as IMenuItem[],
-	},
+	modules,
+	state,
 	mutations: {
 		// Active Actions
 		addActiveAction (state, action: string) {
@@ -527,8 +546,11 @@ export const store = new Vuex.Store({
 		setMaxExecutionTimeout (state, maxExecutionTimeout: number) {
 			Vue.set(state, 'maxExecutionTimeout', maxExecutionTimeout);
 		},
-		setVersionCli (state, version: string) {
+		setVersionCli(state, version: string) {
 			Vue.set(state, 'versionCli', version);
+		},
+		setInstanceId(state, instanceId: string) {
+			Vue.set(state, 'instanceId', instanceId);
 		},
 		setOauthCallbackUrls(state, urls: IDataObject) {
 			Vue.set(state, 'oauthCallbackUrls', urls);
@@ -563,6 +585,17 @@ export const store = new Vuex.Store({
 
 		setWorkflowSettings (state, workflowSettings: IWorkflowSettings) {
 			Vue.set(state.workflow, 'settings', workflowSettings);
+		},
+
+		setWorkflowTagIds (state, tags: string[]) {
+			Vue.set(state.workflow, 'tags', tags);
+		},
+
+		removeWorkflowTagId (state, tagId: string) {
+			const tags = state.workflow.tags as string[];
+			const updated = tags.filter((id: string) => id !== tagId);
+
+			Vue.set(state.workflow, 'tags', updated);
 		},
 
 		// Workflow
@@ -624,6 +657,16 @@ export const store = new Vuex.Store({
 				endpoint = process.env.VUE_APP_ENDPOINT_REST;
 			}
 			return `${state.baseUrl}${endpoint}`;
+		},
+		getRestApiContext(state): IRestApiContext {
+			let endpoint = 'rest';
+			if (process.env.VUE_APP_ENDPOINT_REST) {
+				endpoint = process.env.VUE_APP_ENDPOINT_REST;
+			}
+			return {
+				baseUrl: `${state.baseUrl}${endpoint}`,
+				sessionId: state.sessionId,
+			};
 		},
 		getWebhookBaseUrl: (state): string => {
 			return state.urlBaseWebhook;
@@ -818,6 +861,10 @@ export const store = new Vuex.Store({
 			return state.workflow.settings;
 		},
 
+		workflowTags: (state): string[] => {
+			return state.workflow.tags as string[];
+		},
+
 		// Workflow Result Data
 		getWorkflowExecution: (state): IExecutionResponse | null => {
 			return state.workflowExecutionData;
@@ -845,22 +892,4 @@ export const store = new Vuex.Store({
 			return state.sidebarMenuItems;
 		},
 	},
-
 });
-
-// import Vue from 'vue';
-// import Vuex from 'vuex';
-
-// Vue.use(Vuex)
-
-// export default new Vuex.Store({
-// 	state: {
-
-// 	},
-// 	mutations: {
-
-// 	},
-// 	actions: {
-
-// 	}
-// });
