@@ -25,8 +25,9 @@ class MainProcess {
 			// createProtocol("app");
 			// this.mainWindow.loadURL("app://./index.html");
 
+			// file:///Users/ivov/Development/n8n/packages/editor-ui/dist/index.htmls
 			this.mainWindow.loadURL(url.format({
-				pathname: path.join(__dirname, 'index.html'),
+				pathname: path.join(__dirname, '..', 'dist', 'index.html'),
 				protocol: 'file:',
 				slashes: true,
 			}));
