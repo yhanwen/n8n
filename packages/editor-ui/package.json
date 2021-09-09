@@ -8,7 +8,7 @@
     "name": "Jan Oberhauser",
     "email": "jan@n8n.io"
   },
-  "main": "dist_electron/bundled/background.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/n8n-io/n8n.git"
@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "concurrently": "^6.2.1",
+    "electron-squirrel-startup": "^1.0.0",
     "n8n-design-system": "~0.1.0",
     "timeago.js": "^4.0.2",
     "v-click-outside": "^3.1.2",
@@ -44,6 +45,7 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.60",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.60",
     "@electron-forge/maker-zip": "^6.0.0-beta.60",
+    "@electron-forge/plugin-webpack": "^6.0.0-beta.60",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/vue-fontawesome": "^2.0.2",
@@ -71,6 +73,7 @@
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.2",
+    "css-loader": "^6.2.0",
     "dateformat": "^3.0.3",
     "electron": "^14.0.0",
     "element-ui": "~2.13.0",
@@ -93,16 +96,19 @@
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
     "string-template-parser": "^1.2.6",
+    "style-loader": "^3.2.1",
     "ts-jest": "^26.3.0",
+    "ts-loader": "^9.2.5",
     "tslint": "^6.1.2",
     "typescript": "~4.3.5",
     "uuid": "^8.3.0",
     "vue": "^2.6.11",
     "vue-cli-plugin-webpack-bundle-analyzer": "^2.0.0",
     "vue-json-pretty": "1.7.1",
+    "vue-loader": "^15.9.8",
     "vue-prism-editor": "^0.3.0",
     "vue-router": "^3.0.6",
-    "vue-template-compiler": "^2.6.11",
+    "vue-template-compiler": "^2.6.14",
     "vue-typed-mixins": "^0.2.0",
     "vue2-touch-events": "^3.2.1",
     "vuex": "^3.1.1"
@@ -131,6 +137,24 @@
           "name": "@electron-forge/maker-rpm",
           "config": {}
         }
+      ],
+      "plugins": [
+        [
+          "@electron-forge/plugin-webpack",
+          {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./public/index.html",
+                  "js": "./src/main.ts",
+                  "name": "main_window"
+                }
+              ]
+            }
+          }
+        ]
       ]
     }
   }
