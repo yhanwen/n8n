@@ -1,7 +1,11 @@
 // import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, protocol } from "electron";
 const path = require('path');
 const url = require('url');
+
+// protocol.registerSchemesAsPrivileged([
+//   { scheme: "app", privileges: { secure: true, standard: true } },
+// ]);
 
 class MainProcess {
 	mainWindow: BrowserWindow | null = null;
@@ -16,7 +20,7 @@ class MainProcess {
 			width: 1000,
 			height: 600,
 			resizable: true,
-			webPreferences: { nodeIntegration: true },
+			webPreferences: { nodeIntegration: true, webSecurity: false },
 		});
 
 		if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -27,7 +31,8 @@ class MainProcess {
 
 			// file:///Users/ivov/Development/n8n/packages/editor-ui/dist/index.htmls
 			this.mainWindow.loadURL(url.format({
-				pathname: path.join(__dirname, '..', 'dist', 'index.html'),
+				// pathname: path.join(__dirname, '..', 'dist', 'index.html'), // dev server (original)
+				pathname: path.join('..', 'renderer', 'main_window', 'index.html'), // electron-forge start/make
 				protocol: 'file:',
 				slashes: true,
 			}));

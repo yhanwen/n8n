@@ -16,3 +16,4 @@ _START_PACKAGE
 .idea
 vetur.config.js
 nodelinter.config.json
+.webpack
