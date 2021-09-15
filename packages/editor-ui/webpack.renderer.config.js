@@ -37,9 +37,7 @@ module.exports = {
 	plugins: [
 		new VueLoaderPlugin(),
 	],
-	stats: {
-		warningsFilter: [
-			'imported as' // suppress warnings, TODO: Remove
-		]
-	}
+
+	stats: 'errors-only',
+
 };
