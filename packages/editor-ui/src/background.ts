@@ -1,11 +1,11 @@
-// import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
+import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import { app, BrowserWindow, protocol } from "electron";
 const path = require('path');
 const url = require('url');
 
-// protocol.registerSchemesAsPrivileged([
-//   { scheme: "app", privileges: { secure: true, standard: true } },
-// ]);
+protocol.registerSchemesAsPrivileged([
+  { scheme: "app", privileges: { secure: true, standard: true } },
+]);
 
 class MainProcess {
 	mainWindow: BrowserWindow | null = null;
@@ -26,16 +26,18 @@ class MainProcess {
 		if (process.env.WEBPACK_DEV_SERVER_URL) {
 			this.mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
 		} else {
-			// createProtocol("app");
+			createProtocol("app");
 			// this.mainWindow.loadURL("app://./index.html");
 
+			this.mainWindow.loadURL("app://./renderer/main_window/index.html");
+
 			// file:///Users/ivov/Development/n8n/packages/editor-ui/dist/index.htmls
-			this.mainWindow.loadURL(url.format({
-				// pathname: path.join(__dirname, '..', 'dist', 'index.html'), // dev server (original)
-				pathname: path.join('..', 'renderer', 'main_window', 'index.html'), // electron-forge start/make
-				protocol: 'file:',
-				slashes: true,
-			}));
+			// this.mainWindow.loadURL(url.format({
+			// 	// pathname: path.join(__dirname, '..', 'dist', 'index.html'), // dev server (original)
+			// 	pathname: path.join('..', '.webpack', 'renderer', 'main_window', 'index.html'), // electron-forge start/make
+			// 	protocol: 'file:',
+			// 	slashes: true,
+			// }));
 		}
 
 		this.mainWindow.on("closed", () => {
