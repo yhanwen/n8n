@@ -29,7 +29,7 @@ module.exports = {
     rules,
   },
   resolve: {
-    extensions: ['.js', '.ts', '.css'],
+    extensions: ['.js', '.ts', '.css', '.vue'],
 		alias: {
 			"@": path.resolve(__dirname, 'src/')
 		}
