@@ -29,13 +29,37 @@ class MainProcess {
 			createProtocol("app");
 			// this.mainWindow.loadURL("app://./index.html");
 
-			this.mainWindow.loadURL("app://./renderer/main_window/index.html");
+			// this.mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY as string);
 
-			// file:///Users/ivov/Development/n8n/packages/editor-ui/dist/index.htmls
+			console.log();
+			console.log('***************');
+			// console.log(path.join(__dirname, '..', 'renderer', 'main_window', 'index.html'))
+			// console.log(MAIN_WINDOW_WEBPACK_ENTRY);
+
+			// working for make, not for start
+			const myPath = path.join(__dirname, '..', 'renderer', 'main_window', 'index.html');
+
+			const myUrl = url.format({
+				pathname: myPath,
+				protocol: 'file:',
+				slashes: true,
+			});
+			// const myUrl2 = "app://./../../renderer/index.html";
+			console.log(myUrl);
+			console.log('***************');
+
+			// this.mainWindow.loadURL(myPath); // working
+
+			// this.mainWindow.webContents.openDevTools();
+
+			// @ts-ignore
+			this.mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY); // WORKING!
+
 			// this.mainWindow.loadURL(url.format({
 			// 	// pathname: path.join(__dirname, '..', 'dist', 'index.html'), // dev server (original)
-			// 	pathname: path.join('..', '.webpack', 'renderer', 'main_window', 'index.html'), // electron-forge start/make
-			// 	protocol: 'file:',
+			// 	// pathname: path.join(__dirname, '..', 'renderer', 'main_window', 'index.html'), // electron-forge start/make
+			// 	pathname: myPath,
+			// 	protocol: 'app:',
 			// 	slashes: true,
 			// }));
 		}
