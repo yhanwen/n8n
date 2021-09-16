@@ -4,7 +4,7 @@ const path = require('path');
 const url = require('url');
 
 protocol.registerSchemesAsPrivileged([
-  { scheme: "app", privileges: { secure: true, standard: true } },
+	{ scheme: "app", privileges: { secure: true, standard: true } },
 ]);
 
 class MainProcess {
