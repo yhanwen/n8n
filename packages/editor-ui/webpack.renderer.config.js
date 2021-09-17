@@ -41,3 +41,39 @@ module.exports = {
 	stats: 'errors-only',
 
 };
+
+
+
+// rules.push({
+// 	test: /\.scss$/,
+// 	oneOf: [
+// 		{
+// 			include: path.resolve(__dirname, '../../design-system'),
+// 			resourceQuery: /module/,
+// 			use: [
+// 				'vue-style-loader', // TODO: check options for this loader
+// 				{
+// 					loader: 'css-loader',
+// 					options: {
+// 						modules: true,
+// 					},
+// 				},
+// 				{
+// 					loader: 'sass-loader',
+// 					options: {
+// 						prependData: `@import "${path.resolve(__dirname, 'src/n8n-theme.scss')}";`
+// 					}
+// 				}
+// 			],
+// 		},
+// 		{
+// 			include: path.resolve(__dirname, '../../design-system'),
+// 			use: ['vue-style-loader', 'css-loader', {
+// 				loader: 'sass-loader',
+// 				options: {
+// 					prependData: `@import "${path.resolve(__dirname, 'src/n8n-theme.scss')}";`
+// 				}
+// 			}],
+// 		},
+// 	],
+// });
