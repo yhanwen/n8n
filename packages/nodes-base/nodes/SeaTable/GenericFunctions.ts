@@ -32,6 +32,8 @@ import {
 		IServerInfo,
 } from './Interfaces';
 import {URL} from 'url';
+import { access } from 'fs';
+import { rows } from 'mssql';
 
 const normalize = (subject: string): string => subject ? subject.normalize() : '';
 
@@ -70,6 +72,93 @@ export function apiCtx(api: IApi): ICtx {
 		}
 
 		return {api: prepApi} as ICtx;
+}
+
+
+export async function seatableApiRequest(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, credentials: IDataObject, method: string, endpoint: string,  body: any = {}, qs: IDataObject = {}, option: IDataObject = {}): Promise<any> { // tslint:disable-line:no-any
+
+	const options: OptionsWithUri = {
+		headers: {
+			Authorization: `Token ${credentials.accessToken || credentials.token}`,
+		},
+		method,
+		qs,
+		body,
+		uri: `${credentials.server}${endpoint}`,
+		json: true,
+	};
+
+	console.log(options);
+
+	if (Object.keys(body).length === 0) {
+		delete options.body;
+	}
+
+	if (Object.keys(option).length !== 0) {
+		Object.assign(options, option);
+	}
+
+	try {
+		//@ts-ignore
+		return await this.helpers.request!(options);
+	} catch (error) {
+		throw new NodeApiError(this.getNode(), error);
+	}
+}
+
+export async function setableApiRequestAllItems(this: IHookFunctions | IExecuteFunctions | IPollFunctions, credentials: IDataObject, propertyName: string, method: string, endpoint: string, body: IDataObject, query?: IDataObject): Promise<any> { // tslint:disable-line:no-any
+
+	if (query === undefined) {
+		query = {};
+	}
+	const segment = schema.rowFetchSegmentLimit;
+	query.start = 0;
+	query.limit = segment;
+
+	const returnData: IDataObject[] = [];
+
+	let responseData;
+
+	do {
+		responseData = await seatableApiRequest.call(this, credentials, method, endpoint, body, query) as unknown as IRows;
+		//@ts-ignore
+		returnData.push.apply(returnData, responseData[propertyName]);
+		query.start = +query.start + segment;
+	} while (responseData.rows && responseData.rows.length > segment - 1);
+
+	return returnData;
+}
+
+
+export function getBaseAccessToken(this: IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions | IHookFunctions, credentials: IDataObject): Promise<IDataObject> {
+
+	const options: OptionsWithUri = {
+		headers: { 
+			Authorization: `Token ${credentials.token}`,
+		},
+		uri: `${credentials.server}/api/v2.1/dtable/app-access-token/`,
+		json: true,
+	};
+
+	return this.helpers.request!(options);
+}
+
+export function simplify(data: { results: [{ key: string, value: string } ]}, metadata: IDataObject) {
+	return data.results.map((row: IDataObject) => {
+		for (const key of Object.keys(row)) {
+			if (!key.startsWith('_')) {
+				row[metadata[key] as string] = row[key];
+				delete row[key];
+			} else {
+				delete row[key];
+			}
+		}
+		return row;
+	});
+}
+
+export function getColumns(data: { metadata: [{ key: string, name: string } ] }) {
+	return data.metadata.reduce((obj, value) => Object.assign(obj, { [`${value.key}`]: value.name }), {});
 }
 
 /**
@@ -285,6 +374,8 @@ async function ctxStageAppAccessToken(this: IHookFunctions | IExecuteFunctions |
 				throw new NodeOperationError(this.getNode(), 'SeaTable: Failed to obtain access token of the base.');
 		}
 
+		//console.log(ctx);
+
 		return ctx;
 }
 
@@ -312,6 +403,7 @@ export async function ctxStageDtableMetadata(this: IHookFunctions | IExecuteFunc
 		if (ctx.metadata?.tables === undefined) {
 				throw new NodeOperationError(this.getNode(), 'SeaTable: Metadata error.');
 		}
+		//console.log(ctx.metadata);
 
 		return ctx;
 }
@@ -421,6 +513,7 @@ export async function apiRequest(this: IHookFunctions | IExecuteFunctions | ILoa
 		};
 
 		try {
+				//console.log(apiRequestMergeOptionsWithUri(options, body, option));
 				return await this.helpers.request!(apiRequestMergeOptionsWithUri(options, body, option));
 		} catch (error) {
 				throw new NodeApiError(this.getNode(), error);

@@ -1,174 +1,154 @@
-import {IPollFunctions} from 'n8n-core';
+import {
+	IPollFunctions,
+} from 'n8n-core';
 
 import {
-		IDataObject,
-		ILoadOptionsFunctions,
-		INodeExecutionData,
-		INodeType,
-		INodeTypeDescription,
-		NodeOperationError,
+	IDataObject,
+	ILoadOptionsFunctions,
+	INodeExecutionData,
+	INodePropertyOptions,
+	INodeType,
+	INodeTypeDescription,
+	NodeOperationError,
 } from 'n8n-workflow';
 
 import {
-		apiCtx,
-		apiDtableColumns,
-		apiRequestAllItems,
-		columnNamesGlob,
-		columnNamesToArray,
-		getTableNames,
-		rowsFormatColumns,
-		rowsTimeFilter,
-		rowsTimeSort,
+	getBaseAccessToken,
+	getColumns,
+	seatableApiRequest,
+	setableApiRequestAllItems,
+	simplify,
 } from './GenericFunctions';
 
 import * as moment from 'moment';
-import {TCredentials, TTriggerOperation} from './types';
-import {IApi} from './Interfaces';
-import {schema} from './Schema';
 
 export class SeaTableTrigger implements INodeType {
-		description: INodeTypeDescription = {
-				displayName: 'SeaTable Trigger',
-				name: 'seatableTrigger',
-				icon: 'file:seaTable.svg',
-				group: ['trigger'],
-				version: 1,
-				description: 'Starts the workflow when SeaTable events occur',
-				// nodelinter-ignore-next-line NON_STANDARD_SUBTITLE
-				subtitle: '={{$parameter["operation"] + ": " + $parameter["table"]}}',
-				defaults: {
-						// nodelinter-ignore-next-line PARAM_DESCRIPTION_MISSING_WHERE_OPTIONAL
-						name: 'SeaTable Trigger',
-						color: '#FF8000',
+	description: INodeTypeDescription = {
+		displayName: 'SeaTable Trigger',
+		name: 'seatableTrigger',
+		icon: 'file:seaTable.svg',
+		group: ['trigger'],
+		version: 1,
+		description: 'Starts the workflow when SeaTable events occur',
+		subtitle: '={{$parameter["event"]}}',
+		defaults: {
+			name: 'SeaTable Trigger',
+			color: '#FF8000',
+		},
+		credentials: [
+			{
+				name: 'seatableApi',
+				required: true,
+			},
+		],
+		polling: true,
+		inputs: [],
+		outputs: ['main'],
+		properties: [
+			{
+				displayName: 'Table',
+				name: 'tableName',
+				type: 'options',
+				required: true,
+				typeOptions: {
+					loadOptionsMethod: 'getTableNames',
 				},
-				credentials: [
-						{
-								// nodelinter-ignore-next-line PARAM_DESCRIPTION_MISSING_WHERE_OPTIONAL
-								name: 'seatableApi',
-								required: true,
-						},
+				default: '',
+				description: 'The name of SeaTable table to access',
+			},
+			{
+				displayName: 'Event',
+				name: 'event',
+				type: 'options',
+				options: [
+					{
+						name: 'Row Created',
+						value: 'rowCreated',
+						description: 'Trigger has newly created rows',
+					},
+					{
+						name: 'Row Modified',
+						value: 'rowModified',
+						description: 'Trigger has recently modified rows',
+					},
 				],
-				polling: true,
-				inputs: [],
-				outputs: ['main'],
-				properties: [
-						{
-								displayName: 'Table',
-								name: 'tableName',
-								type: 'options',
-								placeholder: 'Name of table',
-								required: true,
-								typeOptions: {
-										loadOptionsMethod: 'getTableNames',
-								},
-								// nodelinter-ignore-next-line WRONG_DEFAULT_FOR_OPTIONS_TYPE_PARAM
-								default: '',
-								description: 'The name of SeaTable table to access',
-						},
-						{
-								displayName: 'Trigger Operation',
-								name: 'operation',
-								type: 'options',
-								options: [
-										{
-												name: 'Row Creation',
-												value: 'create',
-												description: 'Trigger has newly created rows',
-										},
-										{
-												name: 'Row Modification',
-												value: 'update',
-												description: 'Trigger has recently modified rows',
-										},
-								],
-								default: 'create',
-								description: 'On what the trigger operates',
-						},
+				default: 'rowCreated',
+			},
+			{
+				displayName: 'Simplify Response',
+				name: 'simple',
+				type: 'boolean',
+				default: true,
+				description: 'Return a simplified version of the response instead of the raw data.',
+			},
+		],
+	};
 
-						// ----------------------------------
-						//         All
-						// ----------------------------------
-						{
-								displayName: 'Additional Fields',
-								name: 'additionalFields',
-								type: 'collection',
-								placeholder: 'Add Field',
-								default: {},
-								options: [
-										{
-												displayName: 'Columns:',
-												name: 'columnNames',
-												type: 'string',
-												default: '',
-												// nodelinter-ignore-next-line TECHNICAL_TERM_IN_PARAM_DESCRIPTION
-												description: 'Additional columns to be included. <br><br>By default the standard (always first) column is returned, this field allows to add one or more additional.<br><br><ul><li>Multiple can be separated by comma. Example: <samp>Title,Surname</samp>.',
-										},
-								],
-						},
-				],
-		};
-
-		methods = {
-				loadOptions: {
-						async getTableNames(this: ILoadOptionsFunctions) {
-								return await getTableNames.call(this);
-						},
-				},
-		};
-
-		async poll(this: IPollFunctions): Promise<INodeExecutionData[][] | null> {
-				const webhookData = this.getWorkflowStaticData('node');
-
-				const qs: IDataObject = {};
-
-				const tableName = this.getNodeParameter('tableName') as string;
-
-				const triggerOperation = this.getNodeParameter('operation') as TTriggerOperation;
-
-				const additionalFields = this.getNodeParameter('additionalFields') as IDataObject;
-
-				const triggerColumn = triggerOperation === 'create' ? '_ctime' : '_mtime';
-
-				let columnNames = columnNamesToArray(additionalFields.columnNames as string);
-
-				const credentials: TCredentials = await this.getCredentials('seatableApi');
-				const ctx = apiCtx(credentials as unknown as IApi);
-
-				const endpoint = '/dtable-server/api/v1/dtables/{{dtable_uuid}}/rows/';
-
-				const nowMoment = moment().utc();
-				let lastTimeCheckedMoment = nowMoment;
-				if (this.getMode() === 'manual') {
-						lastTimeCheckedMoment = lastTimeCheckedMoment.subtract(2, 'minute');
+	methods = {
+		loadOptions: {
+			async getTableNames(this: ILoadOptionsFunctions) {
+				const returnData: INodePropertyOptions[] = [];
+				const credentials = await this.getCredentials('seatableApi') as IDataObject;
+				const { access_token: accessToken, dtable_uuid: tableId } = await getBaseAccessToken.call(this, credentials);
+				Object.assign(credentials, { accessToken });
+				const { metadata: { tables } } = await seatableApiRequest.call(this, credentials, 'GET', `/dtable-server/api/v1/dtables/${tableId}/metadata`);
+				for (const table of tables) {
+					returnData.push({
+						name: table.name,
+						value: table.name,
+					});
 				}
+				return returnData;
+			},
+		},
+	};
 
-				const now = nowMoment.format(schema.dateTimeFormat);
-				const lastTimeChecked = lastTimeCheckedMoment.format(schema.dateTimeFormat);
-				const startDate = webhookData.lastTimeChecked as string || lastTimeChecked;
-				const endDate = now;
+	async poll(this: IPollFunctions): Promise<INodeExecutionData[][] | null> {
+		const webhookData = this.getWorkflowStaticData('node');
+		const tableName = this.getNodeParameter('tableName') as string;
+		const simple = this.getNodeParameter('simple') as boolean;
+		const event = this.getNodeParameter('event') as string;
+		const credentials = await this.getCredentials('seatableApi') as IDataObject;
 
-				const dtableColumns = await apiDtableColumns.call(this, ctx, tableName);
-				columnNames = columnNamesGlob(columnNames, dtableColumns);
+		const now = moment().utc().format();
 
-				qs.table_name = tableName;
+		const startDate = webhookData.lastTimeChecked as string || now;
 
-				const rows = await apiRequestAllItems.call(this, ctx, 'GET', endpoint, {}, qs);
+		const endDate = now;
 
-				webhookData.lastTimeChecked = endDate;
+		webhookData.lastTimeChecked = endDate;
 
-				if (Array.isArray(rows.rows) && rows.rows.length) {
-						if (this.getMode() === 'manual' && rows.rows[0][triggerColumn] === undefined) {
-								throw new NodeOperationError(this.getNode(), `The Field "${triggerColumn}" does not exist.`);
-						}
-						rowsTimeFilter(rows, triggerColumn, startDate);
-						rowsTimeSort(rows, triggerColumn);
-						const [{name: defaultColumn}] = dtableColumns;
-						columnNames = [defaultColumn, ...columnNames].filter((columnName) => dtableColumns.find(({name}) => name === columnName));
-						rowsFormatColumns(rows, columnNames);
+		const { access_token: accessToken, dtable_uuid: baseId } = await getBaseAccessToken.call(this, credentials);
 
-						return [this.helpers.returnJsonArray(rows.rows)];
-				}
+		Object.assign(credentials, { accessToken });
 
-				return null;
+		let rows;
+
+		const filterField = (event === 'rowCreated') ? '_ctime' : '_mtime';
+
+		const endpoint = `/dtable-db/api/v1/query/${baseId}/`;
+
+		if (this.getMode() === 'manual') {
+			rows = await seatableApiRequest.call(this, credentials, 'POST', endpoint, { sql: `SELECT * FROM ${tableName} LIMIT 1` });
+		} else {
+			rows = await seatableApiRequest.call(this, credentials, 'POST', endpoint,
+				{ sql: `SELECT * FROM ${tableName} WHERE ${filterField} BETWEEN "${moment(startDate).utc().format('YYYY-MM-D HH:mm:ss')}" AND "${moment(endDate).utc().format('YYYY-MM-D HH:mm:ss')}"` });
 		}
+
+
+		if (rows.metadata && rows.results) {
+			const columns = getColumns(rows);
+			if (simple === true) {
+				rows = simplify(rows, columns);
+			} else {
+				rows = rows.results;
+			}
+		}
+
+		if (Array.isArray(rows) && rows.length) {
+			return [this.helpers.returnJsonArray(rows)];
+		}
+
+		return null;
+	}
 }
