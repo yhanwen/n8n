@@ -7,8 +7,19 @@ export class InternalHooksClass implements IInternalHooksClass {
 	constructor(private telemetry: Telemetry) {}
 
 	async onServerStarted(diagnosticInfo: IDiagnosticInfo): Promise<void> {
-		await this.telemetry.identify({ ...diagnosticInfo });
-		await this.telemetry.track('Instance started', { ...diagnosticInfo });
+		const info = {
+			version_cli: diagnosticInfo.versionCli,
+			db_type: diagnosticInfo.databaseType,
+			notifications_enabled: diagnosticInfo.notificationsEnabled,
+			disable_production_webhooks_on_main_process:
+				diagnosticInfo.disableProductionWebhooksOnMainProcess,
+			basic_auth_active: diagnosticInfo.basicAuthActive,
+			system_info: diagnosticInfo.systemInfo,
+			execution_variables: diagnosticInfo.executionVariables,
+			deployment_type: diagnosticInfo.deploymentType,
+		};
+		await this.telemetry.identify(info);
+		await this.telemetry.track('Instance started', info);
 	}
 
 	async onWorkflowDeleted(workflowId: string): Promise<void> {
