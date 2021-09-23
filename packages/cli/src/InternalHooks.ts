@@ -8,7 +8,7 @@ export class InternalHooksClass implements IInternalHooksClass {
 
 	async onServerStarted(diagnosticInfo: IDiagnosticInfo): Promise<void> {
 		await this.telemetry.identify({ ...diagnosticInfo });
-		await this.telemetry.track('Instance started');
+		await this.telemetry.track('Instance started', { n8n_version: diagnosticInfo.versionCli });
 	}
 
 	async onWorkflowDeleted(workflowId: string): Promise<void> {

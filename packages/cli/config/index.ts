@@ -668,7 +668,7 @@ const config = convict({
 				url: {
 					doc: 'Telemetry data plane URL for frontend.',
 					format: String,
-					default: 'http://telemetry-stage.n8n.io',
+					default: 'https://telemetry-stage.n8n.io',
 					env: 'N8N_TELEMETRY_DATA_PLANE_URL_FRONTEND',
 				},
 			},
@@ -682,7 +682,7 @@ const config = convict({
 				url: {
 					doc: 'Telemetry data plane URL for backend.',
 					format: String,
-					default: 'http://telemetry-stage.n8n.io/v1/batch',
+					default: 'https://telemetry-stage.n8n.io/v1/batch',
 					env: 'N8N_TELEMETRY_DATA_PLANE_URL_FRONTEND',
 				},
 			},
