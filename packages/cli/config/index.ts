@@ -650,6 +650,14 @@ const config = convict({
 		},
 	},
 
+	deployment: {
+		type: {
+			format: String,
+			default: 'default',
+			env: 'N8N_DEPLOYMENT_TYPE',
+		},
+	},
+
 	telemetry: {
 		enabled: {
 			doc: 'Whether telemetry is enabled.',

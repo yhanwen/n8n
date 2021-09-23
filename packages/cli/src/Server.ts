@@ -2877,6 +2877,7 @@ export async function start(): Promise<void> {
 				executions_data_max_age: config.get('executions.pruneDataMaxAge'),
 				executions_data_prune_timeout: config.get('executions.pruneDataTimeout'),
 			},
+			deploymentType: config.get('deployment.type'),
 		};
 
 		void InternalHooksManager.getInstance().onServerStarted(diagnosticInfo);

@@ -292,6 +292,7 @@ export interface IDiagnosticInfo {
 	executionVariables: {
 		[key: string]: string | number | undefined;
 	};
+	deploymentType: string;
 }
 
 export interface IInternalHooksClass {
