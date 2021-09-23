@@ -1,37 +1,31 @@
 /* eslint-disable import/no-cycle */
 import { URL } from 'url';
-import { IConnection, IDataObject, INode, INodeConnections, IWorkflowBase } from '.';
-
-interface INodesGraph {
-	node_types: string[];
-	node_connections: IDataObject[];
-	nodes: INodesGraphNode;
-}
-
-interface INodesGraphNode {
-	[key: string]: INodeItem;
-}
-
-interface INodeItem {
-	type: string;
-	domain?: string;
-}
+import {
+	IConnection,
+	INode,
+	INodeConnections,
+	INodeNameIndex,
+	INodesGraph,
+	INodeGraphItem,
+	INodesGraphResult,
+	IWorkflowBase,
+} from '.';
 
 export function getNodeTypeForName(workflow: IWorkflowBase, nodeName: string): INode | undefined {
 	return workflow.nodes.find((node: INode) => node.name === nodeName);
 }
 
-export function generateNodesGraph(workflow: IWorkflowBase): INodesGraph {
+export function generateNodesGraph(workflow: IWorkflowBase): INodesGraphResult {
 	const nodesGraph: INodesGraph = {
 		node_types: [],
 		node_connections: [],
 		nodes: {},
 	};
-	const nodeNameAndInd: IDataObject = {};
+	const nodeNameAndInd: INodeNameIndex = {};
 
 	workflow.nodes.forEach((node: INode, index: number) => {
 		nodesGraph.node_types.push(node.type);
-		const nodeItem: INodeItem = {
+		const nodeItem: INodeGraphItem = {
 			type: node.type,
 		};
 
@@ -56,5 +50,5 @@ export function generateNodesGraph(workflow: IWorkflowBase): INodesGraph {
 		});
 	});
 
-	return nodesGraph;
+	return { nodeGraph: nodesGraph, nameIndices: nodeNameAndInd };
 }

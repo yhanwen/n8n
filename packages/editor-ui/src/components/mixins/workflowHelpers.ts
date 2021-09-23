@@ -445,7 +445,7 @@ export const workflowHelpers = mixins(
 					this.$store.commit('removeActiveAction', 'workflowSaving');
 					this.$externalHooks().run('workflow.afterUpdate', { workflowData });
 					if(track === true) {
-						this.$telemetry.track('User saved workflow', { workflow_id: this.$store.getters.workflowId, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+						this.$telemetry.track('User saved workflow', { workflow_id: this.$store.getters.workflowId, node_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow).nodeGraph });
 					}
 
 					return true;
@@ -516,7 +516,7 @@ export const workflowHelpers = mixins(
 					this.$store.commit('setStateDirty', false);
 					this.$externalHooks().run('workflow.afterUpdate', { workflowData });
 					if(track === true) {
-						this.$telemetry.track('User saved workflow', { workflow_id: this.$store.getters.workflowId, is_new: true, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+						this.$telemetry.track('User saved workflow', { workflow_id: this.$store.getters.workflowId, is_new: true, node_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow).nodeGraph });
 					}
 
 					return true;

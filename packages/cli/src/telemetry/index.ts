@@ -4,6 +4,17 @@ import TelemetryClient = require('@rudderstack/rudder-sdk-node');
 import { IDataObject } from 'n8n-workflow';
 import config = require('../../config');
 
+interface IExecutionCountsBufferItem {
+	manual_success_count: number;
+	manual_error_count: number;
+	prod_success_count: number;
+	prod_error_count: number;
+}
+
+interface IExecutionCountsBuffer {
+	[workflowId: string]: IExecutionCountsBufferItem;
+}
+
 export class Telemetry {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private client?: any;
@@ -12,7 +23,7 @@ export class Telemetry {
 
 	private pulseIntervalReference: NodeJS.Timeout;
 
-	private executionCountsBuffer: IDataObject[] = [];
+	private executionCountsBuffer: IExecutionCountsBuffer = {};
 
 	constructor(instanceId: string) {
 		this.instanceId = instanceId;
@@ -35,16 +46,42 @@ export class Telemetry {
 			return;
 		}
 
-		await this.track('Workflow execution count', {
-			count: this.executionCountsBuffer.length,
-			executions: this.executionCountsBuffer,
+		Object.keys(this.executionCountsBuffer).forEach(async (workflowId) => {
+			await this.track('Workflow execution count', {
+				workflow_id: workflowId,
+				...this.executionCountsBuffer[workflowId],
+			});
 		});
-		this.executionCountsBuffer = [];
+
+		this.executionCountsBuffer = {};
+
+		await this.track('pulse');
 	}
 
 	async trackWorkflowExecution(properties: IDataObject): Promise<void> {
 		if (this.client) {
-			this.executionCountsBuffer.push({ ...properties, timestamp: new Date().toISOString() });
+			const workflowId = properties.workflow_id as string;
+			this.executionCountsBuffer[workflowId] = this.executionCountsBuffer[workflowId] ?? {
+				manual_error_count: 0,
+				manual_success_count: 0,
+				prod_error_count: 0,
+				prod_success_count: 0,
+			};
+
+			if (properties.success === false) {
+				// errored exec
+				await this.track('Workflow execution errored', properties);
+
+				if (properties.is_manual) {
+					this.executionCountsBuffer[workflowId].manual_error_count++;
+				} else {
+					this.executionCountsBuffer[workflowId].prod_error_count++;
+				}
+			} else if (properties.is_manual) {
+				this.executionCountsBuffer[workflowId].manual_success_count++;
+			} else {
+				this.executionCountsBuffer[workflowId].prod_success_count++;
+			}
 		}
 	}
 

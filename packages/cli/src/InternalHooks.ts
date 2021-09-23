@@ -20,18 +20,20 @@ export class InternalHooksClass implements IInternalHooksClass {
 	async onWorkflowPostExecute(workflow: IWorkflowBase, runData?: IRun): Promise<void> {
 		const properties: IDataObject = {
 			workflow_id: workflow.id,
+			is_manual: false,
 		};
 
 		if (runData !== undefined) {
 			properties.execution_mode = runData.mode;
 			if (runData.mode === 'manual') {
-				properties.nodes_graph = TelemetryHelpers.generateNodesGraph(workflow);
+				properties.is_manual = true;
 			}
 
 			properties.success = !!runData.finished;
 
 			if (!properties.success && runData?.data.resultData.error) {
 				properties.error_message = runData?.data.resultData.error.message;
+				let errorNodeName = runData?.data.resultData.error.node?.name;
 				properties.error_node_type = runData?.data.resultData.error.node?.type;
 
 				if (runData.data.resultData.lastNodeExecuted) {
@@ -42,7 +44,14 @@ export class InternalHooksClass implements IInternalHooksClass {
 
 					if (lastNode !== undefined) {
 						properties.error_node_type = lastNode.type;
+						errorNodeName = lastNode.name;
 					}
+				}
+
+				if (properties.is_manual) {
+					const nodeGraphResult = TelemetryHelpers.generateNodesGraph(workflow);
+					properties.node_graph = nodeGraphResult.nodeGraph;
+					properties.error_node_id = nodeGraphResult.nameIndices[errorNodeName];
 				}
 			}
 		}

@@ -1046,6 +1046,33 @@ export type PropertiesOf<M extends { resource: string; operation: string }> = Ar
 		};
 	}
 >;
+
+// Telemetry
+
+export interface INodesGraph {
+	node_types: string[];
+	node_connections: IDataObject[];
+	nodes: INodesGraphNode;
+}
+
+export interface INodesGraphNode {
+	[key: string]: INodeGraphItem;
+}
+
+export interface INodeGraphItem {
+	type: string;
+	domain?: string;
+}
+
+export interface INodeNameIndex {
+	[name: string]: string;
+}
+
+export interface INodesGraphResult {
+	nodeGraph: INodesGraph;
+	nameIndices: INodeNameIndex;
+}
+
 export interface ITelemetryClientConfig {
 	url: string;
 	key: string;
