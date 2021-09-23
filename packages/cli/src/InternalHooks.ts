@@ -62,7 +62,7 @@ export class InternalHooksClass implements IInternalHooksClass {
 				if (properties.is_manual) {
 					const nodeGraphResult = TelemetryHelpers.generateNodesGraph(workflow);
 					properties.node_graph = nodeGraphResult.nodeGraph;
-					if(errorNodeName) {
+					if (errorNodeName) {
 						properties.error_node_id = nodeGraphResult.nameIndices[errorNodeName];
 					}
 				}
