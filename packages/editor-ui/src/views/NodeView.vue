@@ -145,7 +145,6 @@ import {
 	INodeTypeNameVersion,
 	NodeInputConnections,
 	NodeHelpers,
-	TelemetryHelpers,
 	Workflow,
 	IRun,
 } from 'n8n-workflow';
@@ -651,8 +650,7 @@ export default mixins(
 						return;
 					}
 
-					this.callDebounced('saveCurrentWorkflow', 1000);
-					this.$telemetry.track('User saved workflow', { workflow_id: this.$store.getters.workflowId, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+					this.callDebounced('saveCurrentWorkflow', 1000, undefined, true);
 				} else if (e.key === 'Enter') {
 					// Activate the last selected node
 					const lastSelectedNode = this.$store.getters.lastSelectedNode;

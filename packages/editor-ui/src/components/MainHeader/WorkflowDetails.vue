@@ -79,7 +79,6 @@
 import Vue from "vue";
 import mixins from "vue-typed-mixins";
 import { mapGetters } from "vuex";
-import { TelemetryHelpers } from 'n8n-workflow';
 import { MAX_WORKFLOW_NAME_LENGTH } from "@/constants";
 
 import WorkflowNameShort from "@/components/WorkflowNameShort.vue";
@@ -142,8 +141,7 @@ export default mixins(workflowHelpers).extend({
 	},
 	methods: {
 		onSaveButtonClick () {
-			this.saveCurrentWorkflow();
-			this.$telemetry.track('User saved workflow', { workflow_id: this.currentWorkflowId, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+			this.saveCurrentWorkflow(undefined, true);
 		},
 		onTagsEditEnable() {
 			this.$data.appliedTagIds = this.currentWorkflowTagIds;

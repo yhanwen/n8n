@@ -167,7 +167,6 @@ import { saveAs } from 'file-saver';
 
 import mixins from 'vue-typed-mixins';
 import { mapGetters } from 'vuex';
-import { TelemetryHelpers } from 'n8n-workflow';
 import MenuItemsIterator from './MainSidebarMenuItemsIterator.vue';
 
 const helpMenuItems: IMenuItem[] = [
@@ -432,8 +431,7 @@ export default mixins(
 
 					saveAs(blob, workflowName + '.json');
 				} else if (key === 'workflow-save') {
-					this.saveCurrentWorkflow();
-					this.$telemetry.track('User saved workflow', { workflow_id: this.currentWorkflow, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+					this.saveCurrentWorkflow(undefined, true);
 				} else if (key === 'workflow-duplicate') {
 					this.$store.dispatch('ui/openDuplicateModal');
 				} else if (key === 'help-about') {

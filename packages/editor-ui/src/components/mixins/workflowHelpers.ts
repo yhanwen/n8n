@@ -21,6 +21,7 @@ import {
 	IRunExecutionData,
 	IWorfklowIssues,
 	IWorkflowDataProxyAdditionalKeys,
+	TelemetryHelpers,
 	Workflow,
 	NodeHelpers,
 } from 'n8n-workflow';
@@ -408,10 +409,10 @@ export const workflowHelpers = mixins(
 				return returnData['__xxxxxxx__'];
 			},
 
-			async saveCurrentWorkflow({name, tags}: {name?: string, tags?: string[]} = {}): Promise<boolean> {
+			async saveCurrentWorkflow({name, tags}: {name?: string, tags?: string[]} = {}, track?: boolean): Promise<boolean> {
 				const currentWorkflow = this.$route.params.name;
 				if (!currentWorkflow) {
-					return this.saveAsNewWorkflow({name, tags});
+					return this.saveAsNewWorkflow({name, tags}, track);
 				}
 
 				// Workflow exists already so update it
@@ -443,6 +444,9 @@ export const workflowHelpers = mixins(
 					this.$store.commit('setStateDirty', false);
 					this.$store.commit('removeActiveAction', 'workflowSaving');
 					this.$externalHooks().run('workflow.afterUpdate', { workflowData });
+					if(track === true) {
+						this.$telemetry.track('User saved workflow', { workflow_id: this.$store.getters.workflowId, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+					}
 
 					return true;
 				} catch (e) {
@@ -458,7 +462,7 @@ export const workflowHelpers = mixins(
 				}
 			},
 
-			async saveAsNewWorkflow ({name, tags, resetWebhookUrls}: {name?: string, tags?: string[], resetWebhookUrls?: boolean} = {}): Promise<boolean> {
+			async saveAsNewWorkflow ({name, tags, resetWebhookUrls}: {name?: string, tags?: string[], resetWebhookUrls?: boolean} = {}, track?: boolean): Promise<boolean> {
 				try {
 					this.$store.commit('addActiveAction', 'workflowSaving');
 
@@ -511,6 +515,9 @@ export const workflowHelpers = mixins(
 					this.$store.commit('removeActiveAction', 'workflowSaving');
 					this.$store.commit('setStateDirty', false);
 					this.$externalHooks().run('workflow.afterUpdate', { workflowData });
+					if(track === true) {
+						this.$telemetry.track('User saved workflow', { workflow_id: this.$store.getters.workflowId, is_new: true, nodes_graph: TelemetryHelpers.generateNodesGraph(this.$store.state.workflow) });
+					}
 
 					return true;
 				} catch (e) {
