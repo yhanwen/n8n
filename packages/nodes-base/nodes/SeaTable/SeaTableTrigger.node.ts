@@ -15,6 +15,7 @@ import {
 import {
 	getBaseAccessToken,
 	getColumns,
+	getDownloadableColumns,
 	seatableApiRequest,
 	setableApiRequestAllItems,
 	simplify,
@@ -135,18 +136,21 @@ export class SeaTableTrigger implements INodeType {
 				{ sql: `SELECT * FROM ${tableName} WHERE ${filterField} BETWEEN "${moment(startDate).utc().format('YYYY-MM-D HH:mm:ss')}" AND "${moment(endDate).utc().format('YYYY-MM-D HH:mm:ss')}"` });
 		}
 
+		let response;
 
 		if (rows.metadata && rows.results) {
 			const columns = getColumns(rows);
 			if (simple === true) {
-				rows = simplify(rows, columns);
+				response = simplify(rows, columns);
 			} else {
-				rows = rows.results;
+				response = rows.results;
 			}
 		}
 
-		if (Array.isArray(rows) && rows.length) {
-			return [this.helpers.returnJsonArray(rows)];
+		response = response.map((row: IDataObject) => ({ json: row }));
+
+		if (Array.isArray(response) && response.length) {
+			return [response];
 		}
 
 		return null;

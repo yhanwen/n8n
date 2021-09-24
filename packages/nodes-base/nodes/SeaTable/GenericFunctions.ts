@@ -1,39 +1,56 @@
-import {IExecuteFunctions, IHookFunctions} from 'n8n-core';
+import {
+	IExecuteFunctions,
+	IHookFunctions
+} from 'n8n-core';
 
-import {OptionsWithUri} from 'request';
+import {
+	OptionsWithUri,
+} from 'request';
 
-import {IDataObject, ILoadOptionsFunctions, IPollFunctions, NodeApiError, NodeOperationError} from 'n8n-workflow';
+import {
+	IDataObject,
+	ILoadOptionsFunctions,
+	INodeExecutionData,
+	INodePropertyOptions,
+	IPollFunctions,
+	NodeApiError,
+	NodeOperationError
+} from 'n8n-workflow';
+
+import {
+	TCredentials,
+	TDtableMetadataColumns,
+	TDtableMetadataTables,
+	TEndpoint,
+	TEndpointExpr,
+	TEndpointResolvedExpr,
+	TEndpointVariableName,
+	TLoadedResource,
+	TMethod,
+} from './types';
+
+import {
+	schema,
+} from './Schema';
+
+import {
+	IApi,
+	IAppAccessToken,
+	ICtx,
+	IDtableMetadata,
+	IDtableMetadataColumn,
+	IDtableMetadataTable,
+	IEndpointVariables,
+	IName,
+	IRow,
+	IRowObject,
+} from './Interfaces';
+
+import {
+	URL,
+} from 'url';
 
 import * as _ from 'lodash';
-import {
-		TCredentials,
-		TDtableMetadataColumns,
-		TDtableMetadataTables,
-		TEndpoint,
-		TEndpointExpr,
-		TEndpointResolvedExpr,
-		TEndpointVariableName,
-		TLoadedResource,
-		TMethod,
-} from './types';
-import {schema} from './Schema';
-import {
-		IApi,
-		IAppAccessToken,
-		ICtx,
-		IDtableMetadata,
-		IDtableMetadataColumn,
-		IDtableMetadataTable,
-		IEndpointVariables,
-		IName,
-		IRow,
-		IRowObject,
-		IRows,
-		IServerInfo,
-} from './Interfaces';
-import {URL} from 'url';
-import { access } from 'fs';
-import { rows } from 'mssql';
 
 const normalize = (subject: string): string => subject ? subject.normalize() : '';
 
@@ -42,40 +59,40 @@ export const split = (subject: string): string[] =>
 		.split(/\s*((?:[^\\,]*?(?:\\[\s\S])*)*?)\s*(?:,|$)/)
 		.filter(s => s.length)
 		.map(s => s.replace(/\\([\s\S])/gm, ($0, $1) => $1))
-;
+	;
 
 export function apiCtx(api: IApi): ICtx {
-		if (api === undefined) {
-				throw new Error('Expectation failed: SeaTable: Context: Need api/credentials to create context, got undefined.');
-		}
+	if (api === undefined) {
+		throw new Error('Expectation failed: SeaTable: Context: Need api/credentials to create context, got undefined.');
+	}
 
-		const prepApi = api;
-		prepApi.server = normalize(prepApi.server);
-		if (prepApi.server === '') {
-				throw new Error(`Expectation failed: SeaTable: Context: Need server to create context, got server-less: ${Object.prototype.toString.call(api)}.`);
-		}
-		// noinspection HttpUrlsUsage
-		if (['http://', 'https://'].includes(prepApi.server)) {
-				throw new Error(`Expectation failed: SeaTable: Context: Need server to create context, got URL-scheme only: "${prepApi.server}".`);
-		}
+	const prepApi = api;
+	prepApi.server = normalize(prepApi.server);
+	if (prepApi.server === '') {
+		throw new Error(`Expectation failed: SeaTable: Context: Need server to create context, got server-less: ${Object.prototype.toString.call(api)}.`);
+	}
+	// noinspection HttpUrlsUsage
+	if (['http://', 'https://'].includes(prepApi.server)) {
+		throw new Error(`Expectation failed: SeaTable: Context: Need server to create context, got URL-scheme only: "${prepApi.server}".`);
+	}
 
-		try {
-				const serverUrl = new URL(prepApi.server);
-				if (!['http:', 'https:'].includes(serverUrl.protocol)) {
-						throw new Error(`Unsupported protocol: "${serverUrl.protocol}"`);
-				}
-				serverUrl.hash = serverUrl.search = '';
-				// throw new Error(`debug: ${Object.prototype.toString.call(serverUrl)} "${serverUrl}"`);
-				prepApi.server = serverUrl.toString();
-		} catch (e) {
-				throw new Error(`Expectation failed: SeaTable: Context: Server URL: ${e.message}`);
+	try {
+		const serverUrl = new URL(prepApi.server);
+		if (!['http:', 'https:'].includes(serverUrl.protocol)) {
+			throw new Error(`Unsupported protocol: "${serverUrl.protocol}"`);
 		}
+		serverUrl.hash = serverUrl.search = '';
+		// throw new Error(`debug: ${Object.prototype.toString.call(serverUrl)} "${serverUrl}"`);
+		prepApi.server = serverUrl.toString();
+	} catch (e) {
+		throw new Error(`Expectation failed: SeaTable: Context: Server URL: ${e.message}`);
+	}
 
-		return {api: prepApi} as ICtx;
+	return { api: prepApi } as ICtx;
 }
 
 
-export async function seatableApiRequest(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, credentials: IDataObject, method: string, endpoint: string,  body: any = {}, qs: IDataObject = {}, option: IDataObject = {}): Promise<any> { // tslint:disable-line:no-any
+export async function seatableApiRequest(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, credentials: IDataObject, method: string, endpoint: string, body: any = {}, qs: IDataObject = {}, url: string | undefined = undefined, option: IDataObject = {}): Promise<any> { // tslint:disable-line:no-any
 
 	const options: OptionsWithUri = {
 		headers: {
@@ -84,11 +101,9 @@ export async function seatableApiRequest(this: IHookFunctions | IExecuteFunction
 		method,
 		qs,
 		body,
-		uri: `${credentials.server}${endpoint}`,
+		uri: url || `${credentials.server}${endpoint}`,
 		json: true,
 	};
-
-	console.log(options);
 
 	if (Object.keys(body).length === 0) {
 		delete options.body;
@@ -106,7 +121,7 @@ export async function seatableApiRequest(this: IHookFunctions | IExecuteFunction
 	}
 }
 
-export async function setableApiRequestAllItems(this: IHookFunctions | IExecuteFunctions | IPollFunctions, credentials: IDataObject, propertyName: string, method: string, endpoint: string, body: IDataObject, query?: IDataObject): Promise<any> { // tslint:disable-line:no-any
+export async function setableApiRequestAllItems(this: IExecuteFunctions | IPollFunctions, credentials: IDataObject, propertyName: string, method: string, endpoint: string, body: IDataObject, query?: IDataObject): Promise<any> { // tslint:disable-line:no-any
 
 	if (query === undefined) {
 		query = {};
@@ -130,10 +145,23 @@ export async function setableApiRequestAllItems(this: IHookFunctions | IExecuteF
 }
 
 
-export function getBaseAccessToken(this: IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions | IHookFunctions, credentials: IDataObject): Promise<IDataObject> {
+export async function getTableColumns(this: ILoadOptionsFunctions | IExecuteFunctions, tableName: string): Promise<TDtableMetadataColumns> {
+	const credentials = await this.getCredentials('seatableApi') as IDataObject;
+	const { access_token: accessToken, dtable_uuid: tableId } = await getBaseAccessToken.call(this, credentials);
+	Object.assign(credentials, { accessToken });
+	const { metadata: { tables } } = await seatableApiRequest.call(this, credentials, 'GET', `/dtable-server/api/v1/dtables/${tableId}/metadata`);
+	for (const table of tables) {
+		if (table.name === tableName) {
+			return table.columns;
+		}
+	}
+	return [];
+}
+
+export function getBaseAccessToken(this: IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, credentials: IDataObject): Promise<IDataObject> {
 
 	const options: OptionsWithUri = {
-		headers: { 
+		headers: {
 			Authorization: `Token ${credentials.token}`,
 		},
 		uri: `${credentials.server}/api/v2.1/dtable/app-access-token/`,
@@ -143,7 +171,7 @@ export function getBaseAccessToken(this: IExecuteFunctions | ILoadOptionsFunctio
 	return this.helpers.request!(options);
 }
 
-export function simplify(data: { results: [{ key: string, value: string } ]}, metadata: IDataObject) {
+export function simplify(data: { results: [{ key: string, value: string }] }, metadata: IDataObject) {
 	return data.results.map((row: IDataObject) => {
 		for (const key of Object.keys(row)) {
 			if (!key.startsWith('_')) {
@@ -157,9 +185,50 @@ export function simplify(data: { results: [{ key: string, value: string } ]}, me
 	});
 }
 
-export function getColumns(data: { metadata: [{ key: string, name: string } ] }) {
+export function getColumns(data: { metadata: [{ key: string, name: string }] }) {
 	return data.metadata.reduce((obj, value) => Object.assign(obj, { [`${value.key}`]: value.name }), {});
 }
+
+export function getDownloadableColumns(data: { metadata: [{ key: string, name: string, type: string }] }) {
+	return data.metadata.filter(row => (['image', 'file'].includes(row.type))).map(row => row.name);
+}
+
+// export async function downloadAttachments(this: IExecuteFunctions | IPollFunctions, credentials: IDataObject, records: [{ [key: string]: any }], fieldNames: string[]): Promise<INodeExecutionData[]> {
+// 	const elements: INodeExecutionData[] = [];
+// 	for (const record of records) {
+// 		const element: INodeExecutionData = { json: {}, binary: {} };
+// 		element.json = record as unknown as IDataObject;
+// 		for (const fieldName of fieldNames) {
+// 			if (record[fieldName] !== undefined) {
+// 				for (const [index, attachment] of (record[fieldName] as [{ url: string,  }]).entries()) {
+// 					let file;
+// 					let type;
+// 					let path;
+// 					if (attachment?.url) {
+// 						path = attachment.url.split('/files')[1];
+// 						type = 'file';
+// 						const { download_link } = await seatableApiRequest.call(this, credentials, 'GET', '/api/v2.1/dtable/app-download-link', {}, { path });
+// 						file = await seatableApiRequest.call(this, credentials, 'GET', '', {}, { path }, download_link, { json: false, encoding: null });
+
+// 					} else {
+// 						continue;
+// 						//@ts-ignore
+// 						path = (attachment as string).split('/images')[1];
+// 						type = 'image';
+// 						//const { download_link } = await seatableApiRequest.call(this, credentials, 'GET', '/api/v2.1/dtable/app-download-link', {}, { path });
+// 						//file = await seatableApiRequest.call(this, credentials, 'GET', '', {}, { path }, download_link, { json: false, encoding: null });
+// 					}
+// 					element.binary![`${fieldName}_${type}_${index}`] = await this.helpers.prepareBinaryData(file);
+// 				}
+// 			}
+// 		}
+// 		if (Object.keys(element.binary as IBinaryKeyData).length === 0) {
+// 			delete element.binary;
+// 		}
+// 		elements.push(element);
+// 	}
+// 	return elements;
+// }
 
 /**
  * Helper function for mangling options parts for an API request with the HTTP client in n8n.
@@ -169,15 +238,15 @@ export function getColumns(data: { metadata: [{ key: string, name: string } ] })
  * @param option
  */
 function apiRequestMergeOptionsWithUri(options: OptionsWithUri, body: object, option: IDataObject): OptionsWithUri {
-		if (Object.keys(option).length !== 0) {
-				Object.assign(options, option);
-		}
+	if (Object.keys(option).length !== 0) {
+		Object.assign(options, option);
+	}
 
-		if (Object.keys(body).length === 0) {
-				delete options.body;
-		}
+	if (Object.keys(body).length === 0) {
+		delete options.body;
+	}
 
-		return options;
+	return options;
 }
 
 const uniquePredicate = (current: string, index: number, all: string[]) => all.indexOf(current) === index;
@@ -186,226 +255,137 @@ const namePredicate = (name: string) => (named: IName) => named.name === name;
 export const nameOfPredicate = (names: ReadonlyArray<IName>) => (name: string) => names.find(namePredicate(name));
 
 export function columnNamesToArray(columnNames: string): string[] {
-		return columnNames
-			? split(columnNames)
-				.filter(nonInternalPredicate)
-				.filter(uniquePredicate)
-			: []
-			;
+	return columnNames
+		? split(columnNames)
+			.filter(nonInternalPredicate)
+			.filter(uniquePredicate)
+		: []
+		;
 }
 
 export function columnNamesGlob(columnNames: string[], dtableColumns: TDtableMetadataColumns): string[] {
-		const buffer: string[] = [];
-		const names: string[] = dtableColumns.map(c => c.name).filter(nonInternalPredicate);
-		columnNames.forEach(columnName => {
-				if (columnName !== '*') {
-						buffer.push(columnName);
-						return;
-				}
-				buffer.push(...names);
-		});
-		return buffer.filter(uniquePredicate);
+	const buffer: string[] = [];
+	const names: string[] = dtableColumns.map(c => c.name).filter(nonInternalPredicate);
+	columnNames.forEach(columnName => {
+		if (columnName !== '*') {
+			buffer.push(columnName);
+			return;
+		}
+		buffer.push(...names);
+	});
+	return buffer.filter(uniquePredicate);
 }
 
 /**
  * sequence rows on _seq
  */
 export function rowsSequence(rows: IRows) {
-		const l = rows.rows.length;
-		if (l) {
-				const [first] = rows.rows;
-				if (first && first._seq !== undefined) {
-						return;
-				}
+	const l = rows.rows.length;
+	if (l) {
+		const [first] = rows.rows;
+		if (first && first._seq !== undefined) {
+			return;
 		}
-		for (let i = 0; i < l;) {
-				rows.rows[i]._seq = ++i;
-		}
+	}
+	for (let i = 0; i < l;) {
+		rows.rows[i]._seq = ++i;
+	}
 }
 
 export function rowDeleteInternalColumns(row: IRow): IRow {
-		Object.keys(schema.internalNames).forEach(columnName => delete row[columnName]);
-		return row;
+	Object.keys(schema.internalNames).forEach(columnName => delete row[columnName]);
+	return row;
 }
 
 export function rowsDeleteInternalColumns(rows: IRows) {
-		rows.rows = rows.rows.map(rowDeleteInternalColumns);
+	rows.rows = rows.rows.map(rowDeleteInternalColumns);
 }
 
 function rowFormatColumn(input: unknown): boolean | number | string | string[] | null {
-		if (null === input || undefined === input) {
-				return null;
-		}
-
-		if (typeof input === 'boolean' || typeof input === 'number' || typeof input === 'string') {
-				return input;
-		}
-
-		if (Array.isArray(input) && input.every(i => (typeof i === 'string'))) {
-				return input;
-		}
-
+	if (null === input || undefined === input) {
 		return null;
+	}
+
+	if (typeof input === 'boolean' || typeof input === 'number' || typeof input === 'string') {
+		return input;
+	}
+
+	if (Array.isArray(input) && input.every(i => (typeof i === 'string'))) {
+		return input;
+	}
+
+	return null;
 }
 
 export function rowFormatColumns(row: IRow, columnNames: string[]): IRow {
-		const outRow = {} as IRow;
-		columnNames.forEach((c) => (outRow[c] = rowFormatColumn(row[c])));
-		return outRow;
+	const outRow = {} as IRow;
+	columnNames.forEach((c) => (outRow[c] = rowFormatColumn(row[c])));
+	return outRow;
 }
 
-export function rowsFormatColumns(rows: IRows, columnNames: string[]) {
-		rows.rows = rows.rows.map((row) => rowFormatColumns(row, columnNames));
+export function rowsFormatColumns(rows: IRow[], columnNames: string[]) {
+	rows = rows.map((row) => rowFormatColumns(row, columnNames));
 }
 
 export function rowMapKeyToName(row: IRow, columns: TDtableMetadataColumns): IRow {
-		const mappedRow = {} as IRow;
+	const mappedRow = {} as IRow;
 
-		// move internal columns first
-		Object.keys(schema.internalNames).forEach((key) => {
-				if (row[key]) {
-						mappedRow[key] = row[key];
-						delete row[key];
-				}
-		});
+	// move internal columns first
+	Object.keys(schema.internalNames).forEach((key) => {
+		if (row[key]) {
+			mappedRow[key] = row[key];
+			delete row[key];
+		}
+	});
 
-		// pick each by its key for name
-		Object.keys(row).forEach(key => {
-				const column = columns.find(c => c.key === key);
-				if (column) {
-						mappedRow[column.name] = row[key];
-				}
-		});
+	// pick each by its key for name
+	Object.keys(row).forEach(key => {
+		const column = columns.find(c => c.key === key);
+		if (column) {
+			mappedRow[column.name] = row[key];
+		}
+	});
 
-		return mappedRow;
+	return mappedRow;
 }
 
 export function rowExport(row: IRowObject, columns: TDtableMetadataColumns): IRowObject {
-		for (const columnName of Object.keys(columns)) {
-				if (!columns.find(namePredicate(columnName))) {
-						delete row[columnName];
-				}
+	for (const columnName of Object.keys(columns)) {
+		if (!columns.find(namePredicate(columnName))) {
+			delete row[columnName];
 		}
-		return row;
-}
-
-export function rowsTimeFilter(rows: IRows, columnName: string, startDate: string) {
-		rowsSequence(rows);
-		const filter = (f: string) => f > startDate;
-		rows.rows = rows.rows.filter(row => filter(row[columnName] as string));
-}
-
-export function rowsTimeSort(rows: IRows, columnName: string) {
-		rowsSequence(rows);
-		rows.rows = _.orderBy(rows.rows, [columnName, '_seq'], ['asc', 'asc']);
+	}
+	return row;
 }
 
 const assertResponse = (responsible: unknown): boolean => {
-		if (responsible === undefined || !responsible || typeof responsible === 'string') {
-				return false;
-		}
-		return typeof responsible === 'object';
+	if (responsible === undefined || !responsible || typeof responsible === 'string') {
+		return false;
+	}
+	return typeof responsible === 'object';
 };
 
 async function ctxStageApiCredentials(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx?: ICtx): Promise<ICtx> {
-		ctx = ctx || {} as ICtx;
-		if (!ctx.api) {
-				const credentials: TCredentials = await this.getCredentials('seatableApi');
+	ctx = ctx || {} as ICtx;
+	if (!ctx.api) {
+		const credentials: TCredentials = await this.getCredentials('seatableApi');
 
-				if (credentials === undefined) {
-						throw new NodeOperationError(this.getNode(), 'No credentials got returned!');
-				}
-
-				if (0 === Object.keys(credentials).length) {
-						throw new NodeOperationError(this.getNode(), 'Empty credentials got returned!');
-				}
-
-				ctx = apiCtx(credentials as unknown as IApi);
+		if (credentials === undefined) {
+			throw new NodeOperationError(this.getNode(), 'No credentials got returned!');
 		}
 
-		if (ctx.api === undefined || !assertResponse(ctx.api)) {
-				throw new NodeOperationError(this.getNode(), 'SeaTable: Unable to stage on "api".');
+		if (0 === Object.keys(credentials).length) {
+			throw new NodeOperationError(this.getNode(), 'Empty credentials got returned!');
 		}
 
-		return ctx;
-}
+		ctx = apiCtx(credentials as unknown as IApi);
+	}
 
-async function ctxStageServerInfo(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx?: ICtx): Promise<ICtx> {
-		ctx = await ctxStageApiCredentials.call(this, ctx);
+	if (ctx.api === undefined || !assertResponse(ctx.api)) {
+		throw new NodeOperationError(this.getNode(), 'SeaTable: Unable to stage on "api".');
+	}
 
-		const endpointExpr = endpointExprFunctor(ctx);
-		let responseData;
-		try {
-				responseData = await this.helpers.request!({
-						url: endpointExpr('/server-info/'),
-						json: true,
-				}) as IServerInfo;
-		} catch (error) {
-		}
-		if (responseData?.version === undefined || responseData.edition === undefined) {
-				throw new NodeOperationError(this.getNode(), `SeaTable: Failed to find server at "${ctx.api.server}", please check your credentials server setting.`);
-		}
-		ctx.api.info = responseData;
-
-		return ctx;
-}
-
-async function ctxStageAppAccessToken(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx?: ICtx): Promise<ICtx> {
-		ctx = await ctxStageApiCredentials.call(this, ctx);
-
-		if (ctx.api.appAccessToken === undefined) {
-				if (ctx.api.server === undefined) {
-						throw new NodeOperationError(this.getNode(), 'SeaTable: Unable to stage on "api" for {{server}}.');
-				}
-				const endpointExpr = endpointExprFunctor(ctx);
-				try {
-						ctx.api.appAccessToken = await this.helpers.request!({
-								url: endpointExpr('/api/v2.1/dtable/app-access-token/'),
-								// endpointExpr('Token {{access_token}}')
-								headers: {Authorization: `Token ${ctx.api.token}`},
-								json: true,
-						}) as IAppAccessToken;
-				} catch (error) {
-						throw new NodeApiError(this.getNode(), error);
-				}
-		}
-
-		if (ctx.api.appAccessToken === undefined || !assertResponse(ctx.api.appAccessToken)) {
-				throw new NodeOperationError(this.getNode(), 'SeaTable: Failed to obtain access token of the base.');
-		}
-
-		//console.log(ctx);
-
-		return ctx;
-}
-
-export async function ctxStageDtableMetadata(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx?: ICtx): Promise<ICtx> {
-		ctx = await ctxStageAppAccessToken.call(this, ctx);
-
-		if (ctx.metadata === undefined) {
-				const endpointExpr = endpointExprFunctor(ctx);
-				let responseData;
-				try {
-						responseData = await this.helpers.request!({
-								url: endpointExpr('/dtable-server/api/v1/dtables/{{dtable_uuid}}/metadata/'),
-								headers: {Authorization: endpointExpr('Token {{access_token}}')},
-								json: true,
-						});
-				} catch (error) {
-						throw new NodeApiError(this.getNode(), error);
-				}
-				if (responseData.metadata === undefined || !assertResponse(responseData)) {
-						throw new NodeOperationError(this.getNode(), 'SeaTable: Error while obtaining metadata.');
-				}
-				ctx.metadata = responseData.metadata as IDtableMetadata;
-		}
-
-		if (ctx.metadata?.tables === undefined) {
-				throw new NodeOperationError(this.getNode(), 'SeaTable: Metadata error.');
-		}
-		//console.log(ctx.metadata);
-
-		return ctx;
+	return ctx;
 }
 
 export const dtableSchemaIsColumn = (column: IDtableMetadataColumn): boolean =>
@@ -420,49 +400,32 @@ export const dtableSchemaColumns = (columns: TDtableMetadataColumns): TDtableMet
 export const updateAble = (columns: TDtableMetadataColumns): TDtableMetadataColumns =>
 	columns.filter(dtableSchemaIsUpdateAbleColumn);
 
-export async function apiDtableTables(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx?: ICtx): Promise<TDtableMetadataTables> {
-		ctx = await ctxStageDtableMetadata.call(this, ctx);
-
-		return ctx.metadata.tables;
-}
-
-export async function apiDtableColumns(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx: ICtx | undefined, tableName: string): Promise<TDtableMetadataColumns> {
-		ctx = await ctxStageDtableMetadata.call(this, ctx);
-
-		const table = ctx.metadata.tables.find(namePredicate(tableName)) as IDtableMetadataTable;
-		if (table === undefined) {
-				throw new NodeOperationError(this.getNode(), `SeaTable: Not a table: "${tableName}".`);
-		}
-
-		return dtableSchemaColumns(table.columns);
-}
-
 const trimEnd = (str: string, ch: '/') => {
-		let end = str.length;
-		while (end > 0 && str[end - 1] === ch) {
-				--end;
-		}
-		return end < str.length ? str.substring(0, end) : str;
+	let end = str.length;
+	while (end > 0 && str[end - 1] === ch) {
+		--end;
+	}
+	return end < str.length ? str.substring(0, end) : str;
 };
 
 function endpointCtxExpr(this: void, ctx: ICtx, endpoint: TEndpointExpr): TEndpointResolvedExpr {
-		const endpointVariables: IEndpointVariables = {};
-		endpointVariables.access_token = ctx.api.appAccessToken?.access_token;
-		endpointVariables.dtable_uuid = ctx.api.appAccessToken && ctx.api.appAccessToken['dtable_uuid'];
-		endpointVariables.server = ctx.api.server;
+	const endpointVariables: IEndpointVariables = {};
+	endpointVariables.access_token = ctx.api.appAccessToken?.access_token;
+	endpointVariables.dtable_uuid = ctx.api.appAccessToken && ctx.api.appAccessToken['dtable_uuid'];
+	endpointVariables.server = ctx.api.server;
 
-		endpoint = normalize(endpoint);
-		if (endpoint === undefined || !endpoint.length) {
-				return '';
-		}
+	endpoint = normalize(endpoint);
+	if (endpoint === undefined || !endpoint.length) {
+		return '';
+	}
 
-		if (endpoint.charAt(0) === '/') {
-				endpoint = trimEnd(endpointVariables.server, '/') + endpoint;
-		}
+	if (endpoint.charAt(0) === '/') {
+		endpoint = trimEnd(endpointVariables.server, '/') + endpoint;
+	}
 
-		return endpoint.replace(/({{ *(access_token|dtable_uuid|server) *}})/g, (match: string, expr: string, name: TEndpointVariableName) => {
-				return endpointVariables[name] || match;
-		}) as TEndpointResolvedExpr;
+	return endpoint.replace(/({{ *(access_token|dtable_uuid|server) *}})/g, (match: string, expr: string, name: TEndpointVariableName) => {
+		return endpointVariables[name] || match;
+	}) as TEndpointResolvedExpr;
 }
 
 const endpointExprFunctor = (ctx: ICtx) => (expression: TEndpointExpr): TEndpointResolvedExpr => endpointCtxExpr(ctx, expression);
@@ -475,88 +438,7 @@ const endpointExprFunctor = (ctx: ICtx) => (expression: TEndpointExpr): TEndpoin
  * @returns {Promise<IDtableMetadata>}
  */
 export async function apiMetadata(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx: ICtx): Promise<IDtableMetadata> {
-		ctx = await ctxStageDtableMetadata.call(this, ctx);
+	ctx = await ctxStageDtableMetadata.call(this, ctx);
 
-		return ctx.metadata;
+	return ctx.metadata;
 }
-
-/**
- * Make an API request to SeaTable
- *
- * @export
- * @param {ICtx} ctx
- * @param {TEndpoint} method
- * @param {string} endpoint
- * @param {object} body
- * @param query
- * @param uri
- * @param option
- * @returns {Promise<any>}
- */
-export async function apiRequest(this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions, ctx: ICtx, method: string, endpoint: TEndpoint, body: object, query?: IDataObject, uri?: string, option: IDataObject = {}): Promise<any> { // tslint:disable-line:no-any
-		ctx = await ctxStageAppAccessToken.call(this, ctx);
-
-		const endpointExpr = endpointExprFunctor(ctx);
-
-		query = query || {};
-
-		const options: OptionsWithUri = {
-				headers: {
-						Authorization: endpointExpr('Token {{access_token}}'),
-				},
-				method,
-				body,
-				qs: query,
-				uri: uri || endpointExpr(endpoint),
-				useQuerystring: false,
-				json: true,
-		};
-
-		try {
-				//console.log(apiRequestMergeOptionsWithUri(options, body, option));
-				return await this.helpers.request!(apiRequestMergeOptionsWithUri(options, body, option));
-		} catch (error) {
-				throw new NodeApiError(this.getNode(), error);
-		}
-}
-
-/**
- * Make an API request to paginated SeaTable endpoint
- * and return all results
- *
- * @export
- * @param {ICtx} ctx
- * @param {TMethod} method
- * @param {TEndpoint} endpoint
- * @param {IDataObject} body
- * @param {IDataObject} [query]
- * @returns {Promise<any>}
- */
-export async function apiRequestAllItems(this: IHookFunctions | IExecuteFunctions | IPollFunctions, ctx: ICtx, method: TMethod, endpoint: TEndpoint, body: IDataObject, query?: IDataObject): Promise<any> { // tslint:disable-line:no-any
-
-		if (query === undefined) {
-				query = {};
-		}
-		const segment = schema.rowFetchSegmentLimit;
-		query.start = 0;
-		query.limit = segment;
-
-		const returnData: IDataObject[] = [];
-
-		let responseData;
-
-		do {
-				responseData = await apiRequest.call(this, ctx, method, endpoint, body, query) as unknown as IRows;
-				returnData.push.apply(returnData, responseData.rows);
-				query.start = +query.start + segment;
-		} while (responseData.rows && responseData.rows.length > segment - 1);
-
-		return {rows: returnData};
-}
-
-export const toOptions = (items: ReadonlyArray<TLoadedResource>) =>
-	items.map(({name}: IName) => ({name, value: name}));
-
-export const getTableNames = async function (this: ILoadOptionsFunctions) {
-		return toOptions(await apiDtableTables.call(this));
-};

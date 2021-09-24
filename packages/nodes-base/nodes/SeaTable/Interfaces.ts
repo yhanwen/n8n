@@ -33,6 +33,7 @@ export interface IDtableMetadataColumn {
 		key: string;
 		name: string;
 		type: TColumnType;
+		editable: boolean;
 }
 
 export interface IDtableMetadataTable {
@@ -65,10 +66,6 @@ export interface IRow extends IRowObject {
 		_ctime: string;
 		_mtime: string;
 		_seq?: number;
-}
-
-export interface IRows {
-		rows: IRow[];
 }
 
 export interface IName {
